@@ -24,6 +24,7 @@ namespace PayRunIOClassLibrary
     }
     public class ReadConfigFile
     {
+        string change = null;
         //
         // Using XDocument instead of XmlReader
         //
