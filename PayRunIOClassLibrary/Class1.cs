@@ -343,8 +343,8 @@ namespace PayRunIOClassLibrary
         public decimal Gross { get; set; }
         public decimal NetPayTP { get; set; }
         public int DayHours { get; set; }
-        public DateTime StudentLoanStartDate { get; set; }
-        public DateTime StudentLoanEndDate { get; set; }
+        public DateTime? StudentLoanStartDate { get; set; }
+        public DateTime? StudentLoanEndDate { get; set; }
         public decimal StudentLoan { get; set; }
         public string NILetter { get; set; }
         public string CalculationBasis { get; set; }
@@ -362,7 +362,7 @@ namespace PayRunIOClassLibrary
         public decimal EeRebate { get; set; }
         public decimal ErRebate { get; set; }
         public decimal EeReduction { get; set; }
-        public DateTime LeavingDate { get; set; }
+        public DateTime? LeavingDate { get; set; }
         public bool Leaver { get; set; }
         public string TaxCode { get; set; }
         public bool Week1Month1 { get; set; }
@@ -603,22 +603,33 @@ namespace PayRunIOClassLibrary
     public class RPAddition
     {
         public string EeRef { get; set; }
+
+        public string Code { get; set; }
         public string Description { get; set; }
         public decimal Rate { get; set; }
         public decimal Units { get; set; }
         public decimal AmountTP { get; set; }
         public decimal AmountYTD { get; set; }
+        public decimal AccountsYearBalance { get; set; }
+        public decimal AccountsYearUnits { get; set; }
+        public decimal PayeYearUnits { get; set; }
+        public decimal PayrollAccrued { get; set; }
         public RPAddition() { }
-        public RPAddition(string eeRef, string description, decimal rate, decimal units,
-                           decimal amountTP, decimal amountYTD)
+        public RPAddition(string eeRef, string code, string description, decimal rate, decimal units,
+                           decimal amountTP, decimal amountYTD, decimal accountsYearBalance,
+                           decimal accountsYearUnits, decimal payeYearUnits, decimal payrollAccrued)
         {
             EeRef = eeRef;
+            Code = code;
             Description = description;
             Rate = rate;
             Units = units;
-            AmountTP = amountTP;
-            AmountYTD = amountYTD;
-
+            AmountTP = amountTP; //Amount
+            AmountYTD = amountYTD; //PayeYearBalance
+            AccountsYearBalance = accountsYearBalance;
+            AccountsYearUnits = accountsYearUnits;
+            PayeYearUnits = payeYearUnits;
+            PayrollAccrued = payrollAccrued;
         }
     }
 
@@ -626,18 +637,32 @@ namespace PayRunIOClassLibrary
     public class RPDeduction
     {
         public string EeRef { get; set; }
+        public string Code { get; set; }
         public string Description { get; set; }
+        public decimal Rate { get; set; }
+        public decimal Units { get; set; }
         public decimal AmountTP { get; set; }
         public decimal AmountYTD { get; set; }
+        public decimal AccountsYearBalance { get; set; }
+        public decimal AccountsYearUnits { get; set; }
+        public decimal PayeYearUnits { get; set; }
+        public decimal PayrollAccrued { get; set; }
         public RPDeduction() { }
-        public RPDeduction(string eeRef, string description,
-                           decimal amountTP, decimal amountYTD)
+        public RPDeduction(string eeRef, string code, string description, decimal rate, decimal units,
+                           decimal amountTP, decimal amountYTD, decimal accountsYearBalance,
+                           decimal accountsYearUnits, decimal payeYearUnits, decimal payrollAccrued)
         {
             EeRef = eeRef;
+            Code = code;
             Description = description;
-            AmountTP = amountTP;
-            AmountYTD = amountYTD;
-
+            Rate = rate;
+            Units = units;
+            AmountTP = amountTP; //Amount
+            AmountYTD = amountYTD; //PayeYearBalance
+            AccountsYearBalance = accountsYearBalance;
+            AccountsYearUnits = accountsYearUnits;
+            PayeYearUnits = payeYearUnits;
+            PayrollAccrued = payrollAccrued;
         }
     }
     public class RPPayComponent
