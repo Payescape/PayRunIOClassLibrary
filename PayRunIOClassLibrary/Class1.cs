@@ -514,6 +514,146 @@ namespace PayRunIOClassLibrary
         }
 
     }
+    public class RPEmployeeYtd
+    {
+        public DateTime ThisPeriodStartDate { get; set; }
+        public DateTime LastPaymentDate { get; set; }
+        public string EeRef { get; set; }
+        public DateTime LeavingDate { get; set; }
+        public bool Leaver { get; set; }
+        public decimal TaxPrevEmployment { get; set; }
+        public decimal TaxablePayPrevEmployment { get; set; }
+        public decimal TaxThisEmployment { get; set; }
+        public decimal TaxablePayThisEmployment { get; set; }
+        public decimal GrossedUp { get; set; }
+        public decimal GrossedUpTax { get; set; }
+        public decimal NetPayYTD { get; set; }
+        public decimal GrossPayYTD { get; set; }
+        public decimal BenefitInKindYTD { get; set; }
+        public decimal SuperannuationYTD { get; set; }
+        public decimal HolidayPayYTD { get; set; }
+        public decimal ErPensionYTD { get; set; }
+        public decimal EePensionYTD { get; set; }
+        public decimal AeoYTD { get; set; }
+        public DateTime StudentLoanStartDate { get; set; }
+        public DateTime StudentLoanEndDate { get; set; }
+        public decimal StudentLoanDeductionsYTD { get; set; }
+        public string NiLetter { get; set; }
+        public decimal NiableYTD { get; set; }
+        public decimal EarningsToLEL { get; set; }
+        public decimal EarningsToSET { get; set; }
+        public decimal EarningsToPET { get; set; }
+        public decimal EarningsToUST { get; set; }
+        public decimal EarningsToAUST { get; set; }
+        public decimal EarningsToUEL { get; set; }
+        public decimal EarningsAboveUEL { get; set; }
+        public decimal EeContributionsPt1 { get; set; }
+        public decimal EeContributionsPt2 { get; set; }
+        public decimal ErContributions { get; set; }
+        public decimal EeRebate { get; set; }
+        public decimal ErRebate { get; set; }
+        public decimal ErReduction { get; set; }
+        public decimal EeReduction { get; set; }
+        public string TaxCode { get; set; }
+        public bool Week1Month1 { get; set; }
+        public int WeekNumber { get; set; }
+        public int MonthNumber { get; set; }
+        public int PeriodNumber { get; set; }
+        public decimal EeNiPaidByErAccountsAmount { get; set; }
+        public decimal EeNiPaidByErAccountsUnits { get; set; }
+        public decimal EeGuTaxPaidByErAccountsAmount { get; set; }
+        public decimal EeGuTaxPaidByErAccountsUnits { get; set; }
+        public decimal EeNiLERtoUERAccountsAmount { get; set; }
+        public decimal EeNiLERtoUERAccountsUnits { get; set; }
+        public decimal ErNiAccountsAmount { get; set; }
+        public decimal ErNiAccountsUnits { get; set; }
+        public decimal EeNiLERtoUERPayeAmount { get; set; }
+        public decimal EeNiLERtoUERPayeUnits { get; set; }
+        public decimal EeNiPaidByErPayeAmount { get; set; }
+        public decimal EeNiPaidByErPayeUnits { get; set; }
+        public decimal EeGuTaxPaidByErPayeAmount { get; set; }
+        public decimal EeGuTaxPaidByErPayeUnits { get; set; }
+        public decimal ErNiPayeAmount { get; set; }
+        public decimal ErNiPayeUnits { get; set; }
+        public List<RPPayCode> Additions { get; set; }
+        public RPEmployeeYtd() { }
+        public RPEmployeeYtd(DateTime thisPeriodStartDate, DateTime lastPaymentDate, string eeRef, DateTime leavingDate, bool leaver, decimal taxPrevEmployment,
+                          decimal taxablePayPrevEmployment, decimal taxThisEmployemnt, decimal taxablePayThisEmployment, decimal grossedUp, decimal grossedUpTax,
+                          decimal netPayYTD, decimal grossPayYTD, decimal benefitInKindYTD, decimal superannuationYTD, decimal holidayPayYTD,
+                          decimal erPensionYTD, decimal eePensionYTD, decimal aeoYTD, DateTime studentLoanStartDate, DateTime studentLoanEndDate,
+                          decimal studentLoanDeductionsYTD, string niLetter, decimal niableYTD, decimal earningsToLEL, decimal earningsToSET,
+                          decimal earningsToPET, decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
+                          decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate, decimal erRebate,
+                          decimal erReduction, decimal eeReduction, string taxCode, bool week1Month1, int weekNumber, int monthNumber, int periodNumber,
+                          decimal eeNiPaidByErAccountsAmount, decimal eeNiPaidByErAccountsUnits, decimal eeGuTaxPaidByErAccountsAmount, decimal eeGuTaxPaidByErAccountsUnits,
+                          decimal eeNiLERtoUERAccountsAmount, decimal eeNiLERtoUERAccountsUnits, decimal eeNiLERtoUERPayeAmount, decimal eeNiLERtoUERPayeUnits,
+                          decimal erNiAccountsAmount, decimal erNiAccountsUnits, decimal erNiLERtoUERPayeAmount, decimal erNiLERtoUERPayeUnits, decimal eeNiPaidByErPayeAmount,
+                          decimal eeNiPaidByErPayeUnits, decimal eeGuTaxPaidByErPayeAmount, decimal eeGuTaxPaidByErPayeUnits, decimal erNiPayeAmount, decimal erNiPayeUnits)
+                          
+        {
+            ThisPeriodStartDate = thisPeriodStartDate;
+            LastPaymentDate = lastPaymentDate;
+            EeRef = eeRef;
+            LeavingDate = leavingDate;
+            Leaver = leaver;
+            TaxPrevEmployment = taxPrevEmployment;
+            TaxablePayPrevEmployment = taxablePayPrevEmployment;
+            TaxThisEmployment = taxThisEmployemnt;
+            TaxablePayThisEmployment = taxablePayThisEmployment;
+            GrossedUp = grossedUp;
+            GrossedUpTax = grossedUpTax;
+            NetPayYTD = netPayYTD;
+            GrossPayYTD = grossPayYTD;
+            BenefitInKindYTD = benefitInKindYTD;
+            SuperannuationYTD = superannuationYTD;
+            HolidayPayYTD = holidayPayYTD;
+            ErPensionYTD = erPensionYTD;
+            EePensionYTD = eePensionYTD;
+            AeoYTD = aeoYTD;
+            StudentLoanStartDate = studentLoanStartDate;
+            StudentLoanEndDate = studentLoanEndDate;
+            StudentLoanDeductionsYTD = studentLoanDeductionsYTD;
+            NiLetter = niLetter;
+            NiableYTD = niableYTD;
+            EarningsToLEL = earningsToLEL;
+            EarningsToSET = earningsToSET;
+            EarningsToPET = earningsToPET;
+            EarningsToUST = earningsToUST;
+            EarningsToAUST = earningsToAUST;
+            EarningsToUEL = earningsToUEL;
+            EarningsAboveUEL = earningsAboveUEL;
+            EeContributionsPt1 = eeContributionsPt1;
+            EeContributionsPt2 = eeContributionsPt2;
+            ErContributions = erContributions;
+            EeRebate = eeRebate;
+            ErRebate = erRebate;
+            ErReduction = erReduction;
+            EeReduction = eeReduction;
+            TaxCode = taxCode;
+            Week1Month1 = week1Month1;
+            WeekNumber = weekNumber;
+            MonthNumber = monthNumber;
+            PeriodNumber = periodNumber;
+            EeNiPaidByErAccountsAmount = eeNiPaidByErAccountsAmount;
+            EeNiPaidByErAccountsUnits = eeNiPaidByErAccountsUnits;
+            EeGuTaxPaidByErAccountsAmount = eeGuTaxPaidByErAccountsAmount;
+            EeGuTaxPaidByErAccountsUnits = eeGuTaxPaidByErAccountsUnits;
+            EeNiLERtoUERAccountsAmount = eeNiLERtoUERAccountsAmount;
+            EeNiLERtoUERAccountsUnits = eeNiLERtoUERAccountsUnits;
+            ErNiAccountsAmount = erNiAccountsAmount;
+            ErNiAccountsUnits = erNiAccountsUnits;
+            EeNiLERtoUERPayeAmount = eeNiLERtoUERPayeAmount;
+            EeNiLERtoUERPayeUnits = eeNiLERtoUERPayeUnits;
+            EeNiPaidByErPayeAmount = eeNiPaidByErPayeAmount;
+            EeNiPaidByErPayeUnits = eeNiPaidByErPayeUnits;
+            EeGuTaxPaidByErPayeAmount = eeGuTaxPaidByErPayeAmount;
+            EeGuTaxPaidByErPayeUnits = eeGuTaxPaidByErPayeUnits;
+            ErNiPayeAmount = erNiPayeAmount;
+            ErNiPayeUnits = erNiPayeUnits;
+
+        }
+
+    }
     public class P45
     {
         public string ErOfficeNo { get; set; }
@@ -663,6 +803,34 @@ namespace PayRunIOClassLibrary
             AccountsYearUnits = accountsYearUnits;
             PayeYearUnits = payeYearUnits;
             PayrollAccrued = payrollAccrued;
+        }
+    }
+
+    //Report (RP) Pay Code
+    public class RPPayCode
+    {
+        public string EeRef { get; set; }
+        public string Code { get; set; }
+        public string PayCode { get; set; }
+        public string Description { get; set; }
+        public bool IsPayCode { get; set; }
+        public decimal AccountsAmount{ get; set; }
+        public decimal PayeAmount{ get; set; }
+        public decimal AccountsUnits { get; set; }
+        public decimal PayeUnits { get; set; }
+        public RPPayCode() { }
+        public RPPayCode(string eeRef, string code, string payCode, string description, bool isPayCode,
+                         decimal accountsAmount, decimal payeAmount, decimal accountsUnits, decimal payeUnits)
+        {
+            EeRef = eeRef;
+            Code = code;
+            PayCode = payCode;
+            Description = description;
+            IsPayCode = isPayCode;
+            AccountsAmount = accountsAmount;
+            PayeAmount = payeAmount;
+            AccountsUnits = accountsUnits;
+            PayeUnits = payeUnits;
         }
     }
     public class RPPayComponent
