@@ -575,7 +575,7 @@ namespace PayRunIOClassLibrary
         public decimal EeGuTaxPaidByErPayeUnits { get; set; }
         public decimal ErNiPayeAmount { get; set; }
         public decimal ErNiPayeUnits { get; set; }
-        public List<RPPayCode> Additions { get; set; }
+        public List<RPPayCode> PayCodes { get; set; }
         public RPEmployeeYtd() { }
         public RPEmployeeYtd(DateTime thisPeriodStartDate, DateTime lastPaymentDate, string eeRef, DateTime leavingDate, bool leaver, decimal taxPrevEmployment,
                           decimal taxablePayPrevEmployment, decimal taxThisEmployemnt, decimal taxablePayThisEmployment, decimal grossedUp, decimal grossedUpTax,
@@ -588,7 +588,8 @@ namespace PayRunIOClassLibrary
                           decimal eeNiPaidByErAccountsAmount, decimal eeNiPaidByErAccountsUnits, decimal eeGuTaxPaidByErAccountsAmount, decimal eeGuTaxPaidByErAccountsUnits,
                           decimal eeNiLERtoUERAccountsAmount, decimal eeNiLERtoUERAccountsUnits, decimal eeNiLERtoUERPayeAmount, decimal eeNiLERtoUERPayeUnits,
                           decimal erNiAccountsAmount, decimal erNiAccountsUnits, decimal erNiLERtoUERPayeAmount, decimal erNiLERtoUERPayeUnits, decimal eeNiPaidByErPayeAmount,
-                          decimal eeNiPaidByErPayeUnits, decimal eeGuTaxPaidByErPayeAmount, decimal eeGuTaxPaidByErPayeUnits, decimal erNiPayeAmount, decimal erNiPayeUnits)
+                          decimal eeNiPaidByErPayeUnits, decimal eeGuTaxPaidByErPayeAmount, decimal eeGuTaxPaidByErPayeUnits, decimal erNiPayeAmount, decimal erNiPayeUnits,
+                          List<RPPayCode> payCodes)
                           
         {
             ThisPeriodStartDate = thisPeriodStartDate;
@@ -650,7 +651,7 @@ namespace PayRunIOClassLibrary
             EeGuTaxPaidByErPayeUnits = eeGuTaxPaidByErPayeUnits;
             ErNiPayeAmount = erNiPayeAmount;
             ErNiPayeUnits = erNiPayeUnits;
-
+            PayCodes = payCodes;
         }
 
     }
@@ -813,20 +814,20 @@ namespace PayRunIOClassLibrary
         public string Code { get; set; }
         public string PayCode { get; set; }
         public string Description { get; set; }
-        public bool IsPayCode { get; set; }
+        public string Type { get; set; }
         public decimal AccountsAmount{ get; set; }
         public decimal PayeAmount{ get; set; }
         public decimal AccountsUnits { get; set; }
         public decimal PayeUnits { get; set; }
         public RPPayCode() { }
-        public RPPayCode(string eeRef, string code, string payCode, string description, bool isPayCode,
+        public RPPayCode(string eeRef, string code, string payCode, string description, string type,
                          decimal accountsAmount, decimal payeAmount, decimal accountsUnits, decimal payeUnits)
         {
             EeRef = eeRef;
             Code = code;
             PayCode = payCode;
             Description = description;
-            IsPayCode = isPayCode;
+            Type=type;
             AccountsAmount = accountsAmount;
             PayeAmount = payeAmount;
             AccountsUnits = accountsUnits;
