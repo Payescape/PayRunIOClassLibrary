@@ -22,14 +22,7 @@ namespace PayRunIOClassLibrary
     {
         public PayRunIOWebGlobeClass() { }
 
-        public FileInfo[] GetAllCompletedPayrollFiles(XDocument xdoc)
-        {
-            string path = xdoc.Root.Element("DataHomeFolder").Value + "Outputs";
-            DirectoryInfo folder = new DirectoryInfo(path);
-            FileInfo[] files = folder.GetFiles("*CompletedPayroll*.xml");
-
-            return files;
-        }
+        
         public void UpdateContactDetails(XDocument xdoc)
         {
             string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
@@ -449,7 +442,7 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        public bool CheckIfP32IsRequired(RPParameters rpParameters)
+        public bool CheckIfP32Required(RPParameters rpParameters)
         {
             //Run the next period report to get the next pay period.
             string rptRef = "NEXTPERIOD";
