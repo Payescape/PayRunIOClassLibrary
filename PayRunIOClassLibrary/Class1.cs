@@ -475,7 +475,7 @@ namespace PayRunIOClassLibrary
 
             return p32Required;
         }
-        public RPEmployer ProcessPeriodReport(XDocument xdoc, XmlDocument xmlPeriodReport, RPParameters rpParameters)
+        public Tuple<RPEmployer, RPParameters> ProcessPeriodReport(XDocument xdoc, XmlDocument xmlPeriodReport, RPParameters rpParameters)
         {
             var tuple = PrepareStandardReports(xdoc, xmlPeriodReport, rpParameters);
             List<RPEmployeePeriod> rpEmployeePeriodList = tuple.Item1;
@@ -494,12 +494,12 @@ namespace PayRunIOClassLibrary
             //Create the history csv file from the objects
             CreateHistoryCSV(xdoc, rpParameters, rpEmployer, rpEmployeePeriodList);
 
-            return rpEmployer;
+            return new Tuple<RPEmployer, RPParameters>(rpEmployer, rpParameters);
 
         }
         public void ProcessYtdReport(XDocument xdoc, XmlDocument xmlYTDReport, RPParameters rpParameters)
         {
-            List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport, rpParameters);
+            List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport);
             CreateYTDCSV(xdoc, rpEmployeeYtdList, rpParameters);
 
         }
@@ -522,6 +522,14 @@ namespace PayRunIOClassLibrary
             string[] directories = Directory.GetDirectories(path);
 
             return directories;
+        }
+        public FileInfo[] GetAllCompletedPayrollFiles(XDocument xdoc)
+        {
+            string path = xdoc.Root.Element("DataHomeFolder").Value + "Outputs";
+            DirectoryInfo folder = new DirectoryInfo(path);
+            FileInfo[] files = folder.GetFiles("*CompletedPayroll*.xml");
+            
+            return files;
         }
         public bool ProduceReports(XDocument xdoc, string directory)
         {
@@ -639,11 +647,11 @@ namespace PayRunIOClassLibrary
             //Now extract the necessary data and produce the required reports.
 
             RPParameters rpParameters = GetRPParameters(xmlYTDReport);
-            List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport, rpParameters);
+            List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport);
 
             return new Tuple<List<RPEmployeeYtd>, RPParameters>(rpEmployeeYtdList, rpParameters);
         }
-        private List<RPEmployeeYtd> PrepareYTDCSV(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
+        private List<RPEmployeeYtd> PrepareYTDCSV(XDocument xdoc, XmlDocument xmlReport)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Outgoing";
             List<RPEmployeeYtd> rpEmployeeYtdList = new List<RPEmployeeYtd>();
