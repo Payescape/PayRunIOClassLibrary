@@ -449,39 +449,67 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        //public bool CheckIfP32IsRequired(RPParameters rpParameters)
-        //{
-        //    //Run the next period report to get the next pay period.
-        //    string rptRef = "NEXTPERIOD";              
-        //    string parameter1 = "EmployerKey";
-        //    string parameter2 = "PayScheduleKey";
-        //    DateTime currentPayRunDate = DateTime.MinValue;
-        //    DateTime nextPayRunDate = DateTime.MinValue;
-            
-        //    //Get the next period report
-        //    XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
-        //                                      null, null, null, null, null, null, null, null);
+        public bool CheckIfP32IsRequired(RPParameters rpParameters)
+        {
+            //Run the next period report to get the next pay period.
+            string rptRef = "NEXTPERIOD";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "PayScheduleKey";
+            DateTime currentPayRunDate = DateTime.MinValue;
+            DateTime nextPayRunDate = DateTime.MinValue;
 
-        //    foreach (XmlElement nextPayPeriod in xmlReport.GetElementsByTagName("NextPayPeriod"))
-        //    {
-        //        currentPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "LastPayDay"));
-        //        nextPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "NextPayDay"));
-        //    }
-        //    bool p32Required = false;
-        //    if(currentPayRunDate != DateTime.MinValue)
-        //    {
-        //        int currentTaxMonth = GetTaxMonth(currentPayRunDate);
-        //        int nextTaxMonth = GetTaxMonth(nextPayRunDate);
-        //        if (currentTaxMonth != nextTaxMonth)
-        //        {
-        //            p32Required = true;
-        //        }
+            //Get the next period report
+            XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
+                                              null, null, null, null, null, null, null, null);
 
-        //    }
+            foreach (XmlElement nextPayPeriod in xmlReport.GetElementsByTagName("NextPayPeriod"))
+            {
+                currentPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "LastPayDay"));
+                nextPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "NextPayDay"));
+            }
+            bool p32Required = false;
+            if (currentPayRunDate != DateTime.MinValue)
+            {
+                int currentTaxMonth = GetTaxMonth(currentPayRunDate);
+                int nextTaxMonth = GetTaxMonth(nextPayRunDate);
+                if (currentTaxMonth != nextTaxMonth)
+                {
+                    p32Required = true;
+                }
+
+            }
 
 
-        //    return p32Required;
-        //}
+            return p32Required;
+        }
+        public RPEmployer ProcessPeriodReport(XDocument xdoc, XmlDocument xmlPeriodReport, RPParameters rpParameters)
+        {
+            var tuple = PrepareStandardReports(xdoc, xmlPeriodReport, rpParameters);
+            List<RPEmployeePeriod> rpEmployeePeriodList = tuple.Item1;
+            List<RPPayComponent> rpPayComponents = tuple.Item2;
+            //I don't think the P45 report will be able to be produced from the EmployeePeriod report but I'm leaving it here for now.
+            List<P45> p45s = tuple.Item3;
+            RPEmployer rpEmployer = tuple.Item4;
+            rpParameters = tuple.Item5;
+            //Get the total payable to hmrc, I'm going use it in the zipped file name(possibly!).
+            decimal hmrcTotal = CalculateHMRCTotal(rpEmployeePeriodList);
+            rpEmployer.HMRCDesc = "[" + hmrcTotal.ToString() + "]";
+            //I now have a list of employee with their total for this period & ytd plus addition & deductions
+            //I can print payslips from here.
+            PrintStandardReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters, p45s, rpPayComponents);
+
+            //Create the history csv file from the objects
+            CreateHistoryCSV(xdoc, rpParameters, rpEmployer, rpEmployeePeriodList);
+
+            return rpEmployer;
+
+        }
+        public void ProcessYtdReport(XDocument xdoc, XmlDocument xmlYTDReport, RPParameters rpParameters)
+        {
+            List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport, rpParameters);
+            CreateYTDCSV(xdoc, rpEmployeeYtdList, rpParameters);
+
+        }
         private int GetTaxMonth(DateTime thisDate)
         {
             int taxMonth = thisDate.Month - 3;
@@ -622,7 +650,7 @@ namespace PayRunIOClassLibrary
 
             return new Tuple<List<RPEmployeeYtd>, RPParameters>(rpEmployeeYtdList, rpParameters);
         }
-        public List<RPEmployeeYtd> PrepareYTDCSV(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
+        private List<RPEmployeeYtd> PrepareYTDCSV(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Outgoing";
             List<RPEmployeeYtd> rpEmployeeYtdList = new List<RPEmployeeYtd>();
@@ -889,7 +917,7 @@ namespace PayRunIOClassLibrary
 
             return rpEmployeeYtdList;
         }
-        public void CreateYTDCSV(XDocument xdoc, List<RPEmployeeYtd> rpEmployeeYtdList, RPParameters rpParameters)
+        private void CreateYTDCSV(XDocument xdoc, List<RPEmployeeYtd> rpEmployeeYtdList, RPParameters rpParameters)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Outgoing";
 
@@ -1106,17 +1134,17 @@ namespace PayRunIOClassLibrary
         {
             //Get the total payable to hmrc, I'm going use it in the zipped file name(possibly!).
             decimal hmrcTotal = CalculateHMRCTotal(rpEmployeePeriodList);
-            string hmrcDesc = "[" + hmrcTotal.ToString() + "]";
+            rpEmployer.HMRCDesc = "[" + hmrcTotal.ToString() + "]";
             //I now have a list of employee with their total for this period & ytd plus addition & deductions
             //I can print payslips and standard reports from here.
             PrintStandardReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters, p45s, rpPayComponents);
 
-            ZipReports(xdoc, rpEmployer, rpParameters, hmrcDesc);
+            ZipReports(xdoc, rpEmployer, rpParameters);
             EmailZippedReports(xdoc, rpEmployer, rpParameters);
 
         }
 
-        public void CreateHistoryCSV(XDocument xdoc, RPParameters rpParameters, RPEmployer rpEmployer, List<RPEmployeePeriod> rpEmployeePeriodList)
+        private void CreateHistoryCSV(XDocument xdoc, RPParameters rpParameters, RPEmployer rpEmployer, List<RPEmployeePeriod> rpEmployeePeriodList)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Outgoing";
             string coNo = rpParameters.ErRef;
@@ -1589,7 +1617,7 @@ namespace PayRunIOClassLibrary
         }
 
 
-        public Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters> PrepareStandardReports(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
+        private Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters> PrepareStandardReports(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
         {
             string textLine = null;
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
@@ -1956,7 +1984,7 @@ namespace PayRunIOClassLibrary
             return new Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters>(rpEmployeePeriodList, rpPayComponents, p45s, rpEmployer, rpParameters);
 
         }
-        public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
+        private void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
         {
             PrintPayslips(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPaymentsDueByMethodReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
@@ -1986,7 +2014,7 @@ namespace PayRunIOClassLibrary
             }
             return newAddress;
         }
-        public decimal CalculateHMRCTotal(List<RPEmployeePeriod> rpEmployeePeriodList)
+        private decimal CalculateHMRCTotal(List<RPEmployeePeriod> rpEmployeePeriodList)
         {
             decimal hmrcTotal = 0;
             foreach (RPEmployeePeriod employee in rpEmployeePeriodList)
@@ -2295,7 +2323,7 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        public void ZipReports(XDocument xdoc, RPEmployer rpEmployer, RPParameters rpParameters, string hmrcDesc)
+        public void ZipReports(XDocument xdoc, RPEmployer rpEmployer, RPParameters rpParameters)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
@@ -2306,8 +2334,8 @@ namespace PayRunIOClassLibrary
             //
             string dateTimeStamp = DateTime.Now.ToString("yyyyMMddhhmmssfff");
             string sourceFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports\\" + rpParameters.ErRef;
-            string zipFileName = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports\\" + rpParameters.ErRef + "_PDF_Reports_" + hmrcDesc + "_" + dateTimeStamp + ".zip";
-            string zipFileNameNoPassword = xdoc.Root.Element("DataHomeFolder").Value + "PE-ReportsNoPassword\\" + rpParameters.ErRef + "_PDF_Reports_" + hmrcDesc + "_" + dateTimeStamp + ".zip";
+            string zipFileName = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports\\" + rpParameters.ErRef + "_PDF_Reports_" + rpEmployer.HMRCDesc + "_" + dateTimeStamp + ".zip";
+            string zipFileNameNoPassword = xdoc.Root.Element("DataHomeFolder").Value + "PE-ReportsNoPassword\\" + rpParameters.ErRef + "_PDF_Reports_" + rpEmployer.HMRCDesc + "_" + dateTimeStamp + ".zip";
             string password = null;
             password = rpEmployer.Name.ToLower().Replace(" ", "");
             if (password.Length >= 4)
@@ -2375,7 +2403,7 @@ namespace PayRunIOClassLibrary
                 FileInfo[] files = dirInfo.GetFiles();
                 foreach (FileInfo file in files)
                 {
-                    EmailZippedReport(xdoc, file, rpEmployer, rpParameters);
+                    EmailZippedReport(xdoc, file, rpParameters);
                     file.MoveTo(file.FullName.Replace("PE-Reports", "PE-Reports\\Archive"));
                 }
 
@@ -2386,7 +2414,7 @@ namespace PayRunIOClassLibrary
                 update_Progress(textLine, configDirName, logOneIn);
             }
         }
-        private void EmailZippedReport(XDocument xdoc, FileInfo file, RPEmployer rpEmployer, RPParameters rpParameters)
+        private void EmailZippedReport(XDocument xdoc, FileInfo file, RPParameters rpParameters)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
@@ -2900,13 +2928,14 @@ namespace PayRunIOClassLibrary
     {
         public string Name { get; set; }
         public string PayeRef { get; set; }
+        public string HMRCDesc { get; set; }
 
         public RPEmployer() { }
-        public RPEmployer(string name, string payeRef)
+        public RPEmployer(string name, string payeRef, string hmrcDesc)
         {
             Name = name;
             PayeRef = payeRef;
-
+            HMRCDesc = hmrcDesc;
 
         }
     }
