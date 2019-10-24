@@ -1976,7 +1976,7 @@ namespace PayRunIOClassLibrary
             PrintComponentAnalysisReport(xdoc, rpPayComponents, rpEmployer, rpParameters);
             PrintPensionContributionsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPayrollRunDetailsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
-            PrintPayrollNewReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
+            //PrintPayrollNewReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             if (p45s.Count > 0)
             {
                 PrintP45s(xdoc, p45s, rpParameters);
@@ -2272,80 +2272,81 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        private void PrintPayrollNewReport(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
-        {
-            string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
-            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
-            string coNo = rpParameters.ErRef;
-            string coName = rpEmployer.Name;
-            int taxYear = rpParameters.TaxYear;
-            int taxPeriod = rpParameters.TaxPeriod;
-            string freq = rpParameters.PaySchedule;
-            //var payeMonth = rpParameters.AccYearEnd.Day < 6 ? rpParameters.AccYearEnd.Month - 4 : rpParameters.AccYearEnd.Month - 3;
-            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
-            if (payeMonth <= 0)
-            {
-                payeMonth += 12;
-            }
-            //New a new data source to test the addimng of a data source
-            List<RPAddition> rpAdditionList = new List<RPAddition>();
-            RPAddition rpAddition = new RPAddition();
-            rpAddition.AccountsYearBalance = 12.35m;
-            rpAddition.AccountsYearUnits = 23.46m;
-            rpAddition.AmountTP = 34.57m;
-            rpAddition.AmountYTD = 45.68m;
-            rpAddition.Code = "C1235";
-            rpAddition.Description = "D1235";
-            rpAddition.EeRef = "Ee1235";
-            rpAdditionList.Add(rpAddition);
+        //Testing re: the data source for reports.
+        //private void PrintPayrollNewReport(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
+        //{
+        //    string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
+        //    string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+        //    string coNo = rpParameters.ErRef;
+        //    string coName = rpEmployer.Name;
+        //    int taxYear = rpParameters.TaxYear;
+        //    int taxPeriod = rpParameters.TaxPeriod;
+        //    string freq = rpParameters.PaySchedule;
+        //    //var payeMonth = rpParameters.AccYearEnd.Day < 6 ? rpParameters.AccYearEnd.Month - 4 : rpParameters.AccYearEnd.Month - 3;
+        //    var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+        //    if (payeMonth <= 0)
+        //    {
+        //        payeMonth += 12;
+        //    }
+        //    //New a new data source to test the addimng of a data source
+        //    List<RPAddition> rpAdditionList = new List<RPAddition>();
+        //    RPAddition rpAddition = new RPAddition();
+        //    rpAddition.AccountsYearBalance = 12.35m;
+        //    rpAddition.AccountsYearUnits = 23.46m;
+        //    rpAddition.AmountTP = 34.57m;
+        //    rpAddition.AmountYTD = 45.68m;
+        //    rpAddition.Code = "C1235";
+        //    rpAddition.Description = "D1235";
+        //    rpAddition.EeRef = "Ee1235";
+        //    rpAdditionList.Add(rpAddition);
 
-            rpAddition.AccountsYearBalance = 12.34m;
-            rpAddition.AccountsYearUnits = 23.45m;
-            rpAddition.AmountTP = 34.56m;
-            rpAddition.AmountYTD = 45.67m;
-            rpAddition.Code = "C1234";
-            rpAddition.Description = "D1234";
-            rpAddition.EeRef = "Ee1234";
-            rpAdditionList.Add(rpAddition);
+        //    rpAddition.AccountsYearBalance = 12.34m;
+        //    rpAddition.AccountsYearUnits = 23.45m;
+        //    rpAddition.AmountTP = 34.56m;
+        //    rpAddition.AmountYTD = 45.67m;
+        //    rpAddition.Code = "C1234";
+        //    rpAddition.Description = "D1234";
+        //    rpAddition.EeRef = "Ee1234";
+        //    rpAdditionList.Add(rpAddition);
 
-            //Main payslip report
-            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "PayrollNewReport.repx", true);         //"PayrollRunDetailsReport.repx"
+        //    //Main payslip report
+        //    XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "PayrollNewReport.repx", true);         //"PayrollRunDetailsReport.repx"
 
-            report1.Parameters["CmpName"].Value = rpEmployer.Name;
-            report1.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
-            report1.Parameters["Date"].Value = rpParameters.PayRunDate;
-            report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
-            report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
-            report1.Parameters["PAYEMonth"].Value = payeMonth;
-            report1.DataSource = rpAdditionList;
-            //// To show the report designer. You need to uncomment this to design the report.
-            //// You also need to comment out the report.ExportToPDF line below
-            ////
-            bool designMode = true;
-            if (designMode)
-            {
-                report1.ShowDesigner();
-                //report1.ShowPreview();
+        //    report1.Parameters["CmpName"].Value = rpEmployer.Name;
+        //    report1.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+        //    report1.Parameters["Date"].Value = rpParameters.PayRunDate;
+        //    report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
+        //    report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
+        //    report1.Parameters["PAYEMonth"].Value = payeMonth;
+        //    report1.DataSource = rpAdditionList;
+        //    //// To show the report designer. You need to uncomment this to design the report.
+        //    //// You also need to comment out the report.ExportToPDF line below
+        //    ////
+        //    bool designMode = true;
+        //    if (designMode)
+        //    {
+        //        report1.ShowDesigner();
+        //        //report1.ShowPreview();
 
-            }
-            else
-            {
-                // Export to pdf file.
+        //    }
+        //    else
+        //    {
+        //        // Export to pdf file.
 
-                //
-                // I'm going to remove spaces from the document name. I'll replace them with dashes
-                //
-                //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
-                string dirName = outgoingFolder + "\\" + coNo + "\\";
-                Directory.CreateDirectory(dirName);
-                string docName = coNo + "_PayrollRunDetailsReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
+        //        //
+        //        // I'm going to remove spaces from the document name. I'll replace them with dashes
+        //        //
+        //        //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
+        //        string dirName = outgoingFolder + "\\" + coNo + "\\";
+        //        Directory.CreateDirectory(dirName);
+        //        string docName = coNo + "_PayrollRunDetailsReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
 
-                report1.ExportToPdf(dirName + docName);
-                docName = docName.Replace(".pdf", ".xlsx");
-                report1.ExportToXlsx(dirName + docName);
-            }
+        //        report1.ExportToPdf(dirName + docName);
+        //        docName = docName.Replace(".pdf", ".xlsx");
+        //        report1.ExportToXlsx(dirName + docName);
+        //    }
 
-        }
+        //}
         private void PrintP45s(XDocument xdoc, List<P45> p45s, RPParameters rpParameters)
         {
             string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
