@@ -475,28 +475,7 @@ namespace PayRunIOClassLibrary
 
             return p32Required;
         }
-        public Tuple<RPEmployer, RPParameters> ProcessPeriodReport(XDocument xdoc, XmlDocument xmlPeriodReport, RPParameters rpParameters)
-        {
-            var tuple = PrepareStandardReports(xdoc, xmlPeriodReport, rpParameters);
-            List<RPEmployeePeriod> rpEmployeePeriodList = tuple.Item1;
-            List<RPPayComponent> rpPayComponents = tuple.Item2;
-            //I don't think the P45 report will be able to be produced from the EmployeePeriod report but I'm leaving it here for now.
-            List<P45> p45s = tuple.Item3;
-            RPEmployer rpEmployer = tuple.Item4;
-            rpParameters = tuple.Item5;
-            //Get the total payable to hmrc, I'm going use it in the zipped file name(possibly!).
-            decimal hmrcTotal = CalculateHMRCTotal(rpEmployeePeriodList);
-            rpEmployer.HMRCDesc = "[" + hmrcTotal.ToString() + "]";
-            //I now have a list of employee with their total for this period & ytd plus addition & deductions
-            //I can print payslips from here.
-            PrintStandardReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters, p45s, rpPayComponents);
-
-            //Create the history csv file from the objects
-            CreateHistoryCSV(xdoc, rpParameters, rpEmployer, rpEmployeePeriodList);
-
-            return new Tuple<RPEmployer, RPParameters>(rpEmployer, rpParameters);
-
-        }
+        
         public void ProcessYtdReport(XDocument xdoc, XmlDocument xmlYTDReport, RPParameters rpParameters)
         {
             List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport);
@@ -617,6 +596,11 @@ namespace PayRunIOClassLibrary
             //Now extract the necessary data and produce the required reports.
 
             RPParameters rpParameters = new RPParameters();
+
+            var rootElement = XElement.Parse(xmlReport.InnerXml);
+            var header = rootElement.Elements("Parameters").ToArray();
+            var header1 = rootElement.Elements("Parameters");
+            
             foreach (XmlElement parameter in xmlReport.GetElementsByTagName("Parameters"))
             {
                 rpParameters.ErRef = GetElementByTagFromXml(parameter, "EmployerCode");
@@ -1145,7 +1129,7 @@ namespace PayRunIOClassLibrary
 
         }
 
-        private void CreateHistoryCSV(XDocument xdoc, RPParameters rpParameters, RPEmployer rpEmployer, List<RPEmployeePeriod> rpEmployeePeriodList)
+        public void CreateHistoryCSV(XDocument xdoc, RPParameters rpParameters, RPEmployer rpEmployer, List<RPEmployeePeriod> rpEmployeePeriodList)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Outgoing";
             string coNo = rpParameters.ErRef;
@@ -1618,7 +1602,7 @@ namespace PayRunIOClassLibrary
         }
 
 
-        private Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters> PrepareStandardReports(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
+        public Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters> PrepareStandardReports(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
         {
             string textLine = null;
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
@@ -1985,13 +1969,14 @@ namespace PayRunIOClassLibrary
             return new Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters>(rpEmployeePeriodList, rpPayComponents, p45s, rpEmployer, rpParameters);
 
         }
-        private void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
+        public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
         {
             PrintPayslips(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPaymentsDueByMethodReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintComponentAnalysisReport(xdoc, rpPayComponents, rpEmployer, rpParameters);
             PrintPensionContributionsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPayrollRunDetailsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
+            PrintPayrollNewReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             if (p45s.Count > 0)
             {
                 PrintP45s(xdoc, p45s, rpParameters);
@@ -2015,7 +2000,7 @@ namespace PayRunIOClassLibrary
             }
             return newAddress;
         }
-        private decimal CalculateHMRCTotal(List<RPEmployeePeriod> rpEmployeePeriodList)
+        public decimal CalculateHMRCTotal(List<RPEmployeePeriod> rpEmployeePeriodList)
         {
             decimal hmrcTotal = 0;
             foreach (RPEmployeePeriod employee in rpEmployeePeriodList)
@@ -2263,6 +2248,80 @@ namespace PayRunIOClassLibrary
             //// You also need to comment out the report.ExportToPDF line below
             ////
             bool designMode = false;
+            if (designMode)
+            {
+                report1.ShowDesigner();
+                //report1.ShowPreview();
+
+            }
+            else
+            {
+                // Export to pdf file.
+
+                //
+                // I'm going to remove spaces from the document name. I'll replace them with dashes
+                //
+                //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
+                string dirName = outgoingFolder + "\\" + coNo + "\\";
+                Directory.CreateDirectory(dirName);
+                string docName = coNo + "_PayrollRunDetailsReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
+
+                report1.ExportToPdf(dirName + docName);
+                docName = docName.Replace(".pdf", ".xlsx");
+                report1.ExportToXlsx(dirName + docName);
+            }
+
+        }
+        private void PrintPayrollNewReport(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
+        {
+            string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
+            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+            string coNo = rpParameters.ErRef;
+            string coName = rpEmployer.Name;
+            int taxYear = rpParameters.TaxYear;
+            int taxPeriod = rpParameters.TaxPeriod;
+            string freq = rpParameters.PaySchedule;
+            //var payeMonth = rpParameters.AccYearEnd.Day < 6 ? rpParameters.AccYearEnd.Month - 4 : rpParameters.AccYearEnd.Month - 3;
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
+            //New a new data source to test the addimng of a data source
+            List<RPAddition> rpAdditionList = new List<RPAddition>();
+            RPAddition rpAddition = new RPAddition();
+            rpAddition.AccountsYearBalance = 12.35m;
+            rpAddition.AccountsYearUnits = 23.46m;
+            rpAddition.AmountTP = 34.57m;
+            rpAddition.AmountYTD = 45.68m;
+            rpAddition.Code = "C1235";
+            rpAddition.Description = "D1235";
+            rpAddition.EeRef = "Ee1235";
+            rpAdditionList.Add(rpAddition);
+
+            rpAddition.AccountsYearBalance = 12.34m;
+            rpAddition.AccountsYearUnits = 23.45m;
+            rpAddition.AmountTP = 34.56m;
+            rpAddition.AmountYTD = 45.67m;
+            rpAddition.Code = "C1234";
+            rpAddition.Description = "D1234";
+            rpAddition.EeRef = "Ee1234";
+            rpAdditionList.Add(rpAddition);
+
+            //Main payslip report
+            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "PayrollNewReport.repx", true);         //"PayrollRunDetailsReport.repx"
+
+            report1.Parameters["CmpName"].Value = rpEmployer.Name;
+            report1.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+            report1.Parameters["Date"].Value = rpParameters.PayRunDate;
+            report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
+            report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            report1.Parameters["PAYEMonth"].Value = payeMonth;
+            report1.DataSource = rpAdditionList;
+            //// To show the report designer. You need to uncomment this to design the report.
+            //// You also need to comment out the report.ExportToPDF line below
+            ////
+            bool designMode = true;
             if (designMode)
             {
                 report1.ShowDesigner();
