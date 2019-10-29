@@ -1974,9 +1974,71 @@ namespace PayRunIOClassLibrary
             return new Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters>(rpEmployeePeriodList, rpPayComponents, p45s, rpEmployer, rpParameters);
 
         }
-        public void ProcessBankReports(List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        public void ProcessBankReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
+            
+            //Bank file code is not equal to "001" so a bank file is required.
+            switch(rpEmployer.BankFileCode)
+            {
+                case "001":
+                    //Barclays
+                    CreateBarclaysBankFile(xdoc, rpEmployeePeriodList, rpEmployer);
+                    break;
+                case "002":
+                    //Eagle
+                    CreateEagleBankFile(xdoc, rpEmployeePeriodList, rpEmployer);
+                    break;
+                default:
+                    //No bank file required
+                    break;
+            }
+           
+        }
+        private void CreateBarclaysBankFile(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        {
+            string quotes = "\"";
+            string comma = ",";
+            //Create the Barclays bank file which does not have a header row.
+            using (StreamWriter sw = new StreamWriter("filename"))
+            {
+                string csvLine = null;
+                foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+                {
+                    string fullName = rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname;
+                    fullName = fullName.ToUpper();
+                    csvLine = quotes + rpEmployeePeriod.SortCode + quotes + comma +
+                              quotes + fullName + quotes + comma +
+                              quotes + rpEmployeePeriod.BankAccNo + quotes + comma +
+                              quotes + rpEmployeePeriod.NetPayTP.ToString() + quotes + comma +
+                              quotes + rpEmployer.Name.ToUpper() + quotes + comma +
+                              quotes + "99" + quotes;
+                    sw.WriteLine(csvLine);
+                         
+                }
+            }
+        }
+        private void CreateEagleBankFile(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        {
+            string comma = ",";
+            //Create the Eagle bank file which does have a header row.
+            using (StreamWriter sw = new StreamWriter("filename"))
+            {
+                //Write the header row
+                string csvLine = "AccName,SortCode,AccNumber,Amount,Ref";
+                sw.WriteLine(csvLine);
+                foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+                {
+                    string fullName = rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname;
+                    fullName = fullName.ToUpper();
+                    csvLine = fullName + comma +
+                              rpEmployeePeriod.SortCode + comma +
+                              rpEmployeePeriod.BankAccNo + comma +
+                              rpEmployeePeriod.NetPayTP.ToString() + comma +
+                              fullName;
+                    sw.WriteLine(csvLine);
 
+                }
+            }
         }
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
         {
