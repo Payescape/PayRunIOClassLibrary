@@ -335,7 +335,12 @@ namespace PayRunIOClassLibrary
 
         public void ArchiveCompletedPayrollFile(XDocument xdoc, FileInfo completedPayrollFile)
         {
-            string destFileName = completedPayrollFile.FullName.Replace("Outputs", "PE-ArchivedOutputs");
+            DateTime now = DateTime.Now;
+            string nowString = now.ToString("yyyyMMddHHmmssfff");
+
+            string destFileName = completedPayrollFile.FullName.Replace("Outputs", "PE-ArchivedOutputs").Replace(".xml", "_" + nowString + ".xml");
+            //destFileName = destFileName.Replace(".xml", "_" + nowString + ".xml");
+            
 
             File.Move(completedPayrollFile.FullName, destFileName);
         }
@@ -620,6 +625,9 @@ namespace PayRunIOClassLibrary
             {
                 rpEmployer.Name = GetElementByTagFromXml(employer, "Name");
                 rpEmployer.PayeRef = GetElementByTagFromXml(employer, "EmployerPayeRef");
+                rpEmployer.BankFileCode = "001";
+                rpEmployer.PensionReportCode = "001";
+                //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
             }
             return rpEmployer;
         }
@@ -1974,19 +1982,27 @@ namespace PayRunIOClassLibrary
             return new Tuple<List<RPEmployeePeriod>, List<RPPayComponent>, List<P45>, RPEmployer, RPParameters>(rpEmployeePeriodList, rpPayComponents, p45s, rpEmployer, rpParameters);
 
         }
-        public void ProcessBankReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        public void ProcessBankReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
         {
-            
+            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports" + "\\" + rpParameters.ErRef;
+            string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
+            string dataBase = xdoc.Root.Element("Database").Value;
+            string userID = xdoc.Root.Element("Username").Value;
+            string password = xdoc.Root.Element("Password").Value;
+            string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
+            string[] companyReportCode = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
+            rpEmployer.BankFileCode = companyReportCode[0];
+            rpEmployer.PensionReportCode = companyReportCode[1];
             //Bank file code is not equal to "001" so a bank file is required.
-            switch(rpEmployer.BankFileCode)
+            switch (rpEmployer.BankFileCode)
             {
                 case "001":
                     //Barclays
-                    CreateBarclaysBankFile(xdoc, rpEmployeePeriodList, rpEmployer);
+                    CreateBarclaysBankFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
                     break;
                 case "002":
                     //Eagle
-                    CreateEagleBankFile(xdoc, rpEmployeePeriodList, rpEmployer);
+                    CreateEagleBankFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
                     break;
                 default:
                     //No bank file required
@@ -1994,12 +2010,13 @@ namespace PayRunIOClassLibrary
             }
            
         }
-        private void CreateBarclaysBankFile(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        private void CreateBarclaysBankFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
+            string bankFileName = outgoingFolder + "\\" + "BarclaysBankFile.txt";
             string quotes = "\"";
             string comma = ",";
             //Create the Barclays bank file which does not have a header row.
-            using (StreamWriter sw = new StreamWriter("filename"))
+            using (StreamWriter sw = new StreamWriter(bankFileName))
             {
                 string csvLine = null;
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
@@ -2017,11 +2034,12 @@ namespace PayRunIOClassLibrary
                 }
             }
         }
-        private void CreateEagleBankFile(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        private void CreateEagleBankFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
+            string bankFileName = outgoingFolder + "\\" + "EagleBankFile.csv";
             string comma = ",";
             //Create the Eagle bank file which does have a header row.
-            using (StreamWriter sw = new StreamWriter("filename"))
+            using (StreamWriter sw = new StreamWriter(bankFileName))
             {
                 //Write the header row
                 string csvLine = "AccName,SortCode,AccNumber,Amount,Ref";
@@ -2703,6 +2721,55 @@ namespace PayRunIOClassLibrary
             update_Progress(textLine, configDirName, logOneIn);
 
             return emailAddresses;
+        }
+        private string[] GetCompanyReportCodes(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
+        {
+            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
+            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+            string textLine = null;
+
+            int x = sqlConnectionString.LastIndexOf(";Password=") + 10;
+            int y = sqlConnectionString.LastIndexOf(";");
+            string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
+
+            textLine = string.Format("Start getting the company report codes connection string : {0}.", logConnectionString);
+            update_Progress(textLine, configDirName, logOneIn);
+
+            string companyNo = rpParameters.ErRef;                  //file.FullName.Substring(0, 4);
+            DataTable dtCompanyReportCodes = new DataTable();
+            try
+            {
+                using (var connection = new SqlConnection(sqlConnectionString))
+                using (var command = new SqlCommand("SelectCompanyReportCodes", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                })
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("CompanyNo", companyNo);
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(command);
+                    sqlDataAdapter.Fill(dtCompanyReportCodes);
+                }
+            }
+            catch (Exception ex)
+            {
+                textLine = string.Format("Error getting the company report codes.\r\n{0}.\r\n", ex);
+                update_Progress(textLine, configDirName, logOneIn);
+            }
+            string[] companyReportCodes = new string[2];
+            DataRow jimRow = dtCompanyReportCodes.Rows[0];
+            foreach (DataRow drCompanyReportCodes in dtCompanyReportCodes.Rows)
+            {
+                //Should only be 1 row
+                companyReportCodes[0] = drCompanyReportCodes.ItemArray[0].ToString();
+                companyReportCodes[1] = drCompanyReportCodes.ItemArray[1].ToString();
+                
+            }
+
+            textLine = string.Format("Finished getting company report codes with connection string : {0}.", logConnectionString);
+            update_Progress(textLine, configDirName, logOneIn);
+
+            return companyReportCodes;
         }
     }
     public class ReadConfigFile
