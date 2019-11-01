@@ -541,8 +541,6 @@ namespace PayRunIOClassLibrary
 
                         ProducePDFReports(xdoc, rpEmployeePeriodList, rpEmployer, p45s, rpPayComponents, rpParameters);
 
-                        //Produce bank files if necessary
-                        ProcessBankReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
                         eePeriodProcessed = true;
                     }
                     catch (Exception ex)
@@ -1134,6 +1132,9 @@ namespace PayRunIOClassLibrary
             //I now have a list of employee with their total for this period & ytd plus addition & deductions
             //I can print payslips and standard reports from here.
             PrintStandardReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters, p45s, rpPayComponents);
+            //Produce bank files if necessary
+            ProcessBankReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
+
 
             ZipReports(xdoc, rpEmployer, rpParameters);
             EmailZippedReports(xdoc, rpEmployer, rpParameters);
