@@ -1990,9 +1990,9 @@ namespace PayRunIOClassLibrary
             string userID = xdoc.Root.Element("Username").Value;
             string password = xdoc.Root.Element("Password").Value;
             string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
-            string[] companyReportCode = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
-            rpEmployer.BankFileCode = companyReportCode[0];
-            rpEmployer.PensionReportCode = companyReportCode[1];
+            DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
+            rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();                 //BankFileCode
+            rpEmployer.PensionReportCode = drCompanyReportCodes.ItemArray[1].ToString();            //PensionReportCode
             //Bank file code is not equal to "001" so a bank file is required.
             switch (rpEmployer.BankFileCode)
             {
@@ -2722,7 +2722,7 @@ namespace PayRunIOClassLibrary
 
             return emailAddresses;
         }
-        private string[] GetCompanyReportCodes(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
+        private DataRow GetCompanyReportCodes(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
@@ -2756,20 +2756,20 @@ namespace PayRunIOClassLibrary
                 textLine = string.Format("Error getting the company report codes.\r\n{0}.\r\n", ex);
                 update_Progress(textLine, configDirName, logOneIn);
             }
-            string[] companyReportCodes = new string[2];
-            DataRow jimRow = dtCompanyReportCodes.Rows[0];
-            foreach (DataRow drCompanyReportCodes in dtCompanyReportCodes.Rows)
-            {
-                //Should only be 1 row
-                companyReportCodes[0] = drCompanyReportCodes.ItemArray[0].ToString();
-                companyReportCodes[1] = drCompanyReportCodes.ItemArray[1].ToString();
+            //string[] companyReportCodes = new string[2];
+            DataRow drCompanyReportCodes = dtCompanyReportCodes.Rows[0];
+            //foreach (DataRow drCompanyReportCodes in dtCompanyReportCodes.Rows)
+            //{
+            //    //Should only be 1 row
+            //    companyReportCodes[0] = drCompanyReportCodes.ItemArray[0].ToString();
+            //    companyReportCodes[1] = drCompanyReportCodes.ItemArray[1].ToString();
                 
-            }
+            //}
 
             textLine = string.Format("Finished getting company report codes with connection string : {0}.", logConnectionString);
             update_Progress(textLine, configDirName, logOneIn);
 
-            return companyReportCodes;
+            return drCompanyReportCodes;
         }
     }
     public class ReadConfigFile
