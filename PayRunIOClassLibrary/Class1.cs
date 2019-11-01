@@ -540,6 +540,9 @@ namespace PayRunIOClassLibrary
                         CreateHistoryCSV(xdoc, rpParameters, rpEmployer, rpEmployeePeriodList);
 
                         ProducePDFReports(xdoc, rpEmployeePeriodList, rpEmployer, p45s, rpPayComponents, rpParameters);
+
+                        //Produce bank files if necessary
+                        ProcessBankReports(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
                         eePeriodProcessed = true;
                     }
                     catch (Exception ex)
