@@ -524,6 +524,9 @@ namespace PayRunIOClassLibrary
             bool eeYtdProcessed = false;
             DirectoryInfo dirInfo = new DirectoryInfo(directory);
             FileInfo[] files = dirInfo.GetFiles("*.xml");
+            //We haven't got the correct payroll run date in the "EmployeeYtd" report so I'm going use the RPParameters from the "EmployeePeriod" report.
+            //I'm just a bit concerned of the order they will come in. Hopefully always alphabetical.
+            RPParameters rpParameters = null;
             foreach (FileInfo file in files)
             {
                 if (file.FullName.Contains("EmployeePeriod"))
@@ -535,7 +538,7 @@ namespace PayRunIOClassLibrary
                         List<RPPayComponent> rpPayComponents = tuple.Item2;
                         List<P45> p45s = tuple.Item3;
                         RPEmployer rpEmployer = tuple.Item4;
-                        RPParameters rpParameters = tuple.Item5;
+                        rpParameters = tuple.Item5;
 
                         CreateHistoryCSV(xdoc, rpParameters, rpEmployer, rpEmployeePeriodList);
 
@@ -556,7 +559,8 @@ namespace PayRunIOClassLibrary
                     {
                         var tuple = PrepareYTDReport(xdoc, file);
                         List<RPEmployeeYtd> rpEmployeeYtdList = tuple.Item1;
-                        RPParameters rpParameters = tuple.Item2;
+                        //I'm going to use the RPParameters from the "EmployeePeriod" report for now at least.
+                        //RPParameters rpParameters = tuple.Item2;
                         CreateYTDCSV(xdoc, rpEmployeeYtdList, rpParameters);
                         eeYtdProcessed = true;
                     }
@@ -930,6 +934,8 @@ namespace PayRunIOClassLibrary
                 foreach (RPEmployeeYtd rpEmployeeYtd in rpEmployeeYtdList)
                 {
                     payYTDDetails[0] = rpEmployeeYtd.LastPaymentDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                    //I'm using the rpParameters from the "EmployeePeriod" report.
+                    payYTDDetails[0] = rpParameters.PayRunDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                     payYTDDetails[1] = rpEmployeeYtd.EeRef;
                     if (rpEmployeeYtd.LeavingDate != null)
                     {
