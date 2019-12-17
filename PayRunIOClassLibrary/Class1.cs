@@ -1601,6 +1601,7 @@ namespace PayRunIOClassLibrary
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
         {
             PrintPayslips(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
+            PrintPayslipsSimple(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPaymentsDueByMethodReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintComponentAnalysisReport(xdoc, rpPayComponents, rpEmployer, rpParameters);
             PrintPensionContributionsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
@@ -1679,7 +1680,54 @@ namespace PayRunIOClassLibrary
                 string docName = coNo + "_PayslipReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
 
                 report1.ExportToPdf(dirName + docName);
-                docName = docName.Replace(".pdf", ".xlsx");
+                //docName = docName.Replace(".pdf", ".xlsx");
+                //report1.ExportToXlsx(dirName + docName);
+
+            }
+
+        }
+        private void PrintPayslipsSimple(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
+        {
+            string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
+            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+            string coNo = rpParameters.ErRef;
+            string coName = rpEmployer.Name;
+            int taxYear = rpParameters.TaxYear;
+            int taxPeriod = rpParameters.TaxPeriod;
+            string freq = rpParameters.PaySchedule;
+
+            //Main payslip report
+            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "PayslipSimple.repx", true);
+            report1.Parameters["CmpName"].Value = rpEmployer.Name;
+            report1.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+            report1.Parameters["Date"].Value = rpParameters.PayRunDate; //.AccYearEnd;
+            report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
+            report1.DataSource = rpEmployeePeriodList;
+            //// To show the report designer. You need to uncomment this to design the report.
+            //// You also need to comment out the report.ExportToPDF line below
+            ////
+            bool designMode = true;
+            if (designMode)
+            {
+                report1.ShowDesigner();
+                //report1.ShowPreview();
+
+            }
+            else
+            {
+                // Export to pdf file.
+
+                //
+                // I'm going to remove spaces from the document name. I'll replace them with dashes
+                //
+                //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
+
+                string dirName = outgoingFolder + "\\" + coNo + "\\";
+                Directory.CreateDirectory(dirName);
+                string docName = coNo + "_PayslipReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".xlsx";
+
+                //report1.ExportToPdf(dirName + docName);
+                //docName = docName.Replace(".pdf", ".xlsx");
                 report1.ExportToXlsx(dirName + docName);
 
             }
@@ -2311,76 +2359,7 @@ namespace PayRunIOClassLibrary
 
             return drCompanyReportCodes;
         }
-        public void CreatePreSampleXLSX(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList,
-                                        RPEmployer rpEmployer, RPParameters rpParameters, List<RPPreSamplePayCode> rpPreSamplePayCodes)
-        {
-            //Create a list of the required columns.
-            List<string> reqCol = new List<string>();
-            reqCol.Add("EeRef");
-            reqCol.Add("Name");
-            reqCol.Add("Dept");
-            reqCol.Add("CostCentre");
-            reqCol.Add("Branch");
-            reqCol.Add("Status");
-            reqCol.Add("TaxCode");
-            reqCol.Add("NILetter");
-            reqCol.Add("PreTaxAddDed");
-            reqCol.Add("GrossedUpTaxThisRun");
-            reqCol.Add("EeNIPdByEr");
-            reqCol.Add("GUStudentLoan");
-            reqCol.Add("GUNIReduction");
-            reqCol.Add("PenPreTaxEeGU");
-            reqCol.Add("TotalAbsencePay");
-            reqCol.Add("HolidayPay");
-            reqCol.Add("PenPreTaxEe");
-            reqCol.Add("TaxablePay");
-            reqCol.Add("Tax");
-            reqCol.Add("NI");
-            reqCol.Add("PostTaxAddDed");
-            reqCol.Add("PostTaxPension");
-            reqCol.Add("AEO");
-            reqCol.Add("StudentLoan");
-            reqCol.Add("NetPay");
-            reqCol.Add("ErNI");
-            reqCol.Add("PenEr");
-            reqCol.Add("TotalGrossUp");
-
-            foreach(RPPreSamplePayCode rpPreSamplePayCode in rpPreSamplePayCodes)
-            {
-                reqCol.Add(rpPreSamplePayCode.Description);
-            }
-
-            
-
-            //Need to count how many columns we are going to need
-            string[] headings = new string[reqCol.Count()];
-            int i = 0;
-            foreach (string col in reqCol)
-            {
-                headings[i] = col.ToString();
-                i++;
-            }
-            //Create a workbook.
-            Workbook workbook = new Workbook("X:\\Payescape\\PayRunIO\\PreSample.xlsx", "Pre Sample");
-            foreach(string col in reqCol)
-            {
-                workbook.CurrentWorksheet.AddNextCell(col);
-            }
-            //Write the headings.
-            foreach (string heading in headings)
-            {
-                workbook.CurrentWorksheet.AddNextCell(heading);
-            }
-            //Move to the next row.
-            workbook.CurrentWorksheet.GoToNextRow();
-            //Now create a sample data line.
-            //foreach (string column in columns)
-            //{
-            //    workbook.CurrentWorksheet.AddNextCell(column);
-            //}
-            //Save the workbook.
-            workbook.Save();
-        }
+       
     }
     public class ReadConfigFile
     {
