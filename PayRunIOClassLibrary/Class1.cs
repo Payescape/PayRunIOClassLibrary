@@ -1238,9 +1238,9 @@ namespace PayRunIOClassLibrary
                         {
                             string[] payCodeDetails = new string[12];
                             payCodeDetails = new string[12];
-                            payCodeDetails[0] = rpAddition.Code;
+                            payCodeDetails[0] = rpAddition.Code.TrimStart(' ');
                             payCodeDetails[1] = rpAddition.Description;
-                            payCodeDetails[2] = rpAddition.Code;
+                            payCodeDetails[2] = payCodeDetails[0];
                             payCodeDetails[3] = "E"; //Earnings
                             payCodeDetails[4] = rpAddition.Rate.ToString();
                             payCodeDetails[5] = rpAddition.Units.ToString();
@@ -1282,9 +1282,9 @@ namespace PayRunIOClassLibrary
                         {
                             string[] payCodeDetails = new string[12];
                             payCodeDetails = new string[12];
-                            payCodeDetails[0] = rpDeduction.Code;
+                            payCodeDetails[0] = rpDeduction.Code.TrimStart(' ');
                             payCodeDetails[1] = rpDeduction.Description;
-                            payCodeDetails[2] = rpDeduction.Code;
+                            payCodeDetails[2] = payCodeDetails[0];
                             payCodeDetails[3] = "D"; //Earnings
                             payCodeDetails[4] = rpDeduction.Rate.ToString();
                             payCodeDetails[5] = rpDeduction.Units.ToString();
@@ -1300,25 +1300,22 @@ namespace PayRunIOClassLibrary
                             payCodeDetails[11] = rpDeduction.PayrollAccrued.ToString();
                             switch (payCodeDetails[0]) //PayCode
                             {
-                                //I've put 3 spaces in front the the TAX pay code to make it come first on the payslip
-                                case "   TAX":
+                                case "TAX":
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = payHistoryDetails[29];  // Tax Code
                                     payCodeDetails[2] = payHistoryDetails[29];  // Tax Code
                                     payCodeDetails[3] = "T";                    // Tax    
                                     break;
-                                //I've put 2 spaces in front the the NI pay code to make it come in the correct order on the payslip
-                                case "  NI":
+                                case "NI":
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "NIEeeLERtoUER-A";      // Ee NI
                                     payCodeDetails[2] = "NIEeeLERtoUER";        // Ee NI
                                     payCodeDetails[3] = "T";                    // Tax    
                                     break;
-                                //I've put 1 spaces in front the the pension pay codes to make them come in the correct order on the payslip
-                                case " PENSION":
-                                case " PENSIONSS":
-                                case " PENSIONRAS":
-                                case " PENSIONTAXEX":
+                                case "PENSION":
+                                case "PENSIONSS":
+                                case "PENSIONRAS":
+                                case "PENSIONTAXEX":
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "PenPostTaxEe";         // Ee Pension
                                     payCodeDetails[2] = "PenPostTaxEe";         // Ee Pension
