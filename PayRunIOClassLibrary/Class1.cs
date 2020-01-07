@@ -620,7 +620,7 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.StudentLoanEndDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "StudentLoanEndDate"));
                     rpEmployeeYtd.StudentLoanDeductionsYTD = GetDecimalElementByTagFromXml(employee, "StudentLoanDeductionsYTD");
                     rpEmployeeYtd.NiLetter = GetElementByTagFromXml(employee, "NiLetter");
-                    rpEmployeeYtd.NiableYTD = GetDecimalElementByTagFromXml(employee, "NiableYTD");
+                    rpEmployeeYtd.NiableYTD = GetDecimalElementByTagFromXml(employee, "NiableYtd");
                     rpEmployeeYtd.EarningsToLEL = GetDecimalElementByTagFromXml(employee, "EarningsToLEL");
                     rpEmployeeYtd.EarningsToSET = GetDecimalElementByTagFromXml(employee, "EarningsToSET");
                     rpEmployeeYtd.EarningsToPET = GetDecimalElementByTagFromXml(employee, "EarningsToPET");
@@ -762,7 +762,7 @@ namespace PayRunIOClassLibrary
                             }
                             else
                             {
-                                rpPayCode.Type = "E";
+                                rpPayCode.Type = "D";
                             }
 
                             rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(payCode, "AccountsAmount");
@@ -941,9 +941,9 @@ namespace PayRunIOClassLibrary
                             payCodeDetails[5] = rpPayCode.PayeAmount.ToString();
                             payCodeDetails[6] = rpPayCode.AccountsUnits.ToString();
                             payCodeDetails[7] = rpPayCode.PayeUnits.ToString();
-                            if (payCodeDetails[1] == "D")
+                            if (rpPayCode.Type == "D" && rpPayCode.PayCode != "PenEr" && rpPayCode.PayCode != "PenPostTaxEe")
                             {
-                                //Deduction so multiply by -1
+                                //Deduction so multiply by -1 unless it's "PenEr" or "PenPostTaxEe" which are already positive.
                                 for (int i = 4; i < 8; i++)
                                 {
                                     payCodeDetails[i] = (Convert.ToDecimal(payCodeDetails[i]) * -1).ToString();
@@ -1108,7 +1108,7 @@ namespace PayRunIOClassLibrary
                         payHistoryDetails[10] = rpEmployeePeriod.StudentLoan.ToString();
                         payHistoryDetails[11] = rpEmployeePeriod.NILetter;
                         payHistoryDetails[12] = rpEmployeePeriod.CalculationBasis;
-                        payHistoryDetails[13] = rpEmployeePeriod.TotalPayTP.ToString();     //Was "Total"
+                        payHistoryDetails[13] = rpEmployeePeriod.Total.ToString();
                         payHistoryDetails[14] = rpEmployeePeriod.EarningsToLEL.ToString();
                         payHistoryDetails[15] = rpEmployeePeriod.EarningsToSET.ToString();
                         payHistoryDetails[16] = rpEmployeePeriod.EarningsToPET.ToString();
@@ -2694,7 +2694,7 @@ namespace PayRunIOClassLibrary
         public decimal StudentLoan { get; set; }
         public string NILetter { get; set; }
         public string CalculationBasis { get; set; }
-        public decimal TotalPayTP { get; set; }
+        public decimal Total { get; set; }
         public decimal EarningsToLEL { get; set; }
         public decimal EarningsToSET { get; set; }
         public decimal EarningsToPET { get; set; }
@@ -2736,6 +2736,7 @@ namespace PayRunIOClassLibrary
         public decimal ErNICTP { get; set; }
         public string Frequency { get; set; }
         public decimal NetPayYTD { get; set; }
+        public decimal TotalPayTP { get; set; }
         public decimal TotalPayYTD { get; set; }
         public decimal TotalDedTP { get; set; }
         public decimal TotalDedYTD { get; set; }
@@ -2758,7 +2759,7 @@ namespace PayRunIOClassLibrary
                           string country, string sortCode, string bankAccNo, DateTime dateOfBirth, string gender, string buildingSocRef,
                           string niNumber, string paymentMethod, DateTime payRunDate, DateTime periodStartDate, DateTime periodEndDate, int payrollYear,
                           decimal gross, decimal netPayTP, decimal dayHours, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
-                          decimal studentLoan, string niLetter, string calculationBasis, 
+                          decimal studentLoan, string niLetter, string calculationBasis, decimal total,
                           decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET, decimal earningsToUST, decimal earningsToAUST,
                           decimal earningsToUEL, decimal earningsAboveUEL, decimal eeContributionsPt1, decimal eeContributionsPt2,
                           decimal erNICYTD, decimal eeRebate, decimal erRebate, decimal eeReduction, DateTime leavingDate, bool leaver,
@@ -2804,7 +2805,7 @@ namespace PayRunIOClassLibrary
             StudentLoan = studentLoan;
             NILetter = niLetter;
             CalculationBasis = calculationBasis;
-            TotalPayTP = totalPayTP;
+            Total = total;
             EarningsToLEL = earningsToLEL;
             EarningsToSET = earningsToSET;
             EarningsToPET = earningsToPET;
