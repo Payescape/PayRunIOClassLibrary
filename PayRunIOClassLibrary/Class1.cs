@@ -629,7 +629,7 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.EarningsToUEL = GetDecimalElementByTagFromXml(employee, "EarningsToUEL");
                     rpEmployeeYtd.EarningsAboveUEL = GetDecimalElementByTagFromXml(employee, "EarningsAboveUEL");
                     rpEmployeeYtd.EeContributionsPt1 = GetDecimalElementByTagFromXml(employee, "EeContributionsPt1");
-                    rpEmployeeYtd.EeContributionsPt2 = GetDecimalElementByTagFromXml(employee, "EeContributionsPt1");
+                    rpEmployeeYtd.EeContributionsPt2 = GetDecimalElementByTagFromXml(employee, "EeContributionsPt2");
                     rpEmployeeYtd.ErContributions = GetDecimalElementByTagFromXml(employee, "ErContributions");
                     rpEmployeeYtd.EeRebate = GetDecimalElementByTagFromXml(employee, "EeRebate");
                     rpEmployeeYtd.ErRebate = GetDecimalElementByTagFromXml(employee, "ErRebate");
