@@ -3213,10 +3213,14 @@ namespace PayRunIOClassLibrary
         public decimal AmountTP { get; set; }
         public decimal UnitsYTD { get; set; }
         public decimal AmountYTD { get; set; }
+        public bool IsTaxable { get; set; }
+        public bool IsPayCode { get; set; }
+        public string EarningOrDeduction { get; set; }
         public RPPayComponent() { }
         public RPPayComponent(string payCode, string description, string eeRef, string fullname,
                               string surname, decimal rate, decimal unitsTP, decimal amountTP,
-                               decimal unitsYTD, decimal amountYTD)
+                               decimal unitsYTD, decimal amountYTD, bool isTaxable, bool isPayCode,
+                               string earningOrDeduction)
         {
             PayCode = payCode;
             Description = description;
@@ -3228,7 +3232,9 @@ namespace PayRunIOClassLibrary
             AmountTP = amountTP;
             UnitsYTD = unitsYTD;
             AmountYTD = amountYTD;
-
+            IsTaxable = isTaxable;
+            IsPayCode = isPayCode;
+            EarningOrDeduction = earningOrDeduction;
         }
     }
     public class SMTPEmailSettings
