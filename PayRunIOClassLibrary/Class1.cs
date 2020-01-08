@@ -855,7 +855,7 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[1] = rpEmployeeYtd.EeRef;
                     if (rpEmployeeYtd.LeavingDate != null)
                     {
-                        payYTDDetails[2] = rpEmployeeYtd.LeavingDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                        payYTDDetails[2] = Convert.ToDateTime(rpEmployeeYtd.LeavingDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                     }
                     else
                     {
@@ -885,7 +885,7 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[17] = rpEmployeeYtd.AeoYTD.ToString();
                     if (rpEmployeeYtd.StudentLoanStartDate != null)
                     {
-                        payYTDDetails[18] = rpEmployeeYtd.StudentLoanStartDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                        payYTDDetails[18] = Convert.ToDateTime(rpEmployeeYtd.StudentLoanStartDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                     }
                     else
                     {
@@ -893,7 +893,7 @@ namespace PayRunIOClassLibrary
                     }
                     if (rpEmployeeYtd.StudentLoanEndDate != null)
                     {
-                        payYTDDetails[19] = rpEmployeeYtd.StudentLoanEndDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                        payYTDDetails[19] = Convert.ToDateTime(rpEmployeeYtd.StudentLoanEndDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                     }
                     else
                     {
@@ -1099,7 +1099,7 @@ namespace PayRunIOClassLibrary
                         }
                         if (rpEmployeePeriod.StudentLoanEndDate != null)
                         {
-                            payHistoryDetails[9] = Convert.ToDateTime(rpEmployeePeriod.StudentLoanStartDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                            payHistoryDetails[9] = Convert.ToDateTime(rpEmployeePeriod.StudentLoanEndDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                         }
                         else
                         {
@@ -1122,7 +1122,15 @@ namespace PayRunIOClassLibrary
                         payHistoryDetails[24] = rpEmployeePeriod.EeRebate.ToString();
                         payHistoryDetails[25] = rpEmployeePeriod.ErRebate.ToString();
                         payHistoryDetails[26] = rpEmployeePeriod.EeReduction.ToString();
-                        payHistoryDetails[27] = Convert.ToDateTime(rpEmployeePeriod.LeavingDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                        if(rpEmployeePeriod.LeavingDate != null)
+                        {
+                            payHistoryDetails[27] = Convert.ToDateTime(rpEmployeePeriod.LeavingDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                        }
+                        else
+                        {
+                            payHistoryDetails[27] = "";
+                        }
+                        
                         if (rpEmployeePeriod.Leaver)
                         {
                             payHistoryDetails[28] = "N";
@@ -2872,7 +2880,7 @@ namespace PayRunIOClassLibrary
         public DateTime ThisPeriodStartDate { get; set; }
         public DateTime LastPaymentDate { get; set; }
         public string EeRef { get; set; }
-        public DateTime LeavingDate { get; set; }
+        public DateTime? LeavingDate { get; set; }
         public bool Leaver { get; set; }
         public decimal TaxPrevEmployment { get; set; }
         public decimal TaxablePayPrevEmployment { get; set; }
@@ -2888,8 +2896,8 @@ namespace PayRunIOClassLibrary
         public decimal ErPensionYTD { get; set; }
         public decimal EePensionYTD { get; set; }
         public decimal AeoYTD { get; set; }
-        public DateTime StudentLoanStartDate { get; set; }
-        public DateTime StudentLoanEndDate { get; set; }
+        public DateTime? StudentLoanStartDate { get; set; }
+        public DateTime? StudentLoanEndDate { get; set; }
         public decimal StudentLoanDeductionsYTD { get; set; }
         public string NiLetter { get; set; }
         public decimal NiableYTD { get; set; }
@@ -2930,10 +2938,10 @@ namespace PayRunIOClassLibrary
         public decimal ErNiPayeUnits { get; set; }
         public List<RPPayCode> PayCodes { get; set; }
         public RPEmployeeYtd() { }
-        public RPEmployeeYtd(DateTime thisPeriodStartDate, DateTime lastPaymentDate, string eeRef, DateTime leavingDate, bool leaver, decimal taxPrevEmployment,
+        public RPEmployeeYtd(DateTime thisPeriodStartDate, DateTime lastPaymentDate, string eeRef, DateTime? leavingDate, bool leaver, decimal taxPrevEmployment,
                           decimal taxablePayPrevEmployment, decimal taxThisEmployemnt, decimal taxablePayThisEmployment, decimal grossedUp, decimal grossedUpTax,
                           decimal netPayYTD, decimal grossPayYTD, decimal benefitInKindYTD, decimal superannuationYTD, decimal holidayPayYTD,
-                          decimal erPensionYTD, decimal eePensionYTD, decimal aeoYTD, DateTime studentLoanStartDate, DateTime studentLoanEndDate,
+                          decimal erPensionYTD, decimal eePensionYTD, decimal aeoYTD, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
                           decimal studentLoanDeductionsYTD, string niLetter, decimal niableYTD, decimal earningsToLEL, decimal earningsToSET,
                           decimal earningsToPET, decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
                           decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate, decimal erRebate,
