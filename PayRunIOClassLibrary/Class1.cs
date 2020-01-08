@@ -600,7 +600,7 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.ThisPeriodStartDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "ThisPeriodStartDate"));
                     rpEmployeeYtd.LastPaymentDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "LastPaymentDate"));
                     rpEmployeeYtd.EeRef = GetElementByTagFromXml(employee, "EeRef");
-                    rpEmployeeYtd.LeavingDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "LeavingDate"));
+                    rpEmployeeYtd.LeavingDate = GetDateElementByTagFromXml(employee, "LeavingDate");
                     rpEmployeeYtd.Leaver = GetBooleanElementByTagFromXml(employee, "Leaver");
                     rpEmployeeYtd.TaxPrevEmployment = GetDecimalElementByTagFromXml(employee, "TaxPrevEmployment");
                     rpEmployeeYtd.TaxablePayPrevEmployment = GetDecimalElementByTagFromXml(employee, "TaxablePayPrevEmployment");
@@ -616,8 +616,8 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.ErPensionYTD = GetDecimalElementByTagFromXml(employee, "ErPensionYTD");
                     rpEmployeeYtd.EePensionYTD = GetDecimalElementByTagFromXml(employee, "EePensionYTD");
                     rpEmployeeYtd.AeoYTD = GetDecimalElementByTagFromXml(employee, "AeoYTD");
-                    rpEmployeeYtd.StudentLoanStartDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "StudentLoanStartDate"));
-                    rpEmployeeYtd.StudentLoanEndDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "StudentLoanEndDate"));
+                    rpEmployeeYtd.StudentLoanStartDate = GetDateElementByTagFromXml(employee, "StudentLoanStartDate");
+                    rpEmployeeYtd.StudentLoanEndDate = GetDateElementByTagFromXml(employee, "StudentLoanEndDate");
                     rpEmployeeYtd.StudentLoanDeductionsYTD = GetDecimalElementByTagFromXml(employee, "StudentLoanDeductionsYTD");
                     rpEmployeeYtd.NiLetter = GetElementByTagFromXml(employee, "NiLetter");
                     rpEmployeeYtd.NiableYTD = GetDecimalElementByTagFromXml(employee, "NiableYtd");
@@ -1133,11 +1133,11 @@ namespace PayRunIOClassLibrary
                         
                         if (rpEmployeePeriod.Leaver)
                         {
-                            payHistoryDetails[28] = "N";
+                            payHistoryDetails[28] = "Y";
                         }
                         else
                         {
-                            payHistoryDetails[28] = "Y";
+                            payHistoryDetails[28] = "N";
                         }
 
                         payHistoryDetails[29] = rpEmployeePeriod.TaxCode.ToString();
