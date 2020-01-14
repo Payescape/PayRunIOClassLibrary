@@ -583,14 +583,17 @@ namespace PayRunIOClassLibrary
 
                     }
                     DateTime periodStartDate = DateTime.ParseExact(GetElementByTagFromXml(employee, "ThisPeriodStartDate"), "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                    if (leaver.StartsWith("N"))
-                    {
-                        include = true;
-                    }
-                    else if (leavingDate >= periodStartDate)
-                    {
-                        include = true;
-                    }
+                    //It seems they want to include leaver in the YTD csv file. I think this might change!
+                    include = true;
+                    //if (leaver.StartsWith("N"))
+                    //{
+                    //    include = true;
+                    //}
+                    //else if (leavingDate >= periodStartDate)
+                    //{
+                    //    include = true;
+                    //}
+                    
                 }
 
                 if (include)
