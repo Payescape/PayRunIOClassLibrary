@@ -1455,7 +1455,7 @@ namespace PayRunIOClassLibrary
             {
                 try
                 {
-                    decimalValue = Convert.ToDecimal(GetElementByTagFromXml(xmlElement, tag));
+                    decimalValue = Convert.ToDecimal(element);
                 }
                 catch
                 {
@@ -1469,11 +1469,15 @@ namespace PayRunIOClassLibrary
         {
             bool boolValue = false;
             string element = GetElementByTagFromXml(xmlElement, tag);
+            if(element=="Y" || element=="Yes")
+            {
+                element = "true";
+            }
             if (element != null)
             {
                 try
                 {
-                    boolValue = Convert.ToBoolean(GetElementByTagFromXml(xmlElement, tag));
+                    boolValue = Convert.ToBoolean(element);
                 }
                 catch
                 {
@@ -1492,7 +1496,7 @@ namespace PayRunIOClassLibrary
             {
                 try
                 {
-                    intValue = Convert.ToInt32(GetElementByTagFromXml(xmlElement, tag));
+                    intValue = Convert.ToInt32(element);
                 }
                 catch
                 {
@@ -1510,7 +1514,7 @@ namespace PayRunIOClassLibrary
             {
                 try
                 {
-                    dateValue = Convert.ToDateTime(GetElementByTagFromXml(xmlElement, tag));
+                    dateValue = Convert.ToDateTime(element);
                 }
                 catch
                 {
