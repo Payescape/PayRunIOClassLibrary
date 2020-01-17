@@ -2684,6 +2684,7 @@ namespace PayRunIOClassLibrary
         public string Surname { get; set; }
         public string Fullname { get; set; }
         public string RefFullname { get; set; }
+        public string SurnameForename { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
         public string Address3 { get; set; }
@@ -2769,7 +2770,7 @@ namespace PayRunIOClassLibrary
         public List<RPAddition> Additions { get; set; }
         public List<RPDeduction> Deductions { get; set; }
         public RPEmployeePeriod() { }
-        public RPEmployeePeriod(string reference, string title, string forename, string surname, string fullname, string refFullname,
+        public RPEmployeePeriod(string reference, string title, string forename, string surname, string fullname, string refFullname, string surnameForename,
                           string address1, string address2, string address3, string address4, string postcode,
                           string country, string sortCode, string bankAccNo, DateTime dateOfBirth, string gender, string buildingSocRef,
                           string niNumber, string paymentMethod, DateTime payRunDate, DateTime periodStartDate, DateTime periodEndDate, int payrollYear,
@@ -2795,6 +2796,7 @@ namespace PayRunIOClassLibrary
             Surname = surname;
             Fullname = fullname;
             RefFullname = refFullname;
+            SurnameForename = surnameForename;
             Address1 = address1;
             Address2 = address2;
             Address3 = address3;
