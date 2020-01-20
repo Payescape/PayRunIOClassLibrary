@@ -1577,16 +1577,18 @@ namespace PayRunIOClassLibrary
                 string csvLine = null;
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
                 {
-                    string fullName = rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname;
-                    fullName = fullName.ToUpper();
-                    csvLine = quotes + rpEmployeePeriod.SortCode + quotes + comma +
-                              quotes + fullName + quotes + comma +
-                              quotes + rpEmployeePeriod.BankAccNo + quotes + comma +
-                              quotes + rpEmployeePeriod.NetPayTP.ToString() + quotes + comma +
-                              quotes + rpEmployer.Name.ToUpper() + quotes + comma +
-                              quotes + "99" + quotes;
-                    sw.WriteLine(csvLine);
-                         
+                    if (rpEmployeePeriod.PaymentMethod == "BACS")
+                    {
+                        string fullName = rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname;
+                        fullName = fullName.ToUpper();
+                        csvLine = quotes + rpEmployeePeriod.SortCode + quotes + comma +
+                                  quotes + fullName + quotes + comma +
+                                  quotes + rpEmployeePeriod.BankAccNo + quotes + comma +
+                                  quotes + rpEmployeePeriod.NetPayTP.ToString() + quotes + comma +
+                                  quotes + rpEmployer.Name.ToUpper() + quotes + comma +
+                                  quotes + "99" + quotes;
+                        sw.WriteLine(csvLine);
+                    }
                 }
             }
         }
@@ -1602,16 +1604,18 @@ namespace PayRunIOClassLibrary
                 sw.WriteLine(csvLine);
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
                 {
-                    string fullName = rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname;
-                    fullName = fullName.ToUpper();
-                    csvLine = fullName + comma +
-                              rpEmployeePeriod.SortCode + comma +
-                              rpEmployeePeriod.BankAccNo + comma +
-                              rpEmployeePeriod.NetPayTP.ToString() + comma +
-                              fullName;
-                    sw.WriteLine(csvLine);
-
-                }
+                    if(rpEmployeePeriod.PaymentMethod == "BACS")
+                    {
+                        string fullName = rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname;
+                        fullName = fullName.ToUpper();
+                        csvLine = fullName + comma +
+                                  rpEmployeePeriod.SortCode + comma +
+                                  rpEmployeePeriod.BankAccNo + comma +
+                                  rpEmployeePeriod.NetPayTP.ToString() + comma +
+                                  fullName;
+                        sw.WriteLine(csvLine);
+                    }
+               }
             }
         }
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
