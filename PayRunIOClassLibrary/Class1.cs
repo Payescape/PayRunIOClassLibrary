@@ -1661,6 +1661,7 @@ namespace PayRunIOClassLibrary
         }
         private void PrintPayslips(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
         {
+            string changed = "true";
             string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
             string coNo = rpParameters.ErRef;
