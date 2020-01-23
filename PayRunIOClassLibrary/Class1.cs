@@ -3229,6 +3229,7 @@ namespace PayRunIOClassLibrary
         public string EeRef { get; set; }
         public string Fullname { get; set; }
         public string Surname { get; set; }
+        public string SurnameForename { get; set; }
         public decimal Rate { get; set; }
         public decimal UnitsTP { get; set; }
         public decimal AmountTP { get; set; }
@@ -3239,7 +3240,7 @@ namespace PayRunIOClassLibrary
         public string EarningOrDeduction { get; set; }
         public RPPayComponent() { }
         public RPPayComponent(string payCode, string description, string eeRef, string fullname,
-                              string surname, decimal rate, decimal unitsTP, decimal amountTP,
+                              string surname, string surnameForename, decimal rate, decimal unitsTP, decimal amountTP,
                                decimal unitsYTD, decimal amountYTD, bool isTaxable, bool isPayCode,
                                string earningOrDeduction)
         {
@@ -3248,6 +3249,7 @@ namespace PayRunIOClassLibrary
             EeRef = eeRef;
             Fullname = fullname;
             Surname = surname;
+            SurnameForename = surnameForename;
             Rate = rate;
             UnitsTP = unitsTP;
             AmountTP = amountTP;
