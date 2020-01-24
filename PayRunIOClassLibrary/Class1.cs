@@ -847,7 +847,7 @@ namespace PayRunIOClassLibrary
             {
 
                 //Loop through each employee and write the csv file.
-                string[] payYTDDetails = new string[41];
+                string[] payYTDDetails = new string[46];
 
 
                 foreach (RPEmployeeYtd rpEmployeeYtd in rpEmployeeYtdList)
@@ -930,6 +930,12 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[38] = rpEmployeeYtd.WeekNumber.ToString();
                     payYTDDetails[39] = rpEmployeeYtd.MonthNumber.ToString();
                     payYTDDetails[40] = rpEmployeeYtd.PeriodNumber.ToString();
+                    payYTDDetails[41] = rpEmployeeYtd.NiableYTD.ToString();
+                    payYTDDetails[42] = ""; //Student Loan Plan Type
+                    payYTDDetails[43] = ""; //Postgraduate Loan Start Date
+                    payYTDDetails[44] = ""; //Postgraduate Loan End Date
+                    payYTDDetails[45] = ""; //Postgraduate Loan Deducted
+
                     foreach (RPPayCode rpPayCode in rpEmployeeYtd.PayCodes)
                     {
                         //Don't use pay codes TAX, NI or any that begin with PENSION
@@ -990,7 +996,9 @@ namespace PayRunIOClassLibrary
                               "Ee Contributions Pt1,Ee Contributions Pt2,Er Contributions," +
                               "Ee Rebate,Er Rebate, Ee Reduction,PayCode,det,payCodeValue," +
                               "payCodeDesc,Acc Year Bal,PAYE Year Bal,Acc Year Units," +
-                              "PAYE Year Units,Tax Code, Week1/ Month 1,Week Number, Month Number";
+                              "PAYE Year Units,Tax Code, Week1/ Month 1,Week Number, Month Number," +
+                              "NI Earnings YTD,Student Loan Plan Type,Postgraduate Loan Start Date," +
+                              "Postgraduate Loan End Date,Postgraduate Loan Deducted";
                 csvLine = csvHeader;
                 sw.WriteLine(csvLine);
                 csvLine = null;
@@ -1038,8 +1046,8 @@ namespace PayRunIOClassLibrary
             {
                 csvLine = csvLine + "\"" + payCodeDetails[i] + "\"" + ",";
             }
-            //From payYTDDetails[36] (TaxCode) to payYTDDetails[39] (Month Number)
-            for (int i = 36; i < 40; i++)
+            //From payYTDDetails[36] (TaxCode) to payYTDDetails[45] (Postgraduate Loan Deducted)
+            for (int i = 36; i < 45; i++)
             {
                 csvLine = csvLine + "\"" + payYTDDetails[i] + "\"" + ",";
             }
