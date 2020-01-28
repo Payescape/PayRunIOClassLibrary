@@ -22,6 +22,7 @@ namespace PayRunIOClassLibrary
     {
         public PayRunIOWebGlobeClass() { }
 
+        //Testing making a change to the class report
         
         public void UpdateContactDetails(XDocument xdoc)
         {
