@@ -20,6 +20,7 @@ namespace PayRunIOClassLibrary
 {
     public class PayRunIOWebGlobeClass
     {
+        //Changed by Jim Borland on 29/1/2020 at 10:20
         public PayRunIOWebGlobeClass() { }
 
         
@@ -847,7 +848,7 @@ namespace PayRunIOClassLibrary
             {
 
                 //Loop through each employee and write the csv file.
-                string[] payYTDDetails = new string[46];
+                string[] payYTDDetails = new string[45];
 
 
                 foreach (RPEmployeeYtd rpEmployeeYtd in rpEmployeeYtdList)
@@ -929,12 +930,12 @@ namespace PayRunIOClassLibrary
                     }
                     payYTDDetails[38] = rpEmployeeYtd.WeekNumber.ToString();
                     payYTDDetails[39] = rpEmployeeYtd.MonthNumber.ToString();
-                    payYTDDetails[40] = rpEmployeeYtd.PeriodNumber.ToString();
-                    payYTDDetails[41] = rpEmployeeYtd.NiableYTD.ToString();
-                    payYTDDetails[42] = ""; //Student Loan Plan Type
-                    payYTDDetails[43] = ""; //Postgraduate Loan Start Date
-                    payYTDDetails[44] = ""; //Postgraduate Loan End Date
-                    payYTDDetails[45] = ""; //Postgraduate Loan Deducted
+                    //payYTDDetails[40] = rpEmployeeYtd.PeriodNumber.ToString(); //PeriodNumber was here but never seemed to be used.
+                    payYTDDetails[40] = rpEmployeeYtd.NiableYTD.ToString();
+                    payYTDDetails[41] = ""; //Student Loan Plan Type
+                    payYTDDetails[42] = ""; //Postgraduate Loan Start Date
+                    payYTDDetails[43] = ""; //Postgraduate Loan End Date
+                    payYTDDetails[44] = ""; //Postgraduate Loan Deducted
 
                     foreach (RPPayCode rpPayCode in rpEmployeeYtd.PayCodes)
                     {
@@ -1047,7 +1048,7 @@ namespace PayRunIOClassLibrary
                 csvLine = csvLine + "\"" + payCodeDetails[i] + "\"" + ",";
             }
             //From payYTDDetails[36] (TaxCode) to payYTDDetails[45] (Postgraduate Loan Deducted)
-            for (int i = 36; i < 45; i++)
+            for (int i = 36; i < 44; i++)
             {
                 csvLine = csvLine + "\"" + payYTDDetails[i] + "\"" + ",";
             }
