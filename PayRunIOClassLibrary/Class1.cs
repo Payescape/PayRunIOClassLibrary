@@ -12,9 +12,9 @@ using System.Xml;
 using Microsoft.VisualBasic.FileIO;
 using System.Globalization;
 using System.Net.Mail;
-using DevExpress.XtraReports.UI;
 using PayRunIO.CSharp.SDK;
 using PicoXLSX;
+using DevExpress.XtraReports.UI;
 
 namespace PayRunIOClassLibrary
 {
