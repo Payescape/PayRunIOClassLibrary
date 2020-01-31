@@ -63,6 +63,10 @@
       <HintPath>..\packages\PayRunIO.OAuth1.19.20.3.226\lib\net452\PayRunIO.OAuth1.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PicoXLSX, Version=2.6.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PicoXLSX.2.6.4\lib\net45\PicoXLSX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
