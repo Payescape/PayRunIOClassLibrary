@@ -448,39 +448,39 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        public bool CheckIfP32Required(RPParameters rpParameters)
-        {
-            //Run the next period report to get the next pay period.
-            string rptRef = "NEXTPERIOD";
-            string parameter1 = "EmployerKey";
-            string parameter2 = "PayScheduleKey";
-            DateTime currentPayRunDate = DateTime.MinValue;
-            DateTime nextPayRunDate = DateTime.MinValue;
+        //public bool CheckIfP32Required(RPParameters rpParameters)
+        //{
+        //    //Run the next period report to get the next pay period.
+        //    string rptRef = "NEXTPERIOD";
+        //    string parameter1 = "EmployerKey";
+        //    string parameter2 = "PayScheduleKey";
+        //    DateTime currentPayRunDate = DateTime.MinValue;
+        //    DateTime nextPayRunDate = DateTime.MinValue;
 
-            //Get the next period report
-            XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
-                                              null, null, null, null, null, null, null, null);
+        //    //Get the next period report
+        //    XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
+        //                                      null, null, null, null, null, null, null, null);
 
-            foreach (XmlElement nextPayPeriod in xmlReport.GetElementsByTagName("NextPayPeriod"))
-            {
-                currentPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "LastPayDay"));
-                nextPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "NextPayDay"));
-            }
-            bool p32Required = false;
-            if (currentPayRunDate != DateTime.MinValue)
-            {
-                int currentTaxMonth = GetTaxMonth(currentPayRunDate);
-                int nextTaxMonth = GetTaxMonth(nextPayRunDate);
-                if (currentTaxMonth != nextTaxMonth)
-                {
-                    p32Required = true;
-                }
+        //    foreach (XmlElement nextPayPeriod in xmlReport.GetElementsByTagName("NextPayPeriod"))
+        //    {
+        //        currentPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "LastPayDay"));
+        //        nextPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "NextPayDay"));
+        //    }
+        //    bool p32Required = false;
+        //    if (currentPayRunDate != DateTime.MinValue)
+        //    {
+        //        int currentTaxMonth = GetTaxMonth(currentPayRunDate);
+        //        int nextTaxMonth = GetTaxMonth(nextPayRunDate);
+        //        if (currentTaxMonth != nextTaxMonth)
+        //        {
+        //            p32Required = true;
+        //        }
 
-            }
+        //    }
 
 
-            return p32Required;
-        }
+        //    return p32Required;
+        //}
         
         public void ProcessYtdReport(XDocument xdoc, XmlDocument xmlYTDReport, RPParameters rpParameters)
         {
@@ -547,6 +547,7 @@ namespace PayRunIOClassLibrary
             {
                 rpEmployer.Name = GetElementByTagFromXml(employer, "Name");
                 rpEmployer.PayeRef = GetElementByTagFromXml(employer, "EmployerPayeRef");
+                rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
                 rpEmployer.BankFileCode = "001";
                 rpEmployer.PensionReportCode = "001";
                 //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
@@ -2674,17 +2675,19 @@ namespace PayRunIOClassLibrary
         public string HMRCDesc { get; set; }
         public string BankFileCode { get; set; }
         public string PensionReportCode { get; set; }
+        public bool P32Required { get; set; }
 
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
-                           string bankFileCode, string pensionReportCode)
+                           string bankFileCode, string pensionReportCode,
+                           bool p32Required)
         {
             Name = name;
             PayeRef = payeRef;
             HMRCDesc = hmrcDesc;
             BankFileCode = bankFileCode;
             PensionReportCode = pensionReportCode;
-
+            P32Required = p32Required;
         }
     }
 
