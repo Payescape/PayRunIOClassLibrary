@@ -3273,6 +3273,80 @@ namespace PayRunIOClassLibrary
             EarningOrDeduction = earningOrDeduction;
         }
     }
+    public class P32SummaryReport
+    {
+        public string EmployerName { get; set; }
+        public string EmployerPayeRef { get; set; }
+        public string PaymentRef { get; set; }
+        public int TaxYear { get; set; }
+        public DateTime TaxYearStartDate { get; set; }
+        public DateTime TaxYearEndDate { get; set; }
+        public int AnnualEmploymentAllowance { get; set; }
+        public List<RPP32Period> P32Periods { get; set; }
+    }
+    public class RPP32Period
+    {
+        //Period 0 equals opening balance & period 13 equals annual total
+        public int PeriodNo { get; set; }
+        public string PeriodName { get; set; }
+        public decimal Tax { get; set; }
+        public decimal StudentLoan { get; set; }
+        public decimal PostGraduateLoan { get; set; }
+        public decimal NetTax { get; set; }
+        public decimal EmployerNI { get; set; }
+        public decimal EmployeeNI { get; set; }
+        public decimal GrossNICs { get; set; }
+        public decimal SmpRecovered { get; set; }
+        public decimal SmpComp { get; set; }
+        public decimal SppRecovered { get; set; }
+        public decimal SppComp { get; set; }
+        public decimal ShppRecovered { get; set; }
+        public decimal ShppComp { get; set; }
+        public decimal SapRecovered { get; set; }
+        public decimal SapComp { get; set; }
+        public decimal CisDeducted { get; set; }
+        public decimal CisSuffered { get; set; }
+        public decimal NetNICs { get; set; }
+        public decimal EmploymentAllowance { get; set; }
+        public decimal AmountDue { get; set; }
+        public decimal AmountPaid { get; set; }
+        public decimal RemainingBalance { get; set; }
+        public RPP32Period() { }
+        public RPP32Period(int periodNo, string periodName,
+                           decimal tax, decimal studentLoan, decimal postGraduateLoan, decimal netTax,
+                           decimal employerNI, decimal employeeNI, decimal grossNICs, decimal smpRecovered,
+                           decimal smpComp, decimal sppRecovered, decimal sppComp, decimal shppRecovered,
+                           decimal shppComp, decimal sapRecovered, decimal sapComp, decimal cisDeducted,
+                           decimal cisSuffered, decimal netNICs, decimal employmentAllowance, decimal amountDue,
+                           decimal amountPaid, decimal remainingBalance)
+        {
+            PeriodNo = periodNo;
+            PeriodName = periodName;
+            Tax = tax;
+            StudentLoan = studentLoan;
+            PostGraduateLoan = postGraduateLoan;
+            NetTax = netTax;
+            EmployerNI = employerNI;
+            EmployeeNI = employeeNI;
+            GrossNICs = grossNICs;
+            SmpRecovered = smpRecovered;
+            SmpComp = smpComp;
+            SppRecovered = sppRecovered;
+            SppComp = sppComp;
+            ShppRecovered = shppRecovered;
+            ShppComp = shppComp;
+            SapRecovered = sapRecovered;
+            SapComp = sapComp;
+            CisDeducted = cisDeducted;
+            CisSuffered = cisSuffered;
+            NetNICs = netNICs;
+            EmploymentAllowance = employmentAllowance;
+            AmountDue = amountDue;
+            AmountPaid = amountPaid;
+            RemainingBalance = remainingBalance;
+        }
+    }
+
     public class SMTPEmailSettings
     {
         public string Subject { get; set; }
