@@ -1633,10 +1633,25 @@ namespace PayRunIOClassLibrary
             int taxYear = rpP32SummaryReport.TaxYear;
             int taxPeriod = rpParameters.TaxPeriod;
             string freq = rpParameters.PaySchedule;
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
 
             //Main payslip report
-            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "P32.repx", true);
-            report1.DataSource = rpP32SummaryReport;
+            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "P32Report.repx", true);
+            report1.Parameters["CmpName"].Value = coName;
+            report1.Parameters["PayeRef"].Value = rpP32SummaryReport.EmployerPayeRef;
+            report1.Parameters["Date"].Value = rpParameters.PayRunDate; //.AccYearEnd;
+            report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
+            report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            report1.Parameters["PAYEMonth"].Value = payeMonth;
+            report1.Parameters["AnnualEmploymentAllowance"].Value = rpP32SummaryReport.AnnualEmploymentAllowance;
+            report1.Parameters["PaymentRef"].Value = rpP32SummaryReport.PaymentRef;
+            report1.Parameters["TaxYearStartDate"].Value = rpP32SummaryReport.TaxYearStartDate;
+            report1.Parameters["TaxYearEndDate"].Value = rpP32SummaryReport.TaxYearEndDate;
+            report1.DataSource = rpP32SummaryReport.P32Periods;
             //// To show the report designer. You need to uncomment this to design the report.
             //// You also need to comment out the report.ExportToPDF line below
             ////
