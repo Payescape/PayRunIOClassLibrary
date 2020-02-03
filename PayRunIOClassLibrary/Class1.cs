@@ -28,7 +28,7 @@ namespace PayRunIOClassLibrary
         public void UpdateContactDetails(XDocument xdoc)
         {
             string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
-            string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
+            string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL"; 
             string dataBase = xdoc.Root.Element("Database").Value;
             string userID = xdoc.Root.Element("Username").Value;
             string password = xdoc.Root.Element("Password").Value;
