@@ -449,40 +449,21 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        //public bool CheckIfP32Required(RPParameters rpParameters)
-        //{
-        //    //Run the next period report to get the next pay period.
-        //    string rptRef = "NEXTPERIOD";
-        //    string parameter1 = "EmployerKey";
-        //    string parameter2 = "PayScheduleKey";
-        //    DateTime currentPayRunDate = DateTime.MinValue;
-        //    DateTime nextPayRunDate = DateTime.MinValue;
+        public XmlDocument GetP32SumReport(RPParameters rpParameters)
+        {
+            //Run the next period report to get the next pay period.
+            string rptRef = "P32SUM";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "TaxYear";
+            
+            //Get the P32Sum report
+            XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.TaxYear.ToString(),
+                                              null, null, null, null, null, null, null, null);
 
-        //    //Get the next period report
-        //    XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
-        //                                      null, null, null, null, null, null, null, null);
+            
+            return xmlReport;
+        }
 
-        //    foreach (XmlElement nextPayPeriod in xmlReport.GetElementsByTagName("NextPayPeriod"))
-        //    {
-        //        currentPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "LastPayDay"));
-        //        nextPayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(nextPayPeriod, "NextPayDay"));
-        //    }
-        //    bool p32Required = false;
-        //    if (currentPayRunDate != DateTime.MinValue)
-        //    {
-        //        int currentTaxMonth = GetTaxMonth(currentPayRunDate);
-        //        int nextTaxMonth = GetTaxMonth(nextPayRunDate);
-        //        if (currentTaxMonth != nextTaxMonth)
-        //        {
-        //            p32Required = true;
-        //        }
-
-        //    }
-
-
-        //    return p32Required;
-        //}
-        
         public void ProcessYtdReport(XDocument xdoc, XmlDocument xmlYTDReport, RPParameters rpParameters)
         {
             List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport);
@@ -1641,6 +1622,48 @@ namespace PayRunIOClassLibrary
             if (p45s.Count > 0)
             {
                 PrintP45s(xdoc, p45s, rpParameters);
+            }
+        }
+        public void PrintP32Report(XDocument xdoc, RPP32SummaryReport rpP32SummaryReport, RPParameters rpParameters)
+        {
+            string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
+            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+            string coNo = rpParameters.ErRef;
+            string coName = rpP32SummaryReport.EmployerName;
+            int taxYear = rpP32SummaryReport.TaxYear;
+            int taxPeriod = rpParameters.TaxPeriod;
+            string freq = rpParameters.PaySchedule;
+
+            //Main payslip report
+            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "P32.repx", true);
+            report1.DataSource = rpP32SummaryReport;
+            //// To show the report designer. You need to uncomment this to design the report.
+            //// You also need to comment out the report.ExportToPDF line below
+            ////
+            bool designMode = true;
+            if (designMode)
+            {
+                report1.ShowDesigner();
+                //report1.ShowPreview();
+
+            }
+            else
+            {
+                // Export to pdf file.
+
+                //
+                // I'm going to remove spaces from the document name. I'll replace them with dashes
+                //
+                //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
+
+                string dirName = outgoingFolder + "\\" + coNo + "\\";
+                Directory.CreateDirectory(dirName);
+                string docName = coNo + "_P32ReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
+
+                report1.ExportToPdf(dirName + docName);
+                //docName = docName.Replace(".pdf", ".xlsx");
+                //report1.ExportToXlsx(dirName + docName);
+
             }
         }
         public string[] RemoveBlankAddressLines(string[] oldAddress)
@@ -3273,7 +3296,7 @@ namespace PayRunIOClassLibrary
             EarningOrDeduction = earningOrDeduction;
         }
     }
-    public class P32SummaryReport
+    public class RPP32SummaryReport
     {
         public string EmployerName { get; set; }
         public string EmployerPayeRef { get; set; }
