@@ -587,6 +587,9 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.ThisPeriodStartDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "ThisPeriodStartDate"));
                     rpEmployeeYtd.LastPaymentDate = Convert.ToDateTime(GetDateElementByTagFromXml(employee, "LastPaymentDate"));
                     rpEmployeeYtd.EeRef = GetElementByTagFromXml(employee, "EeRef");
+                    rpEmployeeYtd.Branch = GetElementByTagFromXml(employee, "Branch");
+                    rpEmployeeYtd.CostCentre = GetElementByTagFromXml(employee, "CostCentre");
+                    rpEmployeeYtd.Department = GetElementByTagFromXml(employee, "Department");
                     rpEmployeeYtd.LeavingDate = GetDateElementByTagFromXml(employee, "LeavingDate");
                     rpEmployeeYtd.Leaver = GetBooleanElementByTagFromXml(employee, "Leaver");
                     rpEmployeeYtd.TaxPrevEmployment = GetDecimalElementByTagFromXml(employee, "TaxPrevEmployment");
@@ -600,27 +603,71 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.BenefitInKindYTD = GetDecimalElementByTagFromXml(employee, "BenefitInKindYTD");
                     rpEmployeeYtd.SuperannuationYTD = GetDecimalElementByTagFromXml(employee, "Superannuation");
                     rpEmployeeYtd.HolidayPayYTD = GetDecimalElementByTagFromXml(employee, "HolidayPayYTD");
-                    rpEmployeeYtd.ErPensionYTD = GetDecimalElementByTagFromXml(employee, "ErPensionYTD");
-                    rpEmployeeYtd.EePensionYTD = GetDecimalElementByTagFromXml(employee, "EePensionYTD");
+                    List<RPPension> rpPensions = new List<RPPension>();
+                    foreach (XmlElement pension in employee.GetElementsByTagName("Pension"))
+                    {
+                        RPPension rpPension = new RPPension();
+                        rpPension.Key = Convert.ToInt32(pension.GetAttribute("Key"));
+                        rpPension.Code = GetElementByTagFromXml(pension,"Code");
+                        rpPension.SchemeName = GetElementByTagFromXml(pension, "SchemeName");
+                        rpPension.EePensionYtd = GetDecimalElementByTagFromXml(pension, "EePensionYtd");
+                        rpPension.ErPensionYtd = GetDecimalElementByTagFromXml(pension, "ErPensionYtd");
+
+                        rpPensions.Add(rpPension);
+                    }
+                    rpEmployeeYtd.Pensions = rpPensions;
                     rpEmployeeYtd.AeoYTD = GetDecimalElementByTagFromXml(employee, "AeoYTD");
                     rpEmployeeYtd.StudentLoanStartDate = GetDateElementByTagFromXml(employee, "StudentLoanStartDate");
                     rpEmployeeYtd.StudentLoanEndDate = GetDateElementByTagFromXml(employee, "StudentLoanEndDate");
                     rpEmployeeYtd.StudentLoanDeductionsYTD = GetDecimalElementByTagFromXml(employee, "StudentLoanDeductionsYTD");
-                    rpEmployeeYtd.NiLetter = GetElementByTagFromXml(employee, "NiLetter");
-                    rpEmployeeYtd.NiableYTD = GetDecimalElementByTagFromXml(employee, "NiableYtd");
-                    rpEmployeeYtd.EarningsToLEL = GetDecimalElementByTagFromXml(employee, "EarningsToLEL");
-                    rpEmployeeYtd.EarningsToSET = GetDecimalElementByTagFromXml(employee, "EarningsToSET");
-                    rpEmployeeYtd.EarningsToPET = GetDecimalElementByTagFromXml(employee, "EarningsToPET");
-                    rpEmployeeYtd.EarningsToUST = GetDecimalElementByTagFromXml(employee, "EarningsToUST");
-                    rpEmployeeYtd.EarningsToAUST = GetDecimalElementByTagFromXml(employee, "EarningsToAUST");
-                    rpEmployeeYtd.EarningsToUEL = GetDecimalElementByTagFromXml(employee, "EarningsToUEL");
-                    rpEmployeeYtd.EarningsAboveUEL = GetDecimalElementByTagFromXml(employee, "EarningsAboveUEL");
-                    rpEmployeeYtd.EeContributionsPt1 = GetDecimalElementByTagFromXml(employee, "EeContributionsPt1");
-                    rpEmployeeYtd.EeContributionsPt2 = GetDecimalElementByTagFromXml(employee, "EeContributionsPt2");
-                    rpEmployeeYtd.ErContributions = GetDecimalElementByTagFromXml(employee, "ErContributions");
-                    rpEmployeeYtd.EeRebate = GetDecimalElementByTagFromXml(employee, "EeRebate");
-                    rpEmployeeYtd.ErRebate = GetDecimalElementByTagFromXml(employee, "ErRebate");
-                    rpEmployeeYtd.ErReduction = GetDecimalElementByTagFromXml(employee, "ErReduction");
+                    rpEmployeeYtd.PostgraduateLoanStartDate = GetDateElementByTagFromXml(employee, "PostgraduateLoanStartDate");
+                    rpEmployeeYtd.PostgraduateLoanEndDate = GetDateElementByTagFromXml(employee, "PostgraduateLoanEndDate");
+                    rpEmployeeYtd.PostgraduateLoanDeductionsYTD = GetDecimalElementByTagFromXml(employee, "PostgraduateLoanDeductionsYTD");
+                    
+                    foreach (XmlElement nicYtd in employee.GetElementsByTagName("NicYtd"))
+                    {
+                        RPNicYtd rpNicYtd = new RPNicYtd();
+                        rpNicYtd.NILetter = nicYtd.GetAttribute("NiLetter");
+                        rpNicYtd.NiableYtd = GetDecimalElementByTagFromXml(nicYtd, "NiableYtd");
+                        rpNicYtd.EarningsToLEL = GetDecimalElementByTagFromXml(nicYtd, "EarningsToLEL");
+                        rpNicYtd.EarningsToSET = GetDecimalElementByTagFromXml(nicYtd, "EarningsToSET");
+                        rpNicYtd.EarningsToPET = GetDecimalElementByTagFromXml(nicYtd, "EarningsToPET");
+                        rpNicYtd.EarningsToUST = GetDecimalElementByTagFromXml(nicYtd, "EarningsToUST");
+                        rpNicYtd.EarningsToAUST = GetDecimalElementByTagFromXml(nicYtd, "EarningsToAUST");
+                        rpNicYtd.EarningsToUEL = GetDecimalElementByTagFromXml(nicYtd, "EarningsToUEL");
+                        rpNicYtd.EarningsAboveUEL = GetDecimalElementByTagFromXml(nicYtd, "EarningsAboveUEL");
+                        rpNicYtd.EeContributionsPt1 = GetDecimalElementByTagFromXml(nicYtd, "EeContributionsPt1");
+                        rpNicYtd.EeContributionsPt2 = GetDecimalElementByTagFromXml(nicYtd, "EeContributionsPt2");
+                        rpNicYtd.ErContributions = GetDecimalElementByTagFromXml(nicYtd, "ErContributions");
+                        rpNicYtd.EeRebate = GetDecimalElementByTagFromXml(nicYtd, "EeRebate");
+                        rpNicYtd.ErRebate = GetDecimalElementByTagFromXml(nicYtd, "ErRebate");
+                        rpNicYtd.ErReduction = GetDecimalElementByTagFromXml(nicYtd, "ErReduction");
+
+                        rpEmployeeYtd.NicYtd = rpNicYtd;
+                    }
+                    foreach (XmlElement nicAccountingPeriod in employee.GetElementsByTagName("NicAccountingPeriod"))
+                    {
+                        RPNicAccountingPeriod rpNicAccountingPeriod = new RPNicAccountingPeriod();
+                        rpNicAccountingPeriod.NILetter = nicAccountingPeriod.GetAttribute("NiLetter");
+                        rpNicAccountingPeriod.NiableYtd = GetDecimalElementByTagFromXml(nicAccountingPeriod, "NiableYtd");
+                        rpNicAccountingPeriod.EarningsToLEL = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsToLEL");
+                        rpNicAccountingPeriod.EarningsToSET = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsToSET");
+                        rpNicAccountingPeriod.EarningsToPET = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsToPET");
+                        rpNicAccountingPeriod.EarningsToUST = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsToUST");
+                        rpNicAccountingPeriod.EarningsToAUST = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsToAUST");
+                        rpNicAccountingPeriod.EarningsToUEL = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsToUEL");
+                        rpNicAccountingPeriod.EarningsAboveUEL = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EarningsAboveUEL");
+                        rpNicAccountingPeriod.EeContributionsPt1 = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EeContributionsPt1");
+                        rpNicAccountingPeriod.EeContributionsPt2 = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EeContributionsPt2");
+                        rpNicAccountingPeriod.ErContributions = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErContributions");
+                        rpNicAccountingPeriod.EeRebate = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EeRebate");
+                        rpNicAccountingPeriod.ErRebate = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErRebate");
+                        rpNicAccountingPeriod.ErReduction = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErReduction");
+
+                        rpEmployeeYtd.NicAccountingPeriod = rpNicAccountingPeriod;
+                    }
+
+                    rpEmployeeYtd.Pensions = rpPensions;
                     rpEmployeeYtd.EeReduction = GetDecimalElementByTagFromXml(employee, "EeReduction");
                     rpEmployeeYtd.TaxCode = GetElementByTagFromXml(employee, "TaxCode");
                     rpEmployeeYtd.Week1Month1 = GetBooleanElementByTagFromXml(employee, "Week1Month1");
@@ -730,6 +777,54 @@ namespace PayRunIOClassLibrary
                             rpPayCodeList.Add(rpPayCode);
                             //rpEmployeeYtd.PayCodes.Add(rpPayCode);
                         }
+                    }
+                    //Add in the pension schemes
+                    foreach(RPPension rpPension in rpEmployeeYtd.Pensions)
+                    {
+                        //Ee pension
+                        RPPayCode rpPayCode = new RPPayCode();
+
+                        rpPayCode.EeRef = rpEmployeeYtd.EeRef;
+                        rpPayCode.Code = "0";
+                        rpPayCode.PayCode = rpPension.Code;
+                        rpPayCode.Description = rpPension.SchemeName;
+                        rpPayCode.Type = "P";
+                        rpPayCode.AccountsAmount = rpPension.EePensionYtd;
+                        rpPayCode.PayeAmount = rpPension.EePensionYtd;
+                        rpPayCode.AccountsUnits = 0;
+                        rpPayCode.PayeUnits = 0;
+
+                        rpPayCodeList.Add(rpPayCode);
+
+                        //Er pension
+                        rpPayCode = new RPPayCode();
+
+                        rpPayCode.EeRef = rpEmployeeYtd.EeRef;
+                        rpPayCode.Code = "0";
+                        rpPayCode.PayCode = rpPension.Code;
+                        rpPayCode.Description = rpPension.SchemeName;
+                        rpPayCode.Type = "P";
+                        rpPayCode.AccountsAmount = rpPension.ErPensionYtd;
+                        rpPayCode.PayeAmount = rpPension.ErPensionYtd;
+                        rpPayCode.AccountsUnits = 0;
+                        rpPayCode.PayeUnits = 0;
+
+                        rpPayCodeList.Add(rpPayCode);
+
+                        //Pensionable pay
+                        rpPayCode = new RPPayCode();
+
+                        rpPayCode.EeRef = rpEmployeeYtd.EeRef;
+                        rpPayCode.Code = "0";
+                        rpPayCode.PayCode = rpPension.Code;
+                        rpPayCode.Description = rpPension.SchemeName;
+                        rpPayCode.Type = "P";
+                        rpPayCode.AccountsAmount = rpEmployeeYtd.NicYtd.NiableYtd;
+                        rpPayCode.PayeAmount = rpEmployeeYtd.NicYtd.NiableYtd;
+                        rpPayCode.AccountsUnits = 0;
+                        rpPayCode.PayeUnits = 0;
+
+                        rpPayCodeList.Add(rpPayCode);
                     }
 
                     foreach (XmlElement payCodes in employee.GetElementsByTagName("PayCodes"))
@@ -867,8 +962,16 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[12] = rpEmployeeYtd.BenefitInKindYTD.ToString();
                     payYTDDetails[13] = rpEmployeeYtd.SuperannuationYTD.ToString();
                     payYTDDetails[14] = rpEmployeeYtd.HolidayPayYTD.ToString();
-                    payYTDDetails[15] = rpEmployeeYtd.ErPensionYTD.ToString();
-                    payYTDDetails[16] = rpEmployeeYtd.EePensionYTD.ToString();
+                    //Add the pensions from the list of pensions
+                    decimal erPensionYtd = 0;
+                    decimal eePensionYtd = 0;
+                    foreach(RPPension pension in rpEmployeeYtd.Pensions)
+                    {
+                        erPensionYtd = erPensionYtd + pension.ErPensionYtd;
+                        eePensionYtd = eePensionYtd + pension.EePensionYtd;
+                    }
+                    payYTDDetails[15] = erPensionYtd.ToString();
+                    payYTDDetails[16] = eePensionYtd.ToString();
                     payYTDDetails[17] = rpEmployeeYtd.AeoYTD.ToString();
                     if (rpEmployeeYtd.StudentLoanStartDate != null)
                     {
@@ -887,20 +990,20 @@ namespace PayRunIOClassLibrary
                         payYTDDetails[19] = "";
                     }
                     payYTDDetails[20] = rpEmployeeYtd.StudentLoanDeductionsYTD.ToString();
-                    payYTDDetails[21] = rpEmployeeYtd.NiLetter;
-                    payYTDDetails[22] = rpEmployeeYtd.NiableYTD.ToString();
-                    payYTDDetails[23] = rpEmployeeYtd.EarningsToLEL.ToString();
-                    payYTDDetails[24] = rpEmployeeYtd.EarningsToSET.ToString();
-                    payYTDDetails[25] = rpEmployeeYtd.EarningsToPET.ToString();
-                    payYTDDetails[26] = rpEmployeeYtd.EarningsToUST.ToString();
-                    payYTDDetails[27] = rpEmployeeYtd.EarningsToAUST.ToString();
-                    payYTDDetails[28] = rpEmployeeYtd.EarningsToUEL.ToString();
-                    payYTDDetails[29] = rpEmployeeYtd.EarningsAboveUEL.ToString();
-                    payYTDDetails[30] = rpEmployeeYtd.EeContributionsPt1.ToString();
-                    payYTDDetails[31] = rpEmployeeYtd.EeContributionsPt2.ToString();
-                    payYTDDetails[32] = rpEmployeeYtd.ErContributions.ToString();
-                    payYTDDetails[33] = rpEmployeeYtd.EeRebate.ToString();
-                    payYTDDetails[34] = rpEmployeeYtd.ErRebate.ToString();
+                    payYTDDetails[21] = rpEmployeeYtd.NicYtd.NILetter;
+                    payYTDDetails[22] = rpEmployeeYtd.NicYtd.NiableYtd.ToString();
+                    payYTDDetails[23] = rpEmployeeYtd.NicYtd.EarningsToLEL.ToString();
+                    payYTDDetails[24] = rpEmployeeYtd.NicYtd.EarningsToSET.ToString();
+                    payYTDDetails[25] = rpEmployeeYtd.NicYtd.EarningsToPET.ToString();
+                    payYTDDetails[26] = rpEmployeeYtd.NicYtd.EarningsToUST.ToString();
+                    payYTDDetails[27] = rpEmployeeYtd.NicYtd.EarningsToAUST.ToString();
+                    payYTDDetails[28] = rpEmployeeYtd.NicYtd.EarningsToUEL.ToString();
+                    payYTDDetails[29] = rpEmployeeYtd.NicYtd.EarningsAboveUEL.ToString();
+                    payYTDDetails[30] = rpEmployeeYtd.NicYtd.EeContributionsPt1.ToString();
+                    payYTDDetails[31] = rpEmployeeYtd.NicYtd.EeContributionsPt2.ToString();
+                    payYTDDetails[32] = rpEmployeeYtd.NicYtd.ErContributions.ToString();
+                    payYTDDetails[33] = rpEmployeeYtd.NicYtd.EeRebate.ToString();
+                    payYTDDetails[34] = rpEmployeeYtd.NicYtd.ErRebate.ToString();
                     payYTDDetails[35] = rpEmployeeYtd.EeReduction.ToString();
                     payYTDDetails[36] = rpEmployeeYtd.TaxCode;
                     if (rpEmployeeYtd.Week1Month1)
@@ -914,11 +1017,11 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[38] = rpEmployeeYtd.WeekNumber.ToString();
                     payYTDDetails[39] = rpEmployeeYtd.MonthNumber.ToString();
                     //payYTDDetails[40] = rpEmployeeYtd.PeriodNumber.ToString(); //PeriodNumber was here but never seemed to be used.
-                    payYTDDetails[40] = rpEmployeeYtd.NiableYTD.ToString();
-                    payYTDDetails[41] = ""; //Student Loan Plan Type
-                    payYTDDetails[42] = ""; //Postgraduate Loan Start Date
-                    payYTDDetails[43] = ""; //Postgraduate Loan End Date
-                    payYTDDetails[44] = ""; //Postgraduate Loan Deducted
+                    payYTDDetails[40] = rpEmployeeYtd.NicYtd.NiableYtd.ToString();
+                    payYTDDetails[41] = rpEmployeeYtd.StudentLoanPlanType; //Student Loan Plan Type
+                    payYTDDetails[42] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanStartDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan Start Date
+                    payYTDDetails[43] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanEndDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan End Date
+                    payYTDDetails[44] = rpEmployeeYtd.PostgraduateLoanDeductionsYTD.ToString()  ; //Postgraduate Loan Deducted
 
                     foreach (RPPayCode rpPayCode in rpEmployeeYtd.PayCodes)
                     {
@@ -1307,12 +1410,16 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = payHistoryDetails[29];  // Tax Code
                                     payCodeDetails[2] = payHistoryDetails[29];  // Tax Code
+                                    payCodeDetails[7] = "0";
+                                    payCodeDetails[8] = "0";
                                     payCodeDetails[3] = "T";                    // Tax    
                                     break;
                                 case "NI":
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "NIEeeLERtoUER-A";      // Ee NI
                                     payCodeDetails[2] = "NIEeeLERtoUER";        // Ee NI
+                                    payCodeDetails[7] = "0";
+                                    payCodeDetails[8] = "0";
                                     payCodeDetails[3] = "T";                    // Tax    
                                     break;
                                 case "PENSION":
@@ -1399,11 +1506,7 @@ namespace PayRunIOClassLibrary
                     batch = "W";
                     break;
             }
-            if (rpParameters.PaySchedule == "Monthly")
-            {
-                batch = "M";
-            }
-
+            
             string process = null;
             process = "20" + payHistoryDetails[1].Substring(6, 2) + payHistoryDetails[1].Substring(3, 2) + payHistoryDetails[1].Substring(0, 2) + "01";
             csvLine = csvLine + "\"" + rpParameters.ErRef + "\"" + "," +                                   //Co. Number
@@ -2944,6 +3047,9 @@ namespace PayRunIOClassLibrary
         public DateTime ThisPeriodStartDate { get; set; }
         public DateTime LastPaymentDate { get; set; }
         public string EeRef { get; set; }
+        public string Branch { get; set; }
+        public string CostCentre { get; set; }
+        public string Department { get; set; }
         public DateTime? LeavingDate { get; set; }
         public bool Leaver { get; set; }
         public decimal TaxPrevEmployment { get; set; }
@@ -2957,27 +3063,17 @@ namespace PayRunIOClassLibrary
         public decimal BenefitInKindYTD { get; set; }
         public decimal SuperannuationYTD { get; set; }
         public decimal HolidayPayYTD { get; set; }
-        public decimal ErPensionYTD { get; set; }
-        public decimal EePensionYTD { get; set; }
+        public List<RPPension> Pensions { get; set; }
         public decimal AeoYTD { get; set; }
         public DateTime? StudentLoanStartDate { get; set; }
         public DateTime? StudentLoanEndDate { get; set; }
+        public string StudentLoanPlanType { get; set; }
         public decimal StudentLoanDeductionsYTD { get; set; }
-        public string NiLetter { get; set; }
-        public decimal NiableYTD { get; set; }
-        public decimal EarningsToLEL { get; set; }
-        public decimal EarningsToSET { get; set; }
-        public decimal EarningsToPET { get; set; }
-        public decimal EarningsToUST { get; set; }
-        public decimal EarningsToAUST { get; set; }
-        public decimal EarningsToUEL { get; set; }
-        public decimal EarningsAboveUEL { get; set; }
-        public decimal EeContributionsPt1 { get; set; }
-        public decimal EeContributionsPt2 { get; set; }
-        public decimal ErContributions { get; set; }
-        public decimal EeRebate { get; set; }
-        public decimal ErRebate { get; set; }
-        public decimal ErReduction { get; set; }
+        public DateTime? PostgraduateLoanStartDate { get; set; }
+        public DateTime? PostgraduateLoanEndDate { get; set; }
+        public decimal PostgraduateLoanDeductionsYTD { get; set; }
+        public RPNicYtd NicYtd { get; set; }
+        public RPNicAccountingPeriod NicAccountingPeriod { get; set; }
         public decimal EeReduction { get; set; }
         public string TaxCode { get; set; }
         public bool Week1Month1 { get; set; }
@@ -3002,14 +3098,17 @@ namespace PayRunIOClassLibrary
         public decimal ErNiPayeUnits { get; set; }
         public List<RPPayCode> PayCodes { get; set; }
         public RPEmployeeYtd() { }
-        public RPEmployeeYtd(DateTime thisPeriodStartDate, DateTime lastPaymentDate, string eeRef, DateTime? leavingDate, bool leaver, decimal taxPrevEmployment,
+        public RPEmployeeYtd(DateTime thisPeriodStartDate, DateTime lastPaymentDate, string eeRef, string branch, string costCentre, string department,
+                          DateTime? leavingDate, bool leaver, decimal taxPrevEmployment,
                           decimal taxablePayPrevEmployment, decimal taxThisEmployemnt, decimal taxablePayThisEmployment, decimal grossedUp, decimal grossedUpTax,
                           decimal netPayYTD, decimal grossPayYTD, decimal benefitInKindYTD, decimal superannuationYTD, decimal holidayPayYTD,
-                          decimal erPensionYTD, decimal eePensionYTD, decimal aeoYTD, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
-                          decimal studentLoanDeductionsYTD, string niLetter, decimal niableYTD, decimal earningsToLEL, decimal earningsToSET,
-                          decimal earningsToPET, decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
-                          decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate, decimal erRebate,
-                          decimal erReduction, decimal eeReduction, string taxCode, bool week1Month1, int weekNumber, int monthNumber, int periodNumber,
+                          List<RPPension> pensions,
+                          decimal aeoYTD, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
+                          string studentLoanPlanType, decimal studentLoanDeductionsYTD, DateTime? postgraduateLoanStartDate, DateTime? postgraduateLoanEndDate,
+                          decimal postgraduateLoanDeductionsYTD,
+                          RPNicYtd nicYtd, RPNicAccountingPeriod nicAccountingPeriod,
+                          decimal eeReduction, 
+                          string taxCode, bool week1Month1, int weekNumber, int monthNumber, int periodNumber,
                           decimal eeNiPaidByErAccountsAmount, decimal eeNiPaidByErAccountsUnits, decimal eeGuTaxPaidByErAccountsAmount, decimal eeGuTaxPaidByErAccountsUnits,
                           decimal eeNiLERtoUERAccountsAmount, decimal eeNiLERtoUERAccountsUnits, decimal eeNiLERtoUERPayeAmount, decimal eeNiLERtoUERPayeUnits,
                           decimal erNiAccountsAmount, decimal erNiAccountsUnits, decimal erNiLERtoUERPayeAmount, decimal erNiLERtoUERPayeUnits, decimal eeNiPaidByErPayeAmount,
@@ -3020,6 +3119,9 @@ namespace PayRunIOClassLibrary
             ThisPeriodStartDate = thisPeriodStartDate;
             LastPaymentDate = lastPaymentDate;
             EeRef = eeRef;
+            Branch = Branch;
+            CostCentre = CostCentre;
+            Department = Department;
             LeavingDate = leavingDate;
             Leaver = leaver;
             TaxPrevEmployment = taxPrevEmployment;
@@ -3033,27 +3135,17 @@ namespace PayRunIOClassLibrary
             BenefitInKindYTD = benefitInKindYTD;
             SuperannuationYTD = superannuationYTD;
             HolidayPayYTD = holidayPayYTD;
-            ErPensionYTD = erPensionYTD;
-            EePensionYTD = eePensionYTD;
+            Pensions = pensions;
             AeoYTD = aeoYTD;
             StudentLoanStartDate = studentLoanStartDate;
             StudentLoanEndDate = studentLoanEndDate;
+            StudentLoanPlanType = studentLoanPlanType;
             StudentLoanDeductionsYTD = studentLoanDeductionsYTD;
-            NiLetter = niLetter;
-            NiableYTD = niableYTD;
-            EarningsToLEL = earningsToLEL;
-            EarningsToSET = earningsToSET;
-            EarningsToPET = earningsToPET;
-            EarningsToUST = earningsToUST;
-            EarningsToAUST = earningsToAUST;
-            EarningsToUEL = earningsToUEL;
-            EarningsAboveUEL = earningsAboveUEL;
-            EeContributionsPt1 = eeContributionsPt1;
-            EeContributionsPt2 = eeContributionsPt2;
-            ErContributions = erContributions;
-            EeRebate = eeRebate;
-            ErRebate = erRebate;
-            ErReduction = erReduction;
+            PostgraduateLoanStartDate = postgraduateLoanStartDate;
+            PostgraduateLoanEndDate = postgraduateLoanEndDate;
+            PostgraduateLoanDeductionsYTD = postgraduateLoanDeductionsYTD;
+            NicYtd = nicYtd;
+            NicAccountingPeriod = nicAccountingPeriod;
             EeReduction = eeReduction;
             TaxCode = taxCode;
             Week1Month1 = week1Month1;
@@ -3080,6 +3172,104 @@ namespace PayRunIOClassLibrary
         }
 
     }
+    public class RPPension
+    {
+        public int Key { get; set; }
+        public string Code { get; set; }
+        public string SchemeName { get; set; }
+        public decimal EePensionYtd { get; set; }
+        public decimal ErPensionYtd { get; set; }
+       public RPPension() { }
+        public RPPension(int key, string code, string schemeName, decimal eePensionYtd, decimal erPensionYtd)
+        {
+            Key=key;
+            Code = code;
+            SchemeName=schemeName;
+            EePensionYtd=eePensionYtd;
+            ErPensionYtd=erPensionYtd;
+        }
+    }
+    public class RPNicYtd
+    {
+        public string NILetter { get; set; }
+        public decimal NiableYtd { get; set; }
+        public decimal EarningsToLEL { get; set; }
+        public decimal EarningsToSET { get; set; }
+        public decimal EarningsToPET { get; set; }
+        public decimal EarningsToUST { get; set; }
+        public decimal EarningsToAUST { get; set; }
+        public decimal EarningsToUEL { get; set; }
+        public decimal EarningsAboveUEL { get; set; }
+        public decimal EeContributionsPt1 { get; set; }
+        public decimal EeContributionsPt2 { get; set; }
+        public decimal ErContributions { get; set; }
+        public decimal EeRebate { get; set; }
+        public decimal ErRebate { get; set; }
+        public decimal ErReduction { get; set; }
+        public RPNicYtd() { }
+        public RPNicYtd(string niLetter, decimal niableYtd, decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET,
+                        decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
+                        decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate,
+                        decimal erRebate, decimal erReduction)
+        {
+            NILetter=niLetter;
+            NiableYtd=niableYtd;
+            EarningsToLEL=earningsToLEL;
+            EarningsToSET=earningsToSET;
+            EarningsToPET=earningsToPET;
+            EarningsToUST = earningsToUST;
+            EarningsToAUST = earningsToAUST;
+            EarningsToUEL = earningsToUEL;
+            EarningsAboveUEL = earningsAboveUEL;
+            EeContributionsPt1 = eeContributionsPt1;
+            EeContributionsPt2 = eeContributionsPt2;
+            ErContributions = erContributions;
+            EeRebate=eeRebate;
+            ErRebate=erRebate;
+            ErReduction=erReduction;
+        }
+    }
+    public class RPNicAccountingPeriod
+    {
+        public string NILetter { get; set; }
+        public decimal NiableYtd { get; set; }
+        public decimal EarningsToLEL { get; set; }
+        public decimal EarningsToSET { get; set; }
+        public decimal EarningsToPET { get; set; }
+        public decimal EarningsToUST { get; set; }
+        public decimal EarningsToAUST { get; set; }
+        public decimal EarningsToUEL { get; set; }
+        public decimal EarningsAboveUEL { get; set; }
+        public decimal EeContributionsPt1 { get; set; }
+        public decimal EeContributionsPt2 { get; set; }
+        public decimal ErContributions { get; set; }
+        public decimal EeRebate { get; set; }
+        public decimal ErRebate { get; set; }
+        public decimal ErReduction { get; set; }
+        public RPNicAccountingPeriod() { }
+        public RPNicAccountingPeriod(string niLetter, decimal niableYtd, decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET,
+                        decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
+                        decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate,
+                        decimal erRebate, decimal erReduction)
+        {
+            NILetter = niLetter;
+            NiableYtd = niableYtd;
+            EarningsToLEL = earningsToLEL;
+            EarningsToSET = earningsToSET;
+            EarningsToPET = earningsToPET;
+            EarningsToUST = earningsToUST;
+            EarningsToAUST = earningsToAUST;
+            EarningsToUEL = earningsToUEL;
+            EarningsAboveUEL = earningsAboveUEL;
+            EeContributionsPt1 = eeContributionsPt1;
+            EeContributionsPt2 = eeContributionsPt2;
+            ErContributions = erContributions;
+            EeRebate = eeRebate;
+            ErRebate = erRebate;
+            ErReduction = erReduction;
+        }
+    }
+
     public class P45
     {
         public string ErOfficeNo { get; set; }
