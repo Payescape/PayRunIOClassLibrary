@@ -1344,9 +1344,9 @@ namespace PayRunIOClassLibrary
                         {
                             string[] payCodeDetails = new string[12];
                             payCodeDetails = new string[12];
-                            payCodeDetails[0] = rpAddition.Code.TrimStart(' ');
+                            payCodeDetails[0] = "";
                             payCodeDetails[1] = rpAddition.Description;
-                            payCodeDetails[2] = payCodeDetails[0];
+                            payCodeDetails[2] = rpAddition.Code.TrimStart(' ');
                             payCodeDetails[3] = "E"; //Earnings
                             payCodeDetails[4] = rpAddition.Rate.ToString();
                             payCodeDetails[5] = rpAddition.Units.ToString();
@@ -1388,9 +1388,9 @@ namespace PayRunIOClassLibrary
                         {
                             string[] payCodeDetails = new string[12];
                             payCodeDetails = new string[12];
-                            payCodeDetails[0] = rpDeduction.Code.TrimStart(' ');
+                            payCodeDetails[0] = "";
                             payCodeDetails[1] = rpDeduction.Description;
-                            payCodeDetails[2] = payCodeDetails[0];
+                            payCodeDetails[2] = rpDeduction.Code.TrimStart(' ');
                             payCodeDetails[3] = "D"; //Earnings
                             payCodeDetails[4] = rpDeduction.Rate.ToString();
                             payCodeDetails[5] = rpDeduction.Units.ToString();
@@ -1404,7 +1404,7 @@ namespace PayRunIOClassLibrary
                             payCodeDetails[9] = rpDeduction.AccountsYearUnits.ToString();
                             payCodeDetails[10] = rpDeduction.PayeYearUnits.ToString();
                             payCodeDetails[11] = rpDeduction.PayrollAccrued.ToString();
-                            switch (payCodeDetails[0]) //PayCode
+                            switch (payCodeDetails[2]) //PayCode
                             {
                                 case "TAX":
                                     payCodeDetails[0] = "0";
