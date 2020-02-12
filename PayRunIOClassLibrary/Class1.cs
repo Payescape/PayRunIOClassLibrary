@@ -610,6 +610,7 @@ namespace PayRunIOClassLibrary
                         rpPensionYtd.Key = Convert.ToInt32(pension.GetAttribute("Key"));
                         rpPensionYtd.Code = GetElementByTagFromXml(pension,"Code");
                         rpPensionYtd.SchemeName = GetElementByTagFromXml(pension, "SchemeName");
+                        rpPensionYtd.PensionablePayYtd = GetDecimalElementByTagFromXml(pension, "PensionablePayYtd");
                         rpPensionYtd.EePensionYtd = GetDecimalElementByTagFromXml(pension, "EePensionYtd");
                         rpPensionYtd.ErPensionYtd = GetDecimalElementByTagFromXml(pension, "ErPensionYtd");
 
@@ -642,6 +643,7 @@ namespace PayRunIOClassLibrary
                         rpNicYtd.ErContributions = GetDecimalElementByTagFromXml(nicYtd, "ErContributions");
                         rpNicYtd.EeRebate = GetDecimalElementByTagFromXml(nicYtd, "EeRebate");
                         rpNicYtd.ErRebate = GetDecimalElementByTagFromXml(nicYtd, "ErRebate");
+                        rpNicYtd.EeReduction = GetDecimalElementByTagFromXml(nicYtd, "EeReduction");
                         rpNicYtd.ErReduction = GetDecimalElementByTagFromXml(nicYtd, "ErReduction");
 
                         rpEmployeeYtd.NicYtd = rpNicYtd;
@@ -663,12 +665,14 @@ namespace PayRunIOClassLibrary
                         rpNicAccountingPeriod.ErContributions = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErContributions");
                         rpNicAccountingPeriod.EeRebate = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EeRebate");
                         rpNicAccountingPeriod.ErRebate = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErRebate");
+                        rpNicAccountingPeriod.EeReduction = GetDecimalElementByTagFromXml(nicAccountingPeriod, "EeReduction");
+                        rpNicAccountingPeriod.ErReduction = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErReduction");
+
                         rpNicAccountingPeriod.ErReduction = GetDecimalElementByTagFromXml(nicAccountingPeriod, "ErReduction");
 
                         rpEmployeeYtd.NicAccountingPeriod = rpNicAccountingPeriod;
                     }
 
-                    rpEmployeeYtd.EeReduction = GetDecimalElementByTagFromXml(employee, "EeReduction");
                     rpEmployeeYtd.TaxCode = GetElementByTagFromXml(employee, "TaxCode");
                     rpEmployeeYtd.Week1Month1 = GetBooleanElementByTagFromXml(employee, "Week1Month1");
                     rpEmployeeYtd.WeekNumber = GetIntElementByTagFromXml(employee, "WeekNumber");
@@ -819,8 +823,8 @@ namespace PayRunIOClassLibrary
                         rpPayCode.PayCode = rpPensionYtd.Code;
                         rpPayCode.Description = rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
-                        rpPayCode.AccountsAmount = rpEmployeeYtd.NicYtd.NiableYtd;
-                        rpPayCode.PayeAmount = rpEmployeeYtd.NicYtd.NiableYtd;
+                        rpPayCode.AccountsAmount = rpPensionYtd.PensionablePayYtd;
+                        rpPayCode.PayeAmount = rpPensionYtd.PensionablePayYtd;
                         rpPayCode.AccountsUnits = 0;
                         rpPayCode.PayeUnits = 0;
 
@@ -1004,7 +1008,7 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[32] = rpEmployeeYtd.NicYtd.ErContributions.ToString();
                     payYTDDetails[33] = rpEmployeeYtd.NicYtd.EeRebate.ToString();
                     payYTDDetails[34] = rpEmployeeYtd.NicYtd.ErRebate.ToString();
-                    payYTDDetails[35] = rpEmployeeYtd.EeReduction.ToString();
+                    payYTDDetails[35] = rpEmployeeYtd.NicYtd.EeReduction.ToString();
                     payYTDDetails[36] = rpEmployeeYtd.TaxCode;
                     if (rpEmployeeYtd.Week1Month1)
                     {
@@ -2927,15 +2931,6 @@ namespace PayRunIOClassLibrary
         public decimal TaxablePayTP { get; set; }
         public decimal HolidayAccruedTd { get; set; }
         public List<RPPensionPeriod> Pensions { get; set; }
-        //public decimal ErPensionYTD { get; set; }
-        //public decimal EePensionYTD { get; set; }
-        //public decimal ErPensionTP { get; set; }
-        //public decimal EePensionTP { get; set; }
-        //public decimal ErContributionPercent { get; set; }
-        //public decimal EeContributionPercent { get; set; }
-        //public decimal PensionablePay { get; set; }
-        //public DateTime ErPensionPayRunDate { get; set; }
-        //public DateTime EePensionPayRunDate { get; set; }
         public DateTime DirectorshipAppointmentDate { get; set; }
         public bool Director { get; set; }
         public decimal EeContributionsTaxPeriodPt1 { get; set; }
@@ -3041,15 +3036,6 @@ namespace PayRunIOClassLibrary
             TaxablePayTP = taxablePayTP;
             HolidayAccruedTd = holidayAccruedTd;
             Pensions = pensions;
-            //ErPensionYTD = erPensionYTD;
-            //EePensionYTD = eePensionYTD;
-            //ErPensionTP = erPensionTP;
-            //EePensionTP = eePensionTP;
-            //ErContributionPercent = erContributionPercent;
-            //EeContributionPercent = eeContributionPercent;
-            //PensionablePay = pensionablePay;
-            //ErPensionPayRunDate = erPensionPayRunDate;
-            //EePensionPayRunDate = eePensionPayRunDate;
             DirectorshipAppointmentDate = directorshipAppointmentDate;
             Director = director;
             EeContributionsTaxPeriodPt1 = eeContributionsTaxPeriodPt1;
@@ -3109,7 +3095,6 @@ namespace PayRunIOClassLibrary
         public decimal PostgraduateLoanDeductionsYTD { get; set; }
         public RPNicYtd NicYtd { get; set; }
         public RPNicAccountingPeriod NicAccountingPeriod { get; set; }
-        public decimal EeReduction { get; set; }
         public string TaxCode { get; set; }
         public bool Week1Month1 { get; set; }
         public int WeekNumber { get; set; }
@@ -3181,7 +3166,6 @@ namespace PayRunIOClassLibrary
             PostgraduateLoanDeductionsYTD = postgraduateLoanDeductionsYTD;
             NicYtd = nicYtd;
             NicAccountingPeriod = nicAccountingPeriod;
-            EeReduction = eeReduction;
             TaxCode = taxCode;
             Week1Month1 = week1Month1;
             WeekNumber = weekNumber;
@@ -3252,14 +3236,17 @@ namespace PayRunIOClassLibrary
         public int Key { get; set; }
         public string Code { get; set; }
         public string SchemeName { get; set; }
+        public decimal PensionablePayYtd { get; set; }
         public decimal EePensionYtd { get; set; }
         public decimal ErPensionYtd { get; set; }
        public RPPensionYtd() { }
-        public RPPensionYtd(int key, string code, string schemeName, decimal eePensionYtd, decimal erPensionYtd)
+        public RPPensionYtd(int key, string code, string schemeName, 
+                            decimal pensionablePayYtd, decimal eePensionYtd, decimal erPensionYtd)
         {
             Key=key;
             Code = code;
             SchemeName=schemeName;
+            PensionablePayYtd = pensionablePayYtd;
             EePensionYtd=eePensionYtd;
             ErPensionYtd=erPensionYtd;
         }
@@ -3280,12 +3267,13 @@ namespace PayRunIOClassLibrary
         public decimal ErContributions { get; set; }
         public decimal EeRebate { get; set; }
         public decimal ErRebate { get; set; }
+        public decimal EeReduction { get; set; }
         public decimal ErReduction { get; set; }
         public RPNicYtd() { }
         public RPNicYtd(string niLetter, decimal niableYtd, decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET,
                         decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
                         decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate,
-                        decimal erRebate, decimal erReduction)
+                        decimal erRebate, decimal eeReduction, decimal erReduction)
         {
             NILetter=niLetter;
             NiableYtd=niableYtd;
@@ -3301,7 +3289,8 @@ namespace PayRunIOClassLibrary
             ErContributions = erContributions;
             EeRebate=eeRebate;
             ErRebate=erRebate;
-            ErReduction=erReduction;
+            EeReduction=eeReduction;
+            ErReduction = erReduction;
         }
     }
     public class RPNicAccountingPeriod
@@ -3321,11 +3310,12 @@ namespace PayRunIOClassLibrary
         public decimal EeRebate { get; set; }
         public decimal ErRebate { get; set; }
         public decimal ErReduction { get; set; }
+        public decimal EeReduction { get; set; }
         public RPNicAccountingPeriod() { }
         public RPNicAccountingPeriod(string niLetter, decimal niableYtd, decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET,
                         decimal earningsToUST, decimal earningsToAUST, decimal earningsToUEL, decimal earningsAboveUEL,
                         decimal eeContributionsPt1, decimal eeContributionsPt2, decimal erContributions, decimal eeRebate,
-                        decimal erRebate, decimal erReduction)
+                        decimal erRebate, decimal eeReduction, decimal erReduction)
         {
             NILetter = niLetter;
             NiableYtd = niableYtd;
@@ -3341,6 +3331,7 @@ namespace PayRunIOClassLibrary
             ErContributions = erContributions;
             EeRebate = eeRebate;
             ErRebate = erRebate;
+            EeReduction = eeReduction;
             ErReduction = erReduction;
         }
     }
