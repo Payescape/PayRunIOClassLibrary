@@ -603,19 +603,20 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.BenefitInKindYTD = GetDecimalElementByTagFromXml(employee, "BenefitInKindYTD");
                     rpEmployeeYtd.SuperannuationYTD = GetDecimalElementByTagFromXml(employee, "Superannuation");
                     rpEmployeeYtd.HolidayPayYTD = GetDecimalElementByTagFromXml(employee, "HolidayPayYTD");
-                    List<RPPension> rpPensions = new List<RPPension>();
+                    List<RPPensionYtd> rpPensionsYtd = new List<RPPensionYtd>();
                     foreach (XmlElement pension in employee.GetElementsByTagName("Pension"))
                     {
-                        RPPension rpPension = new RPPension();
-                        rpPension.Key = Convert.ToInt32(pension.GetAttribute("Key"));
-                        rpPension.Code = GetElementByTagFromXml(pension,"Code");
-                        rpPension.SchemeName = GetElementByTagFromXml(pension, "SchemeName");
-                        rpPension.EePensionYtd = GetDecimalElementByTagFromXml(pension, "EePensionYtd");
-                        rpPension.ErPensionYtd = GetDecimalElementByTagFromXml(pension, "ErPensionYtd");
+                        RPPensionYtd rpPensionYtd = new RPPensionYtd();
+                        rpPensionYtd.Key = Convert.ToInt32(pension.GetAttribute("Key"));
+                        rpPensionYtd.Code = GetElementByTagFromXml(pension,"Code");
+                        rpPensionYtd.SchemeName = GetElementByTagFromXml(pension, "SchemeName");
+                        rpPensionYtd.EePensionYtd = GetDecimalElementByTagFromXml(pension, "EePensionYtd");
+                        rpPensionYtd.ErPensionYtd = GetDecimalElementByTagFromXml(pension, "ErPensionYtd");
 
-                        rpPensions.Add(rpPension);
+                        rpPensionsYtd.Add(rpPensionYtd);
                     }
-                    rpEmployeeYtd.Pensions = rpPensions;
+                    rpEmployeeYtd.Pensions = rpPensionsYtd;
+
                     rpEmployeeYtd.AeoYTD = GetDecimalElementByTagFromXml(employee, "AeoYTD");
                     rpEmployeeYtd.StudentLoanStartDate = GetDateElementByTagFromXml(employee, "StudentLoanStartDate");
                     rpEmployeeYtd.StudentLoanEndDate = GetDateElementByTagFromXml(employee, "StudentLoanEndDate");
@@ -667,7 +668,6 @@ namespace PayRunIOClassLibrary
                         rpEmployeeYtd.NicAccountingPeriod = rpNicAccountingPeriod;
                     }
 
-                    rpEmployeeYtd.Pensions = rpPensions;
                     rpEmployeeYtd.EeReduction = GetDecimalElementByTagFromXml(employee, "EeReduction");
                     rpEmployeeYtd.TaxCode = GetElementByTagFromXml(employee, "TaxCode");
                     rpEmployeeYtd.Week1Month1 = GetBooleanElementByTagFromXml(employee, "Week1Month1");
@@ -779,18 +779,18 @@ namespace PayRunIOClassLibrary
                         }
                     }
                     //Add in the pension schemes
-                    foreach(RPPension rpPension in rpEmployeeYtd.Pensions)
+                    foreach(RPPensionYtd rpPensionYtd in rpEmployeeYtd.Pensions)
                     {
                         //Ee pension
                         RPPayCode rpPayCode = new RPPayCode();
 
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
-                        rpPayCode.PayCode = rpPension.Code;
-                        rpPayCode.Description = rpPension.SchemeName;
+                        rpPayCode.PayCode = rpPensionYtd.Code;
+                        rpPayCode.Description = rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
-                        rpPayCode.AccountsAmount = rpPension.EePensionYtd;
-                        rpPayCode.PayeAmount = rpPension.EePensionYtd;
+                        rpPayCode.AccountsAmount = rpPensionYtd.EePensionYtd;
+                        rpPayCode.PayeAmount = rpPensionYtd.EePensionYtd;
                         rpPayCode.AccountsUnits = 0;
                         rpPayCode.PayeUnits = 0;
 
@@ -801,11 +801,11 @@ namespace PayRunIOClassLibrary
 
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
-                        rpPayCode.PayCode = rpPension.Code;
-                        rpPayCode.Description = rpPension.SchemeName;
+                        rpPayCode.PayCode = rpPensionYtd.Code;
+                        rpPayCode.Description = rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
-                        rpPayCode.AccountsAmount = rpPension.ErPensionYtd;
-                        rpPayCode.PayeAmount = rpPension.ErPensionYtd;
+                        rpPayCode.AccountsAmount = rpPensionYtd.ErPensionYtd;
+                        rpPayCode.PayeAmount = rpPensionYtd.ErPensionYtd;
                         rpPayCode.AccountsUnits = 0;
                         rpPayCode.PayeUnits = 0;
 
@@ -816,8 +816,8 @@ namespace PayRunIOClassLibrary
 
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
-                        rpPayCode.PayCode = rpPension.Code;
-                        rpPayCode.Description = rpPension.SchemeName;
+                        rpPayCode.PayCode = rpPensionYtd.Code;
+                        rpPayCode.Description = rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpEmployeeYtd.NicYtd.NiableYtd;
                         rpPayCode.PayeAmount = rpEmployeeYtd.NicYtd.NiableYtd;
@@ -965,10 +965,10 @@ namespace PayRunIOClassLibrary
                     //Add the pensions from the list of pensions
                     decimal erPensionYtd = 0;
                     decimal eePensionYtd = 0;
-                    foreach(RPPension pension in rpEmployeeYtd.Pensions)
+                    foreach(RPPensionYtd pensionYtd in rpEmployeeYtd.Pensions)
                     {
-                        erPensionYtd = erPensionYtd + pension.ErPensionYtd;
-                        eePensionYtd = eePensionYtd + pension.EePensionYtd;
+                        erPensionYtd = erPensionYtd + pensionYtd.ErPensionYtd;
+                        eePensionYtd = eePensionYtd + pensionYtd.EePensionYtd;
                     }
                     payYTDDetails[15] = erPensionYtd.ToString();
                     payYTDDetails[16] = eePensionYtd.ToString();
@@ -1016,11 +1016,26 @@ namespace PayRunIOClassLibrary
                     }
                     payYTDDetails[38] = rpEmployeeYtd.WeekNumber.ToString();
                     payYTDDetails[39] = rpEmployeeYtd.MonthNumber.ToString();
-                    //payYTDDetails[40] = rpEmployeeYtd.PeriodNumber.ToString(); //PeriodNumber was here but never seemed to be used.
                     payYTDDetails[40] = rpEmployeeYtd.NicYtd.NiableYtd.ToString();
                     payYTDDetails[41] = rpEmployeeYtd.StudentLoanPlanType; //Student Loan Plan Type
-                    payYTDDetails[42] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanStartDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan Start Date
-                    payYTDDetails[43] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanEndDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan End Date
+
+                    if (rpEmployeeYtd.PostgraduateLoanStartDate != null)
+                    {
+                        payYTDDetails[42] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanStartDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan Start Date
+                    }
+                    else
+                    {
+                        payYTDDetails[42] = "";
+                    }
+                    if (rpEmployeeYtd.PostgraduateLoanEndDate != null)
+                    {
+                        payYTDDetails[43] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanEndDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan End Date
+                    }
+                    else
+                    {
+                        payYTDDetails[43] = "";
+                    }
+
                     payYTDDetails[44] = rpEmployeeYtd.PostgraduateLoanDeductionsYTD.ToString()  ; //Postgraduate Loan Deducted
 
                     foreach (RPPayCode rpPayCode in rpEmployeeYtd.PayCodes)
@@ -1254,12 +1269,29 @@ namespace PayRunIOClassLibrary
                         payHistoryDetails[35] = rpEmployeePeriod.TaxThis.ToString();
                         payHistoryDetails[36] = rpEmployeePeriod.TaxablePayYTD.ToString();
                         payHistoryDetails[37] = rpEmployeePeriod.HolidayAccruedTd.ToString();
-                        payHistoryDetails[38] = rpEmployeePeriod.ErPensionYTD.ToString();
-                        payHistoryDetails[39] = rpEmployeePeriod.EePensionYTD.ToString();
-                        payHistoryDetails[40] = rpEmployeePeriod.ErPensionTP.ToString();
-                        payHistoryDetails[41] = rpEmployeePeriod.EePensionTP.ToString();
-                        payHistoryDetails[42] = rpEmployeePeriod.ErPensionPayRunDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
-                        payHistoryDetails[43] = rpEmployeePeriod.EePensionPayRunDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+
+                        decimal erPensionYtd = 0;
+                        decimal eePensionYtd = 0;
+                        decimal erPensionTp = 0;
+                        decimal eePensionTp = 0;
+                        decimal erPensionPrd = 0;
+                        decimal eePensionPrd = 0;
+                        foreach(RPPensionPeriod pensionPeriod in rpEmployeePeriod.Pensions)
+                        {
+                            erPensionYtd = erPensionYtd + pensionPeriod.ErPensionYtd;
+                            eePensionYtd = eePensionYtd + pensionPeriod.EePensionYtd;
+                            erPensionTp = erPensionTp + pensionPeriod.ErPensionTaxPeriod;
+                            eePensionTp = eePensionTp + pensionPeriod.EePensionTaxPeriod;
+                            erPensionPrd = erPensionPrd + pensionPeriod.ErPensionPayRunDate;
+                            eePensionPrd = eePensionPrd + pensionPeriod.EePensionPayRunDate;
+                        }
+                        payHistoryDetails[38] = erPensionYtd.ToString();
+                        payHistoryDetails[39] = eePensionYtd.ToString();
+                        payHistoryDetails[40] = erPensionTp.ToString();
+                        payHistoryDetails[41] = eePensionTp.ToString();
+                        payHistoryDetails[42] = erPensionPrd.ToString();
+                        payHistoryDetails[43] = eePensionPrd.ToString();
+
                         payHistoryDetails[44] = rpEmployeePeriod.DirectorshipAppointmentDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                         if (rpEmployeePeriod.Director)
                         {
@@ -1291,7 +1323,7 @@ namespace PayRunIOClassLibrary
                         payHistoryDetails[47] = rpEmployeePeriod.EeContributionsTaxPeriodPt2.ToString();
                         payHistoryDetails[48] = rpEmployeePeriod.ErNICTP.ToString();
 
-                        //Er NI & Er Pension
+                       //Er NI & Er Pension
                         for (int i = 0; i < 2; i++)
                         {
                             string[] payCodeDetails = new string[12];
@@ -1308,15 +1340,15 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[1] = "PenEr";
                                     payCodeDetails[2] = "PenEr";
                                     payCodeDetails[3] = "M";
-                                    payCodeDetails[6] = rpEmployeePeriod.ErPensionTP.ToString();
+                                    payCodeDetails[6] = erPensionTp.ToString();
                                     break;
                             }
                             payCodeDetails[0] = "0";
                             payCodeDetails[4] = "0";
-                            payCodeDetails[5] = "0.00";
-                            payCodeDetails[7] = "0.00";
-                            payCodeDetails[8] = "0.00";
-                            payCodeDetails[9] = "0.00";
+                            payCodeDetails[5] = "0";
+                            payCodeDetails[7] = "0";
+                            payCodeDetails[8] = "0";
+                            payCodeDetails[9] = "0";
                             payCodeDetails[10] = "0";
                             payCodeDetails[11] = "0";
 
@@ -1324,9 +1356,9 @@ namespace PayRunIOClassLibrary
                             //Check if any of the values are not zero. If so write the first employee record
                             //
                             bool allZeros = false;
-                            if (payCodeDetails[5] == "0.00" && payCodeDetails[6] == "0.00" &&
-                                payCodeDetails[7] == "0.00" && payCodeDetails[8] == "0.00" &&
-                                payCodeDetails[9] == "0.00")
+                            if (payCodeDetails[5] == "0" && payCodeDetails[6] == "0" &&
+                                payCodeDetails[7] == "0" && payCodeDetails[8] == "0" &&
+                                payCodeDetails[9] == "0")
                             {
                                 allZeros = true;
 
@@ -2894,15 +2926,16 @@ namespace PayRunIOClassLibrary
         public decimal TaxablePayYTD { get; set; }
         public decimal TaxablePayTP { get; set; }
         public decimal HolidayAccruedTd { get; set; }
-        public decimal ErPensionYTD { get; set; }
-        public decimal EePensionYTD { get; set; }
-        public decimal ErPensionTP { get; set; }
-        public decimal EePensionTP { get; set; }
-        public decimal ErContributionPercent { get; set; }
-        public decimal EeContributionPercent { get; set; }
-        public decimal PensionablePay { get; set; }
-        public DateTime ErPensionPayRunDate { get; set; }
-        public DateTime EePensionPayRunDate { get; set; }
+        public List<RPPensionPeriod> Pensions { get; set; }
+        //public decimal ErPensionYTD { get; set; }
+        //public decimal EePensionYTD { get; set; }
+        //public decimal ErPensionTP { get; set; }
+        //public decimal EePensionTP { get; set; }
+        //public decimal ErContributionPercent { get; set; }
+        //public decimal EeContributionPercent { get; set; }
+        //public decimal PensionablePay { get; set; }
+        //public DateTime ErPensionPayRunDate { get; set; }
+        //public DateTime EePensionPayRunDate { get; set; }
         public DateTime DirectorshipAppointmentDate { get; set; }
         public bool Director { get; set; }
         public decimal EeContributionsTaxPeriodPt1 { get; set; }
@@ -2939,8 +2972,9 @@ namespace PayRunIOClassLibrary
                           decimal erNICYTD, decimal eeRebate, decimal erRebate, decimal eeReduction, DateTime leavingDate, bool leaver,
                           string taxCode, bool week1Month1, string taxCodeChangeTypeID, string taxCodeChangeType, decimal taxPrev,
                           decimal taxablePayPrevious, decimal taxThis, decimal taxablePayYTD, decimal taxablePayTP, decimal holidayAccruedTd,
-                          decimal erPensionYTD, decimal eePensionYTD, decimal erPensionTP, decimal eePensionTP, decimal erContributionPercent,
-                          decimal eeContributionPercent, decimal pensionablePay, DateTime erPensionPayRunDate, DateTime eePensionPayRunDate,
+                          List<RPPensionPeriod> pensions,
+                          //decimal erPensionYTD, decimal eePensionYTD, decimal erPensionTP, decimal eePensionTP, decimal erContributionPercent,
+                          //decimal eeContributionPercent, decimal pensionablePay, DateTime erPensionPayRunDate, DateTime eePensionPayRunDate,
                           DateTime directorshipAppointmentDate, bool director, decimal eeContributionsTaxPeriodPt1, decimal eeContributionsTaxPeriodPt2,
                           decimal erNICTP, string frequency, decimal netPayYTD, decimal totalPayTP, decimal totalPayYTD, decimal totalDedTP, 
                           decimal totalDedYTD, string pensionCode, decimal preTaxAddDed, decimal guCosts, decimal absencePay,
@@ -3006,15 +3040,16 @@ namespace PayRunIOClassLibrary
             TaxablePayYTD = taxablePayYTD;
             TaxablePayTP = taxablePayTP;
             HolidayAccruedTd = holidayAccruedTd;
-            ErPensionYTD = erPensionYTD;
-            EePensionYTD = eePensionYTD;
-            ErPensionTP = erPensionTP;
-            EePensionTP = eePensionTP;
-            ErContributionPercent = erContributionPercent;
-            EeContributionPercent = eeContributionPercent;
-            PensionablePay = pensionablePay;
-            ErPensionPayRunDate = erPensionPayRunDate;
-            EePensionPayRunDate = eePensionPayRunDate;
+            Pensions = pensions;
+            //ErPensionYTD = erPensionYTD;
+            //EePensionYTD = eePensionYTD;
+            //ErPensionTP = erPensionTP;
+            //EePensionTP = eePensionTP;
+            //ErContributionPercent = erContributionPercent;
+            //EeContributionPercent = eeContributionPercent;
+            //PensionablePay = pensionablePay;
+            //ErPensionPayRunDate = erPensionPayRunDate;
+            //EePensionPayRunDate = eePensionPayRunDate;
             DirectorshipAppointmentDate = directorshipAppointmentDate;
             Director = director;
             EeContributionsTaxPeriodPt1 = eeContributionsTaxPeriodPt1;
@@ -3063,7 +3098,7 @@ namespace PayRunIOClassLibrary
         public decimal BenefitInKindYTD { get; set; }
         public decimal SuperannuationYTD { get; set; }
         public decimal HolidayPayYTD { get; set; }
-        public List<RPPension> Pensions { get; set; }
+        public List<RPPensionYtd> Pensions { get; set; }
         public decimal AeoYTD { get; set; }
         public DateTime? StudentLoanStartDate { get; set; }
         public DateTime? StudentLoanEndDate { get; set; }
@@ -3102,7 +3137,7 @@ namespace PayRunIOClassLibrary
                           DateTime? leavingDate, bool leaver, decimal taxPrevEmployment,
                           decimal taxablePayPrevEmployment, decimal taxThisEmployemnt, decimal taxablePayThisEmployment, decimal grossedUp, decimal grossedUpTax,
                           decimal netPayYTD, decimal grossPayYTD, decimal benefitInKindYTD, decimal superannuationYTD, decimal holidayPayYTD,
-                          List<RPPension> pensions,
+                          List<RPPensionYtd> pensions,
                           decimal aeoYTD, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
                           string studentLoanPlanType, decimal studentLoanDeductionsYTD, DateTime? postgraduateLoanStartDate, DateTime? postgraduateLoanEndDate,
                           decimal postgraduateLoanDeductionsYTD,
@@ -3172,15 +3207,55 @@ namespace PayRunIOClassLibrary
         }
 
     }
-    public class RPPension
+    public class RPPensionPeriod
     {
         public int Key { get; set; }
         public string Code { get; set; }
         public string SchemeName { get; set; }
         public decimal EePensionYtd { get; set; }
         public decimal ErPensionYtd { get; set; }
-       public RPPension() { }
-        public RPPension(int key, string code, string schemeName, decimal eePensionYtd, decimal erPensionYtd)
+        public decimal PensionablePayYtd { get; set; }
+        public decimal EePensionTaxPeriod { get; set; }
+        public decimal ErPensionTaxPeriod { get; set; }
+        public decimal PensionablePayTaxPeriod { get; set; }
+        public decimal EePensionPayRunDate { get; set; }
+        public decimal ErPensionPayRunDate { get; set; }
+        public decimal PensionablePayPayRunDate { get; set; }
+        public decimal EeContibutionPercent { get; set; }
+        public decimal ErContributionPercent { get; set; }
+        
+        public RPPensionPeriod() { }
+        public RPPensionPeriod(int key, string code, string schemeName, decimal eePensionYtd, decimal erPensionYtd,
+                               decimal pensionablePayYtd, decimal eePensionTaxPeriod, decimal erPensionTaxPeriod,
+                               decimal pensionPayTaxPeriod, decimal eePensionPayRunDate, decimal erPensionPayRunDate,
+                               decimal pensionablePayPayRunDate, decimal eeContributionPercent,
+                               decimal erContributionPercent)
+        {
+            Key = key;
+            Code = code;
+            SchemeName = schemeName;
+            EePensionYtd = eePensionYtd;
+            ErPensionYtd = erPensionYtd;
+            PensionablePayYtd = pensionablePayYtd;
+            EePensionTaxPeriod = eePensionTaxPeriod;
+            ErPensionTaxPeriod = erPensionTaxPeriod;
+            PensionablePayTaxPeriod = pensionPayTaxPeriod;
+            EePensionPayRunDate = eePensionPayRunDate;
+            ErPensionPayRunDate = erPensionPayRunDate;
+            PensionablePayPayRunDate = pensionablePayPayRunDate;
+            EeContibutionPercent = eeContributionPercent;
+            ErContributionPercent = erContributionPercent;
+        }
+    }
+    public class RPPensionYtd
+    {
+        public int Key { get; set; }
+        public string Code { get; set; }
+        public string SchemeName { get; set; }
+        public decimal EePensionYtd { get; set; }
+        public decimal ErPensionYtd { get; set; }
+       public RPPensionYtd() { }
+        public RPPensionYtd(int key, string code, string schemeName, decimal eePensionYtd, decimal erPensionYtd)
         {
             Key=key;
             Code = code;
