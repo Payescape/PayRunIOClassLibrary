@@ -1575,7 +1575,18 @@ namespace PayRunIOClassLibrary
                     //No bank file required
                     break;
             }
-           
+
+            switch (rpEmployer.PensionReportCode)
+            {
+                case "001":
+                    //Nest
+                    CreateNestPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
+                    break;
+                default:
+                    //No bank file required
+                    break;
+            }
+
         }
         private void CreateBarclaysBankFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
@@ -1627,6 +1638,54 @@ namespace PayRunIOClassLibrary
                         sw.WriteLine(csvLine);
                     }
                }
+            }
+        }
+        private void CreateNestPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        {
+            string pensionFileName = outgoingFolder + "\\" + "NestPensionFile.csv";
+
+            string comma = ",";
+            char columnA1 = 'H', columnA = 'D', columnAFooter = 'T'; 
+            int columnCFooter = 3, columnBFooter = rpEmployeePeriodList.Count, zeroContributions = 5;
+            string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = "UNKWOWN",
+                                        columnG1Frequency = rpEmployeePeriodList[0].Frequency.ToString(), columnF = "", columnH1 = "", columnI1 = "",
+                                        columnD1EndDate = rpEmployeePeriodList[0].PeriodEndDate.ToString("yyyy-MM-dd"), columnJ1StartDate = rpEmployeePeriodList[0].PeriodStartDate.ToString("yyyy-MM-dd");
+            //these are needed in order to create the nest file... columnBFooter is how many ees are on the file. 
+            //SourceName may need changed, we have no place for it at the moment so this is default.. b1employerRef waiting on this from PR
+
+            string header = columnA1 + comma + columnB1EmployerReference + comma +
+                                            columnC1 + comma + columnD1EndDate + comma + columnE1SourceName +
+                                            comma + columnF + comma + columnG1Frequency + comma + columnH1 +
+                                            comma + columnI1 + comma + columnJ1StartDate;
+
+            using (StreamWriter sw = new StreamWriter(pensionFileName))
+            {
+                sw.WriteLine(header);
+                string csvLine = null;
+
+                foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+                {
+
+                    if (rpEmployeePeriod.EePensionTP == 0 && rpEmployeePeriod.ErPensionTP == 0)
+                    {
+                        csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+                        comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
+                        columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP +
+                        comma + zeroContributions;
+                        sw.WriteLine(csvLine);
+                    }
+                    else
+                    {
+                        csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+                        comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
+                        columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP;
+                        sw.WriteLine(csvLine);
+                    }
+                }
+
+                string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
+                sw.WriteLine(footer);
+
             }
         }
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
