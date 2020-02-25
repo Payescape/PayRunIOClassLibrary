@@ -1971,7 +1971,7 @@ namespace PayRunIOClassLibrary
             //// To show the report designer. You need to uncomment this to design the report.
             //// You also need to comment out the report.ExportToPDF line below
             ////
-            bool designMode = true;
+            bool designMode = false;
             if (designMode)
             {
                 report1.ShowDesigner();
@@ -2025,7 +2025,7 @@ namespace PayRunIOClassLibrary
             //// To show the report designer. You need to uncomment this to design the report.
             //// You also need to comment out the report.ExportToPDF line below
             ////
-            bool designMode = true;
+            bool designMode = false;
             if (designMode)
             {
                 report1.ShowDesigner();
