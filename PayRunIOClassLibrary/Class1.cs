@@ -449,10 +449,10 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        public XmlDocument GetP32SumReport(RPParameters rpParameters)
+        public XmlDocument GetP32Report(RPParameters rpParameters)
         {
             //Run the next period report to get the next pay period.
-            string rptRef = "P32SUM";
+            string rptRef = "P32";
             string parameter1 = "EmployerKey";
             string parameter2 = "TaxYear";
             
@@ -790,8 +790,8 @@ namespace PayRunIOClassLibrary
 
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
-                        rpPayCode.PayCode = rpPensionYtd.Code;
-                        rpPayCode.Description = rpPensionYtd.SchemeName;
+                        rpPayCode.PayCode = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName + "-Ee";
+                        rpPayCode.Description = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpPensionYtd.EePensionYtd;
                         rpPayCode.PayeAmount = rpPensionYtd.EePensionYtd;
@@ -805,8 +805,8 @@ namespace PayRunIOClassLibrary
 
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
-                        rpPayCode.PayCode = rpPensionYtd.Code;
-                        rpPayCode.Description = rpPensionYtd.SchemeName;
+                        rpPayCode.PayCode = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName + "-Er";
+                        rpPayCode.Description = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpPensionYtd.ErPensionYtd;
                         rpPayCode.PayeAmount = rpPensionYtd.ErPensionYtd;
@@ -820,8 +820,8 @@ namespace PayRunIOClassLibrary
 
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
-                        rpPayCode.PayCode = rpPensionYtd.Code;
-                        rpPayCode.Description = rpPensionYtd.SchemeName;
+                        rpPayCode.PayCode = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName + "-Pay";
+                        rpPayCode.Description = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpPensionYtd.PensionablePayYtd;
                         rpPayCode.PayeAmount = rpPensionYtd.PensionablePayYtd;
@@ -1261,6 +1261,8 @@ namespace PayRunIOClassLibrary
                         if (rpEmployeePeriod.Week1Month1)
                         {
                             payHistoryDetails[30] = "Y";
+                            //Remove the " W1" from the tax code
+                            payHistoryDetails[29] = payHistoryDetails[29].Replace(" W1","");
                         }
                         else
                         {
@@ -1760,6 +1762,7 @@ namespace PayRunIOClassLibrary
                }
             }
         }
+<<<<<<< HEAD
         private void CreateNestPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
             string pensionFileName = outgoingFolder + "\\" + "NestPensionFile.csv";
@@ -1809,12 +1812,16 @@ namespace PayRunIOClassLibrary
             }
         }
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
+=======
+        public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, 
+                                         List<P45> p45s, List<RPPayComponent> rpPayComponents, List<RPPensionContribution> rpPensionContributions)
+>>>>>>> Rel1.0.2/P32Report
         {
             PrintPayslips(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPayslipsSimple(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPaymentsDueByMethodReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintComponentAnalysisReport(xdoc, rpPayComponents, rpEmployer, rpParameters);
-            PrintPensionContributionsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
+            PrintPensionContributionsReport(xdoc, rpPensionContributions, rpEmployer, rpParameters);
             PrintPayrollRunDetailsReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             //PrintPayrollNewReport(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             if (p45s.Count > 0)
@@ -1822,63 +1829,7 @@ namespace PayRunIOClassLibrary
                 PrintP45s(xdoc, p45s, rpParameters);
             }
         }
-        public void PrintP32Report(XDocument xdoc, RPP32SummaryReport rpP32SummaryReport, RPParameters rpParameters)
-        {
-            string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
-            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
-            string coNo = rpParameters.ErRef;
-            string coName = rpP32SummaryReport.EmployerName;
-            int taxYear = rpP32SummaryReport.TaxYear;
-            int taxPeriod = rpParameters.TaxPeriod;
-            string freq = rpParameters.PaySchedule;
-            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
-            if (payeMonth <= 0)
-            {
-                payeMonth += 12;
-            }
-
-            //Main payslip report
-            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "P32Report.repx", true);
-            report1.Parameters["CmpName"].Value = coName;
-            report1.Parameters["PayeRef"].Value = rpP32SummaryReport.EmployerPayeRef;
-            report1.Parameters["Date"].Value = rpParameters.PayRunDate; //.AccYearEnd;
-            report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
-            report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
-            report1.Parameters["PAYEMonth"].Value = payeMonth;
-            report1.Parameters["AnnualEmploymentAllowance"].Value = rpP32SummaryReport.AnnualEmploymentAllowance;
-            report1.Parameters["PaymentRef"].Value = rpP32SummaryReport.PaymentRef;
-            report1.Parameters["TaxYearStartDate"].Value = rpP32SummaryReport.TaxYearStartDate;
-            report1.Parameters["TaxYearEndDate"].Value = rpP32SummaryReport.TaxYearEndDate;
-            report1.DataSource = rpP32SummaryReport.P32Periods;
-            //// To show the report designer. You need to uncomment this to design the report.
-            //// You also need to comment out the report.ExportToPDF line below
-            ////
-            bool designMode = true;
-            if (designMode)
-            {
-                report1.ShowDesigner();
-                //report1.ShowPreview();
-
-            }
-            else
-            {
-                // Export to pdf file.
-
-                //
-                // I'm going to remove spaces from the document name. I'll replace them with dashes
-                //
-                //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
-
-                string dirName = outgoingFolder + "\\" + coNo + "\\";
-                Directory.CreateDirectory(dirName);
-                string docName = coNo + "_P32ReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
-
-                report1.ExportToPdf(dirName + docName);
-                //docName = docName.Replace(".pdf", ".xlsx");
-                //report1.ExportToXlsx(dirName + docName);
-
-            }
-        }
+        
         public string[] RemoveBlankAddressLines(string[] oldAddress)
         {
             string[] newAddress = new string[6];
@@ -2054,7 +2005,7 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        private void PrintPensionContributionsReport(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
+        private void PrintPensionContributionsReport(XDocument xdoc, List<RPPensionContribution> rpPensionContributions, RPEmployer rpEmployer, RPParameters rpParameters)
         {
             string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
@@ -2079,7 +2030,7 @@ namespace PayRunIOClassLibrary
             report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
             report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
             report1.Parameters["PAYEMonth"].Value = payeMonth;
-            report1.DataSource = rpEmployeePeriodList;
+            report1.DataSource = rpPensionContributions;
             //// To show the report designer. You need to uncomment this to design the report.
             //// You also need to comment out the report.ExportToPDF line below
             ////
@@ -2253,6 +2204,63 @@ namespace PayRunIOClassLibrary
                 report1.ExportToXlsx(dirName + docName);
             }
 
+        }
+        public void PrintP32Report(XDocument xdoc, RPP32Report rpP32Report, RPParameters rpParameters)
+        {
+            string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value + "Programs\\";
+            string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+            string coNo = rpParameters.ErRef;
+            string coName = rpP32Report.EmployerName;
+            int taxYear = rpP32Report.TaxYear;
+            int taxPeriod = rpParameters.TaxPeriod;
+            string freq = rpParameters.PaySchedule;
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
+
+            //Main P32 report
+            XtraReport report1 = XtraReport.FromFile(softwareHomeFolder + "P32Report.repx", true);
+            report1.Parameters["CmpName"].Value = coName;
+            report1.Parameters["PayeRef"].Value = rpP32Report.EmployerPayeRef;
+            report1.Parameters["Date"].Value = rpParameters.PayRunDate; //.AccYearEnd;
+            report1.Parameters["Period"].Value = rpParameters.TaxPeriod;
+            report1.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            report1.Parameters["PAYEMonth"].Value = payeMonth;
+            report1.Parameters["AnnualEmploymentAllowance"].Value = rpP32Report.AnnualEmploymentAllowance;
+            report1.Parameters["PaymentRef"].Value = rpP32Report.PaymentRef;
+            report1.Parameters["TaxYearStartDate"].Value = rpP32Report.TaxYearStartDate;
+            report1.Parameters["TaxYearEndDate"].Value = rpP32Report.TaxYearEndDate;
+            report1.DataSource = rpP32Report.RPP32ReportMonths;
+            //// To show the report designer. You need to uncomment this to design the report.
+            //// You also need to comment out the report.ExportToPDF line below
+            ////
+            bool designMode = false;
+            if (designMode)
+            {
+                report1.ShowDesigner();
+                //report1.ShowPreview();
+
+            }
+            else
+            {
+                // Export to pdf file.
+
+                //
+                // I'm going to remove spaces from the document name. I'll replace them with dashes
+                //
+                //string dirName = "V:\\Payescape\\PayRunIO\\WG\\";
+
+                string dirName = outgoingFolder + "\\" + coNo + "\\";
+                Directory.CreateDirectory(dirName);
+                string docName = coNo + "_P32ReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
+
+                report1.ExportToPdf(dirName + docName);
+                //docName = docName.Replace(".pdf", ".xlsx");
+                //report1.ExportToXlsx(dirName + docName);
+
+            }
         }
         public void ZipReports(XDocument xdoc, RPEmployer rpEmployer, RPParameters rpParameters)
         {
@@ -3310,6 +3318,25 @@ namespace PayRunIOClassLibrary
             ErPensionYtd=erPensionYtd;
         }
     }
+    public class RPPensionContribution
+    {
+        public string EeRef { get; set; }
+        public string Fullname { get; set; }
+        public string SurnameForename { get; set; }
+        public string NINumber { get; set; }
+        public RPPensionPeriod RPPensionPeriod { get; set; }
+
+        public RPPensionContribution() { }
+        public RPPensionContribution(string eeRef, string fullname, string surnameForename, 
+                                     string niNumber, RPPensionPeriod rpPensionPeriod)
+        {
+            EeRef = eeRef;
+            Fullname = fullname;
+            SurnameForename = surnameForename;
+            NINumber = niNumber;
+            RPPensionPeriod = rpPensionPeriod;
+        }
+    }
     public class RPNicYtd
     {
         public string NILetter { get; set; }
@@ -3626,7 +3653,7 @@ namespace PayRunIOClassLibrary
             EarningOrDeduction = earningOrDeduction;
         }
     }
-    public class RPP32SummaryReport
+    public class RPP32Report
     {
         public string EmployerName { get; set; }
         public string EmployerPayeRef { get; set; }
@@ -3635,13 +3662,43 @@ namespace PayRunIOClassLibrary
         public DateTime TaxYearStartDate { get; set; }
         public DateTime TaxYearEndDate { get; set; }
         public int AnnualEmploymentAllowance { get; set; }
-        public List<RPP32Period> P32Periods { get; set; }
+        public List<RPP32ReportMonth> RPP32ReportMonths { get; set; }
+        public RPP32Report() { }
+        public RPP32Report(string employerName, string employerPayeRef, string paymentRef,
+                                  int taxYear, DateTime taxYearStartDate, DateTime taxYearEndDate,
+                                  int annualEmploymentAllowance,
+                                  List<RPP32ReportMonth> rpP32ReportMonths)
+        {
+            EmployerName = employerName;
+            EmployerPayeRef = employerPayeRef;
+            PaymentRef = paymentRef;
+            TaxYear = taxYear;
+            TaxYearStartDate = taxYearStartDate;
+            TaxYearEndDate = taxYearEndDate;
+            AnnualEmploymentAllowance = annualEmploymentAllowance;
+            RPP32ReportMonths = rpP32ReportMonths;
+        }
     }
-    public class RPP32Period
+    public class RPP32ReportMonth
     {
-        //Period 0 equals opening balance & period 13 equals annual total
         public int PeriodNo { get; set; }
         public string PeriodName { get; set; }
+        public RPP32Breakdown RPP32Breakdown { get; set; }
+        public RPP32Summary RPP32Summary { get; set; }
+        public RPP32ReportMonth() { }
+        public RPP32ReportMonth(int periodNo, string periodName,
+                                RPP32Breakdown rpP32Breakdown,
+                                RPP32Summary rpP32Summary)
+        {
+            PeriodNo = periodNo;
+            PeriodName = periodName;
+            RPP32Breakdown = rpP32Breakdown;
+            RPP32Summary = rpP32Summary;
+        }
+    }
+    public class RPP32Summary
+    {
+        //Period 0 equals opening balance & period 13 equals annual total
         public decimal Tax { get; set; }
         public decimal StudentLoan { get; set; }
         public decimal PostGraduateLoan { get; set; }
@@ -3664,17 +3721,14 @@ namespace PayRunIOClassLibrary
         public decimal AmountDue { get; set; }
         public decimal AmountPaid { get; set; }
         public decimal RemainingBalance { get; set; }
-        public RPP32Period() { }
-        public RPP32Period(int periodNo, string periodName,
-                           decimal tax, decimal studentLoan, decimal postGraduateLoan, decimal netTax,
-                           decimal employerNI, decimal employeeNI, decimal grossNICs, decimal smpRecovered,
-                           decimal smpComp, decimal sppRecovered, decimal sppComp, decimal shppRecovered,
-                           decimal shppComp, decimal sapRecovered, decimal sapComp, decimal cisDeducted,
-                           decimal cisSuffered, decimal netNICs, decimal employmentAllowance, decimal amountDue,
-                           decimal amountPaid, decimal remainingBalance)
+        public RPP32Summary() { }
+        public RPP32Summary(decimal tax, decimal studentLoan, decimal postGraduateLoan, decimal netTax,
+                            decimal employerNI, decimal employeeNI, decimal grossNICs, decimal smpRecovered,
+                            decimal smpComp, decimal sppRecovered, decimal sppComp, decimal shppRecovered,
+                            decimal shppComp, decimal sapRecovered, decimal sapComp, decimal cisDeducted,
+                            decimal cisSuffered, decimal netNICs, decimal employmentAllowance, decimal amountDue,
+                            decimal amountPaid, decimal remainingBalance)
         {
-            PeriodNo = periodNo;
-            PeriodName = periodName;
             Tax = tax;
             StudentLoan = studentLoan;
             PostGraduateLoan = postGraduateLoan;
@@ -3699,7 +3753,53 @@ namespace PayRunIOClassLibrary
             RemainingBalance = remainingBalance;
         }
     }
+    public class RPP32Breakdown
+    {
+        public List<RPP32Schedule> RPP32Schedules { get; set; }
+        public RPP32Breakdown() { }
+        public RPP32Breakdown(List<RPP32Schedule> rpP32Schedules)
+        {
+            RPP32Schedules = rpP32Schedules;
+        }
+    }
+    public class RPP32Schedule
+    {
+        public string PayScheduleName { get; set; }
+        public string PayScheduleFrequency { get; set; }
+        public List<RPP32PayRun> RPP32PayRuns { get; set; }
+        public RPP32Schedule() { }
+        public RPP32Schedule(string payScheduleName, string payScheduleFrequency,
+                              List<RPP32PayRun> rpP32PayRuns)
+        {
+            PayScheduleName = payScheduleName;
+            PayScheduleFrequency = payScheduleFrequency;
+            RPP32PayRuns = rpP32PayRuns;
+        }
+    }
 
+    public class RPP32PayRun
+    {
+        public DateTime PayDate { get; set; }
+        public int PayPeriod { get; set; }
+        public decimal IncomeTax { get; set; }
+        public decimal StudentLoan { get; set; }
+        public decimal PostGraduateLoan { get; set; }
+        public decimal NetIncomeTax { get; set; }
+        public decimal GrossNICs { get; set; }
+        public RPP32PayRun() { }
+        public RPP32PayRun(DateTime payDate, int payPeriod, decimal incomeTax,
+                           decimal studentLoan, decimal postGraduateLoan,
+                           decimal netIncomeTax, decimal grossNICs)
+        {
+            PayDate = payDate;
+            PayPeriod = payPeriod;
+            IncomeTax = incomeTax;
+            StudentLoan = studentLoan;
+            PostGraduateLoan = postGraduateLoan;
+            NetIncomeTax = netIncomeTax;
+            GrossNICs = grossNICs;
+        }
+    }
     public class SMTPEmailSettings
     {
         public string Subject { get; set; }
