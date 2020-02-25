@@ -1665,7 +1665,6 @@ namespace PayRunIOClassLibrary
 
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
                 {
-
                     if (rpEmployeePeriod.EePensionTP == 0 && rpEmployeePeriod.ErPensionTP == 0)
                     {
                         csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
@@ -1682,10 +1681,8 @@ namespace PayRunIOClassLibrary
                         sw.WriteLine(csvLine);
                     }
                 }
-
                 string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
                 sw.WriteLine(footer);
-
             }
         }
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
