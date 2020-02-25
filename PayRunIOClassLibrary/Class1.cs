@@ -1786,21 +1786,21 @@ namespace PayRunIOClassLibrary
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
                 {
 
-                    if (rpEmployeePeriod.EePensionTP == 0 && rpEmployeePeriod.ErPensionTP == 0)
-                    {
-                        csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
-                        comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
-                        columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP +
-                        comma + zeroContributions;
-                        sw.WriteLine(csvLine);
-                    }
-                    else
-                    {
-                        csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
-                        comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
-                        columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP;
-                        sw.WriteLine(csvLine);
-                    }
+                    //if (rpEmployeePeriod.EePensionTP == 0 && rpEmployeePeriod.ErPensionTP == 0)
+                    //{
+                    //    csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+                    //    comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
+                    //    columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP +
+                    //    comma + zeroContributions;
+                    //    sw.WriteLine(csvLine);
+                    //}
+                    //else
+                    //{
+                    //    csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+                    //    comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
+                    //    columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP;
+                    //    sw.WriteLine(csvLine);
+                    //}
                 }
 
                 string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
