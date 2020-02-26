@@ -1357,14 +1357,14 @@ namespace PayRunIOClassLibrary
                             payCodeDetails[9] = "0";
                             payCodeDetails[10] = "0";
                             payCodeDetails[11] = "0";
-
-                            //
-                            //Check if any of the values are not zero. If so write the first employee record
-                            //
+                            
+                                //
+                                //Check if any of the values are not zero. If so write the first employee record
+                                //
                             bool allZeros = false;
-                            if (payCodeDetails[5] == "0" && payCodeDetails[6] == "0" &&
-                                payCodeDetails[7] == "0" && payCodeDetails[8] == "0" &&
-                                payCodeDetails[9] == "0")
+                            if (Convert.ToDecimal(payCodeDetails[5]) == 0 && Convert.ToDecimal(payCodeDetails[6]) == 0 &&
+                                Convert.ToDecimal(payCodeDetails[7]) == 0 && Convert.ToDecimal(payCodeDetails[8]) == 0 &&
+                                Convert.ToDecimal(payCodeDetails[9]) == 0)
                             {
                                 allZeros = true;
 
