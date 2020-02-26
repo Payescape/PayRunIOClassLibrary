@@ -1762,7 +1762,6 @@ namespace PayRunIOClassLibrary
                }
             }
         }
-<<<<<<< HEAD
         private void CreateNestPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
             string pensionFileName = outgoingFolder + "\\" + "NestPensionFile.csv";
@@ -1811,11 +1810,8 @@ namespace PayRunIOClassLibrary
 
             }
         }
-        public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, List<P45> p45s, List<RPPayComponent> rpPayComponents)
-=======
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, 
                                          List<P45> p45s, List<RPPayComponent> rpPayComponents, List<RPPensionContribution> rpPensionContributions)
->>>>>>> Rel1.0.2/P32Report
         {
             PrintPayslips(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
             PrintPayslipsSimple(xdoc, rpEmployeePeriodList, rpEmployer, rpParameters);
