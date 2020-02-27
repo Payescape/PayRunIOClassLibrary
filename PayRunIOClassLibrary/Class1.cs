@@ -1765,12 +1765,13 @@ namespace PayRunIOClassLibrary
         private void CreateNestPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
             string pensionFileName = outgoingFolder + "\\" + "NestPensionFile.csv";
+            string pension = "NEST";
 
             string comma = ",";
-            char columnA1 = 'H', columnA = 'D', columnAFooter = 'T'; 
-            int columnCFooter = 3, columnBFooter = rpEmployeePeriodList.Count, zeroContributions = 5;
-            string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = "UNKWOWN",
-                                        columnG1Frequency = rpEmployeePeriodList[0].Frequency.ToString(), columnF = "", columnH1 = "", columnI1 = "",
+            char columnA1 = 'H', columnA = 'D', columnAFooter = 'T';
+            int columnCFooter = 3, columnBFooter = rpEmployeePeriodList.Count;
+            string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = "UNKNOWN", zeroContributions = "",
+            columnG1Frequency = rpEmployeePeriodList[0].Frequency.ToString(), columnF = "", columnH1 = "", columnI1 = "",
                                         columnD1EndDate = rpEmployeePeriodList[0].PeriodEndDate.ToString("yyyy-MM-dd"), columnJ1StartDate = rpEmployeePeriodList[0].PeriodStartDate.ToString("yyyy-MM-dd");
             //these are needed in order to create the nest file... columnBFooter is how many ees are on the file. 
             //SourceName may need changed, we have no place for it at the moment so this is default.. b1employerRef waiting on this from PR
@@ -1787,29 +1788,30 @@ namespace PayRunIOClassLibrary
 
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
                 {
+                    foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+                    {
+                        zeroContributions = ""; //need to reset the value else it will always be 5 
+                        bool contains = rpPensionPeriod.SchemeName.IndexOf(pension, StringComparison.OrdinalIgnoreCase) >= 0;
+                        if (contains)
+                        {
+                            if (rpPensionPeriod.EePensionTaxPeriod == 0 && rpPensionPeriod.ErPensionTaxPeriod == 0)
+                            {
+                                zeroContributions = "5";
+                            }
+                            csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+                            comma + rpEmployeePeriod.Reference + comma + rpPensionPeriod.PensionablePayTaxPeriod + comma +
+                            columnF + comma + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod +
+                            comma + zeroContributions;
+                            sw.WriteLine(csvLine);
 
-                    //if (rpEmployeePeriod.EePensionTP == 0 && rpEmployeePeriod.ErPensionTP == 0)
-                    //{
-                    //    csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
-                    //    comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
-                    //    columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP +
-                    //    comma + zeroContributions;
-                    //    sw.WriteLine(csvLine);
-                    //}
-                    //else
-                    //{
-                    //    csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
-                    //    comma + rpEmployeePeriod.Reference + comma + rpEmployeePeriod.PensionablePay + comma +
-                    //    columnF + comma + rpEmployeePeriod.ErPensionTP + comma + rpEmployeePeriod.EePensionTP;
-                    //    sw.WriteLine(csvLine);
-                    //}
+                        }
+                    }
                 }
-
                 string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
                 sw.WriteLine(footer);
-
             }
         }
+        
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, 
                                          List<P45> p45s, List<RPPayComponent> rpPayComponents, List<RPPensionContribution> rpPensionContributions)
         {
