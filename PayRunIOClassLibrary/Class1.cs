@@ -875,9 +875,9 @@ namespace PayRunIOClassLibrary
                                     {
                                         //Deduction so multiply by -1
                                         rpPayCode.AccountsAmount = rpPayCode.AccountsAmount * -1;
-                                        rpPayCode.AccountsUnits = rpPayCode.AccountsUnits * -1;
+                                        //rpPayCode.AccountsUnits = rpPayCode.AccountsUnits * -1;
                                         rpPayCode.PayeAmount = rpPayCode.PayeAmount * -1;
-                                        rpPayCode.PayeUnits = rpPayCode.PayeUnits * -1;
+                                        //rpPayCode.PayeUnits = rpPayCode.PayeUnits * -1;
 
                                     }
                                     if (rpPayCode.Code == "UNPDM")
@@ -1048,7 +1048,7 @@ namespace PayRunIOClassLibrary
                         if (rpPayCode.Code != "TAX" && rpPayCode.Code != "NI" && !rpPayCode.Code.StartsWith("PENSION"))
                         {
                             string[] payCodeDetails = new string[8];
-                            payCodeDetails[0] = rpPayCode.Code;
+                            payCodeDetails[0] = "";// rpPayCode.Code;
                             payCodeDetails[1] = rpPayCode.Type;
                             payCodeDetails[2] = rpPayCode.PayCode;
                             payCodeDetails[3] = rpPayCode.Description;
@@ -1056,25 +1056,19 @@ namespace PayRunIOClassLibrary
                             payCodeDetails[5] = rpPayCode.PayeAmount.ToString();
                             payCodeDetails[6] = rpPayCode.AccountsUnits.ToString();
                             payCodeDetails[7] = rpPayCode.PayeUnits.ToString();
-                            if (rpPayCode.Type == "D" && rpPayCode.PayCode != "PenEr" && rpPayCode.PayCode != "PenPostTaxEe")
-                            {
-                                //Deduction so multiply by -1 unless it's "PenEr" or "PenPostTaxEe" which are already positive.
-                                for (int i = 4; i < 8; i++)
-                                {
-                                    payCodeDetails[i] = (Convert.ToDecimal(payCodeDetails[i]) * -1).ToString();
-                                }
-                            }
-                            if (payCodeDetails[0] == "UNPDM")
-                            {
-                                //Change UNPDM back to UNPD£. WG uses UNPD£ PR doesn't like symbols like £ in pay codes.
-                                payCodeDetails[0] = "";// "UNPD£";
-                                payCodeDetails[2] = "UNPD£";
-                            }
-                            else
-                            {
-                                payCodeDetails[0] = "";
-                            }
 
+                            switch (payCodeDetails[2])
+                            {
+                                case "UNPDM":
+                                    //Change UNPDM back to UNPD£. WG uses UNPD£ PR doesn't like symbols like £ in pay codes.
+                                    payCodeDetails[2] = "UNPD£";
+                                    break;
+                                case "SLOAN":
+                                    payCodeDetails[2] = "StudentLoan";
+                                    payCodeDetails[3] = "StudentLoan";
+                                    break;
+                            }
+                            
                             //Write employee record
                             WritePayYTDCSV(rpParameters, payYTDDetails, payCodeDetails, sw, writeHeader);
                             writeHeader = false;
@@ -1222,7 +1216,9 @@ namespace PayRunIOClassLibrary
                         {
                             payHistoryDetails[9] = "";
                         }
-                        payHistoryDetails[10] = rpEmployeePeriod.StudentLoan.ToString();
+                        //decimal studentLoan = rpEmployeePeriod.StudentLoan * -1;
+                        //payHistoryDetails[10] = studentLoan.ToString();
+                        payHistoryDetails[10] = (rpEmployeePeriod.StudentLoan * -1).ToString();
                         payHistoryDetails[11] = rpEmployeePeriod.NILetter;
                         payHistoryDetails[12] = rpEmployeePeriod.CalculationBasis;
                         payHistoryDetails[13] = rpEmployeePeriod.Total.ToString();
@@ -1427,8 +1423,17 @@ namespace PayRunIOClassLibrary
                             string[] payCodeDetails = new string[12];
                             payCodeDetails = new string[12];
                             payCodeDetails[0] = "";
-                            payCodeDetails[1] = rpDeduction.Description;
-                            payCodeDetails[2] = rpDeduction.Code.TrimStart(' ');
+                            if(rpDeduction.Code == "SLOAN")
+                            {
+                                payCodeDetails[1] = "StudentLoan";
+                                payCodeDetails[2] = "StudentLoan";
+                            }
+                            else
+                            {
+                                payCodeDetails[1] = rpDeduction.Description;
+                                payCodeDetails[2] = rpDeduction.Code.TrimStart(' ');
+                            }
+                            
                             payCodeDetails[3] = "D"; //Earnings
                             payCodeDetails[4] = rpDeduction.Rate.ToString();
                             payCodeDetails[5] = rpDeduction.Units.ToString();
@@ -2234,7 +2239,7 @@ namespace PayRunIOClassLibrary
             //// To show the report designer. You need to uncomment this to design the report.
             //// You also need to comment out the report.ExportToPDF line below
             ////
-            bool designMode = false;
+            bool designMode = true;
             if (designMode)
             {
                 report1.ShowDesigner();
@@ -2996,6 +3001,8 @@ namespace PayRunIOClassLibrary
         public decimal TaxablePayTP { get; set; }
         public decimal HolidayAccruedTd { get; set; }
         public List<RPPensionPeriod> Pensions { get; set; }
+        public decimal ErPensionTotalTP { get; set; }
+        public decimal ErPensionTotalYtd {get;set;}
         public DateTime DirectorshipAppointmentDate { get; set; }
         public bool Director { get; set; }
         public decimal EeContributionsTaxPeriodPt1 { get; set; }
@@ -3033,6 +3040,7 @@ namespace PayRunIOClassLibrary
                           string taxCode, bool week1Month1, string taxCodeChangeTypeID, string taxCodeChangeType, decimal taxPrev,
                           decimal taxablePayPrevious, decimal taxThis, decimal taxablePayYTD, decimal taxablePayTP, decimal holidayAccruedTd,
                           List<RPPensionPeriod> pensions,
+                          decimal erPensionTotalTP, decimal erPensionTotalYtd,
                           //decimal erPensionYTD, decimal eePensionYTD, decimal erPensionTP, decimal eePensionTP, decimal erContributionPercent,
                           //decimal eeContributionPercent, decimal pensionablePay, DateTime erPensionPayRunDate, DateTime eePensionPayRunDate,
                           DateTime directorshipAppointmentDate, bool director, decimal eeContributionsTaxPeriodPt1, decimal eeContributionsTaxPeriodPt2,
@@ -3101,6 +3109,8 @@ namespace PayRunIOClassLibrary
             TaxablePayTP = taxablePayTP;
             HolidayAccruedTd = holidayAccruedTd;
             Pensions = pensions;
+            ErPensionTotalTP = erPensionTotalTP;
+            ErPensionTotalYtd = erPensionTotalYtd;
             DirectorshipAppointmentDate = directorshipAppointmentDate;
             Director = director;
             EeContributionsTaxPeriodPt1 = eeContributionsTaxPeriodPt1;
@@ -3261,6 +3271,7 @@ namespace PayRunIOClassLibrary
         public int Key { get; set; }
         public string Code { get; set; }
         public string SchemeName { get; set; }
+        public string ProviderEmployerReference { get; set; }
         public decimal EePensionYtd { get; set; }
         public decimal ErPensionYtd { get; set; }
         public decimal PensionablePayYtd { get; set; }
@@ -3274,7 +3285,8 @@ namespace PayRunIOClassLibrary
         public decimal ErContributionPercent { get; set; }
         
         public RPPensionPeriod() { }
-        public RPPensionPeriod(int key, string code, string schemeName, decimal eePensionYtd, decimal erPensionYtd,
+        public RPPensionPeriod(int key, string code, string schemeName, string providerEmployerReference,
+                               decimal eePensionYtd, decimal erPensionYtd,
                                decimal pensionablePayYtd, decimal eePensionTaxPeriod, decimal erPensionTaxPeriod,
                                decimal pensionPayTaxPeriod, decimal eePensionPayRunDate, decimal erPensionPayRunDate,
                                decimal pensionablePayPayRunDate, decimal eeContributionPercent,
@@ -3283,6 +3295,7 @@ namespace PayRunIOClassLibrary
             Key = key;
             Code = code;
             SchemeName = schemeName;
+            ProviderEmployerReference = providerEmployerReference;
             EePensionYtd = eePensionYtd;
             ErPensionYtd = erPensionYtd;
             PensionablePayYtd = pensionablePayYtd;
