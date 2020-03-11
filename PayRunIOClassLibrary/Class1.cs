@@ -2239,7 +2239,7 @@ namespace PayRunIOClassLibrary
             //// To show the report designer. You need to uncomment this to design the report.
             //// You also need to comment out the report.ExportToPDF line below
             ////
-            bool designMode = true;
+            bool designMode = false;
             if (designMode)
             {
                 report1.ShowDesigner();
@@ -2260,8 +2260,8 @@ namespace PayRunIOClassLibrary
                 string docName = coNo + "_P32ReportFor_TaxYear_" + taxYear + "_Period_" + taxPeriod + ".pdf";
 
                 report1.ExportToPdf(dirName + docName);
-                //docName = docName.Replace(".pdf", ".xlsx");
-                //report1.ExportToXlsx(dirName + docName);
+                docName = docName.Replace(".pdf", ".xlsx");
+                report1.ExportToXlsx(dirName + docName);
 
             }
         }
@@ -3693,15 +3693,20 @@ namespace PayRunIOClassLibrary
     public class RPP32ReportMonth
     {
         public int PeriodNo { get; set; }
+        public string RPPeriodNo { get; set; }
+        public string RPPeriodText { get; set; }
         public string PeriodName { get; set; }
         public RPP32Breakdown RPP32Breakdown { get; set; }
         public RPP32Summary RPP32Summary { get; set; }
         public RPP32ReportMonth() { }
-        public RPP32ReportMonth(int periodNo, string periodName,
+        public RPP32ReportMonth(int periodNo, string rpPeriodNo, 
+                                string rpPeriodText, string periodName,
                                 RPP32Breakdown rpP32Breakdown,
                                 RPP32Summary rpP32Summary)
         {
             PeriodNo = periodNo;
+            RPPeriodNo = rpPeriodNo;
+            RPPeriodText = rpPeriodText;
             PeriodName = periodName;
             RPP32Breakdown = rpP32Breakdown;
             RPP32Summary = rpP32Summary;
@@ -3725,6 +3730,8 @@ namespace PayRunIOClassLibrary
         public decimal ShppComp { get; set; }
         public decimal SapRecovered { get; set; }
         public decimal SapComp { get; set; }
+        public decimal TotalDeductions { get; set; }
+        public decimal AppLevy { get; set; }
         public decimal CisDeducted { get; set; }
         public decimal CisSuffered { get; set; }
         public decimal NetNICs { get; set; }
@@ -3736,9 +3743,9 @@ namespace PayRunIOClassLibrary
         public RPP32Summary(decimal tax, decimal studentLoan, decimal postGraduateLoan, decimal netTax,
                             decimal employerNI, decimal employeeNI, decimal grossNICs, decimal smpRecovered,
                             decimal smpComp, decimal sppRecovered, decimal sppComp, decimal shppRecovered,
-                            decimal shppComp, decimal sapRecovered, decimal sapComp, decimal cisDeducted,
-                            decimal cisSuffered, decimal netNICs, decimal employmentAllowance, decimal amountDue,
-                            decimal amountPaid, decimal remainingBalance)
+                            decimal shppComp, decimal sapRecovered, decimal sapComp, decimal totalDeductions,
+                            decimal appLevy, decimal cisDeducted, decimal cisSuffered, decimal netNICs,
+                            decimal employmentAllowance, decimal amountDue, decimal amountPaid, decimal remainingBalance)
         {
             Tax = tax;
             StudentLoan = studentLoan;
@@ -3755,6 +3762,8 @@ namespace PayRunIOClassLibrary
             ShppComp = shppComp;
             SapRecovered = sapRecovered;
             SapComp = sapComp;
+            TotalDeductions = totalDeductions;
+            AppLevy = appLevy;
             CisDeducted = cisDeducted;
             CisSuffered = cisSuffered;
             NetNICs = netNICs;
