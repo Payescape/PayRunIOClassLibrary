@@ -3027,6 +3027,7 @@ namespace PayRunIOClassLibrary
         public decimal AOE { get; set; }
         public List<RPAddition> Additions { get; set; }
         public List<RPDeduction> Deductions { get; set; }
+        public List<RPPayslipDeduction> PayslipDeductions { get; set; }
         public RPEmployeePeriod() { }
         public RPEmployeePeriod(string reference, string title, string forename, string surname, string fullname, string refFullname, string surnameForename,
                           string address1, string address2, string address3, string address4, string postcode,
@@ -3048,7 +3049,7 @@ namespace PayRunIOClassLibrary
                           decimal totalDedYTD, string pensionCode, decimal preTaxAddDed, decimal guCosts, decimal absencePay,
                           decimal holidayPay, decimal preTaxPension, decimal tax, decimal netNI,
                           decimal postTaxAddDed, decimal postTaxPension, decimal aoe, 
-                          List<RPAddition> additions, List<RPDeduction> deductions)
+                          List<RPAddition> additions, List<RPDeduction> deductions, List<RPPayslipDeduction> payslipDeductions)
         {
             Reference = reference;
             Title = title;
@@ -3135,6 +3136,7 @@ namespace PayRunIOClassLibrary
             AOE = aoe;
             Additions = additions;
             Deductions = deductions;
+            PayslipDeductions = payslipDeductions;
         }
 
     }
@@ -3558,7 +3560,7 @@ namespace PayRunIOClassLibrary
         public string EeRef { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }
-        public decimal Rate { get; set; }
+       public decimal Rate { get; set; }
         public decimal Units { get; set; }
         public decimal AmountTP { get; set; }
         public decimal AmountYTD { get; set; }
@@ -3567,8 +3569,8 @@ namespace PayRunIOClassLibrary
         public decimal PayeYearUnits { get; set; }
         public decimal PayrollAccrued { get; set; }
         public RPDeduction() { }
-        public RPDeduction(string eeRef, string code, string description, decimal rate, decimal units,
-                           decimal amountTP, decimal amountYTD, decimal accountsYearBalance,
+        public RPDeduction(string eeRef, string code, string description, decimal rate,
+                           decimal units, decimal amountTP, decimal amountYTD, decimal accountsYearBalance,
                            decimal accountsYearUnits, decimal payeYearUnits, decimal payrollAccrued)
         {
             EeRef = eeRef;
@@ -3582,6 +3584,25 @@ namespace PayRunIOClassLibrary
             AccountsYearUnits = accountsYearUnits;
             PayeYearUnits = payeYearUnits;
             PayrollAccrued = payrollAccrued;
+        }
+    }
+    //Payslip Report (RP) Deductions
+    public class RPPayslipDeduction
+    {
+        public string EeRef { get; set; }
+        public string Code { get; set; }
+        public string Description { get; set; }
+        public decimal AmountTP { get; set; }
+        public decimal AmountYTD { get; set; }
+        public RPPayslipDeduction() { }
+        public RPPayslipDeduction(string eeRef, string code, string description,
+                           decimal amountTP, decimal amountYTD)
+        {
+            EeRef = eeRef;
+            Code = code;
+            Description = description;
+            AmountTP = amountTP; //Amount
+            AmountYTD = amountYTD; //PayeYearBalance
         }
     }
 
