@@ -603,6 +603,9 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.BenefitInKindYTD = GetDecimalElementByTagFromXml(employee, "BenefitInKindYTD");
                     rpEmployeeYtd.SuperannuationYTD = GetDecimalElementByTagFromXml(employee, "Superannuation");
                     rpEmployeeYtd.HolidayPayYTD = GetDecimalElementByTagFromXml(employee, "HolidayPayYTD");
+                    rpEmployeeYtd.PensionablePayYtd = 0;
+                    rpEmployeeYtd.EePensionYtd = 0;
+                    rpEmployeeYtd.ErPensionYtd = 0;
                     List<RPPensionYtd> rpPensionsYtd = new List<RPPensionYtd>();
                     foreach (XmlElement pension in employee.GetElementsByTagName("Pension"))
                     {
@@ -613,6 +616,10 @@ namespace PayRunIOClassLibrary
                         rpPensionYtd.PensionablePayYtd = GetDecimalElementByTagFromXml(pension, "PensionablePayYtd");
                         rpPensionYtd.EePensionYtd = GetDecimalElementByTagFromXml(pension, "EePensionYtd");
                         rpPensionYtd.ErPensionYtd = GetDecimalElementByTagFromXml(pension, "ErPensionYtd");
+
+                        rpEmployeeYtd.PensionablePayYtd = rpEmployeeYtd.PensionablePayYtd + rpPensionYtd.PensionablePayYtd;
+                        rpEmployeeYtd.EePensionYtd = rpEmployeeYtd.EePensionYtd + rpPensionYtd.EePensionYtd;
+                        rpEmployeeYtd.ErPensionYtd = rpEmployeeYtd.ErPensionYtd + rpPensionYtd.ErPensionYtd;
 
                         rpPensionsYtd.Add(rpPensionYtd);
                     }
@@ -681,26 +688,56 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.EeNiPaidByErAccountsAmount = GetDecimalElementByTagFromXml(employee, "EeNiPaidByErAccountsAmount");
                     rpEmployeeYtd.EeNiPaidByErAccountsUnits = GetDecimalElementByTagFromXml(employee, "EeNiPaidByErAccountsUnits");
                     rpEmployeeYtd.EeGuTaxPaidByErAccountsAmount = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsAmount");
-                    rpEmployeeYtd.EeGuTaxPaidByErAccountsUnits = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsUnits");
+                    rpEmployeeYtd.EeGuTaxPaidByErAccountsUnits = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsUnit");
                     rpEmployeeYtd.EeNiLERtoUERAccountsAmount = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsAmount");
-                    rpEmployeeYtd.EeNiLERtoUERAccountsUnits = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsUnits");
-                    rpEmployeeYtd.ErNiAccountsAmount = GetDecimalElementByTagFromXml(employee, "ErNiAccountsAmount");
-                    rpEmployeeYtd.ErNiAccountsUnits = GetDecimalElementByTagFromXml(employee, "ErNiAccountsUnits");
+                    rpEmployeeYtd.EeNiLERtoUERAccountsUnits = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsUnit");
+                    rpEmployeeYtd.ErNiAccountsAmount = GetDecimalElementByTagFromXml(employee, "ErNiAccountAmount");
+                    rpEmployeeYtd.ErNiAccountsUnits = GetDecimalElementByTagFromXml(employee, "ErNiAccountUnit");
                     rpEmployeeYtd.EeNiLERtoUERPayeAmount = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeAmount");
-                    rpEmployeeYtd.EeNiLERtoUERPayeUnits = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeUnits");
+                    rpEmployeeYtd.EeNiLERtoUERPayeUnits = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeUnit");
                     rpEmployeeYtd.EeNiPaidByErPayeAmount = GetDecimalElementByTagFromXml(employee, "EeNiPaidByErPayeAmount");
                     rpEmployeeYtd.EeNiPaidByErPayeUnits = GetDecimalElementByTagFromXml(employee, "EeNiPaidByErPayeUnits");
                     rpEmployeeYtd.EeGuTaxPaidByErPayeAmount = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeAmount");
-                    rpEmployeeYtd.EeGuTaxPaidByErPayeUnits = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeUnits");
+                    rpEmployeeYtd.EeGuTaxPaidByErPayeUnits = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeUnit");
                     rpEmployeeYtd.ErNiPayeAmount = GetDecimalElementByTagFromXml(employee, "ErNiPayeAmount");
-                    rpEmployeeYtd.ErNiPayeUnits = GetDecimalElementByTagFromXml(employee, "ErNiPayeUnits");
+                    rpEmployeeYtd.ErNiPayeUnits = GetDecimalElementByTagFromXml(employee, "ErNiPayeUnit");
 
+                    //Find the pension pay codes
+                    rpEmployeeYtd.PensionPreTaxEeAccounts = 0;
+                    rpEmployeeYtd.PensionPreTaxEePaye = 0;
+                    rpEmployeeYtd.PensionPostTaxEeAccounts = 0;
+                    rpEmployeeYtd.PensionPostTaxEePaye = 0;
+                    foreach (XmlElement payCodes in employee.GetElementsByTagName("PayCodes"))
+                    {
+                        foreach (XmlElement payCode in payCodes.GetElementsByTagName("PayCode"))
+                        {
+                            string pensionCode = GetElementByTagFromXml(payCode, "Code");
+                            if (pensionCode.StartsWith("PENSION"))
+                            {
+                                if(pensionCode == "PENSIONRAS" || pensionCode == "PENSIONTAXEX")
+                                {
+                                    rpEmployeeYtd.PensionPostTaxEeAccounts = rpEmployeeYtd.PensionPostTaxEeAccounts + GetDecimalElementByTagFromXml(payCode, "AccountsAmount");
+                                    rpEmployeeYtd.PensionPostTaxEePaye = rpEmployeeYtd.PensionPostTaxEePaye + GetDecimalElementByTagFromXml(payCode, "PayeAmount");
+                                }
+                                else
+                                {
+                                    rpEmployeeYtd.PensionPreTaxEeAccounts = rpEmployeeYtd.PensionPreTaxEeAccounts + GetDecimalElementByTagFromXml(payCode, "AccountsAmount");
+                                    rpEmployeeYtd.PensionPreTaxEePaye = rpEmployeeYtd.PensionPreTaxEePaye + GetDecimalElementByTagFromXml(payCode, "PayeAmount");
+                                }
+                            }
+                            
+                        }
+                    }
+                    rpEmployeeYtd.PensionPreTaxEeAccounts = rpEmployeeYtd.PensionPreTaxEeAccounts * -1;
+                    rpEmployeeYtd.PensionPreTaxEePaye = rpEmployeeYtd.PensionPreTaxEePaye *-1;
+                    rpEmployeeYtd.PensionPostTaxEeAccounts = rpEmployeeYtd.PensionPostTaxEeAccounts * -1;
+                    rpEmployeeYtd.PensionPostTaxEePaye = rpEmployeeYtd.PensionPostTaxEePaye * -1;
 
                     //These next few fields get treated like pay codes. Use them if they are not zero.
-                    //4 pay components EeNiPaidByEr, EeGuTaxPaidByEr, EeNiLERtoUER & ErNi
+                    //7 pay components EeNiPaidByEr, EeGuTaxPaidByEr, EeNiLERtoUER & ErNi
                     List<RPPayCode> rpPayCodeList = new List<RPPayCode>();
 
-                    for (int i = 0; i < 6; i++)
+                    for (int i = 0; i < 7; i++)
                     {
                         RPPayCode rpPayCode = new RPPayCode();
 
@@ -722,35 +759,44 @@ namespace PayRunIOClassLibrary
                                 rpPayCode.PayCode = "GUTax";
                                 rpPayCode.Description = "Grossed up Tax";
                                 rpPayCode.Type = "E";
-                                rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsAmount");
-                                rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeAmount");
-                                rpPayCode.AccountsUnits = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsUnit");
-                                rpPayCode.PayeUnits = GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeUnit");
+                                rpPayCode.AccountsAmount = rpEmployeeYtd.EeGuTaxPaidByErAccountsAmount;//GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsAmount");
+                                rpPayCode.PayeAmount = rpEmployeeYtd.EeGuTaxPaidByErPayeAmount;//GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeAmount");
+                                rpPayCode.AccountsUnits = rpEmployeeYtd.EeGuTaxPaidByErAccountsUnits;//GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErAccountsUnit");
+                                rpPayCode.PayeUnits = rpEmployeeYtd.EeGuTaxPaidByErPayeUnits;//GetDecimalElementByTagFromXml(employee, "EeGuTaxPaidByErPayeUnit");
                                 break;
                             case 2:
                                 rpPayCode.PayCode = "NIEeeLERtoUER";
                                 rpPayCode.Description = "NIEeeLERtoUER-A";
                                 rpPayCode.Type = "E";
-                                rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsAmount");
-                                rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeAmount");
-                                rpPayCode.AccountsUnits = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsUnit");
-                                rpPayCode.PayeUnits = GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeUnit");
+                                rpPayCode.AccountsAmount = rpEmployeeYtd.EeNiLERtoUERAccountsAmount;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsAmount");
+                                rpPayCode.PayeAmount = rpEmployeeYtd.EeNiLERtoUERPayeAmount;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeAmount");
+                                rpPayCode.AccountsUnits = rpEmployeeYtd.EeNiLERtoUERAccountsUnits;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsUnit");
+                                rpPayCode.PayeUnits = rpEmployeeYtd.EeNiLERtoUERPayeUnits;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeUnit");
                                 break;
                             case 3:
                                 rpPayCode.PayCode = "NIEr";
                                 rpPayCode.Description = "NIEr-A";
                                 rpPayCode.Type = "T";
-                                rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(employee, "ErNiAccountAmount");
-                                rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(employee, "ErNiPayeAmount");
-                                rpPayCode.AccountsUnits = GetDecimalElementByTagFromXml(employee, "ErNiAccountUnit");
-                                rpPayCode.PayeUnits = GetDecimalElementByTagFromXml(employee, "ErNiPayeUnit");
+                                rpPayCode.AccountsAmount = rpEmployeeYtd.ErNiAccountsAmount;//GetDecimalElementByTagFromXml(employee, "ErNiAccountAmount");
+                                rpPayCode.PayeAmount = rpEmployeeYtd.ErNiPayeAmount;//GetDecimalElementByTagFromXml(employee, "ErNiPayeAmount");
+                                rpPayCode.AccountsUnits = rpEmployeeYtd.ErNiAccountsUnits;//GetDecimalElementByTagFromXml(employee, "ErNiAccountUnit");
+                                rpPayCode.PayeUnits = rpEmployeeYtd.ErNiPayeUnits;//GetDecimalElementByTagFromXml(employee, "ErNiPayeUnit");
                                 break;
                             case 4:
                                 rpPayCode.PayCode = "PenEr";
                                 rpPayCode.Description = "PenEr";
                                 rpPayCode.Type = "D";
-                                rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(employee, "ErPensionYTD");
-                                rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(employee, "ErPensionYTD");
+                                rpPayCode.AccountsAmount = rpEmployeeYtd.ErPensionYtd;//GetDecimalElementByTagFromXml(employee, "ErPensionYTD");
+                                rpPayCode.PayeAmount = rpEmployeeYtd.ErPensionYtd;//GetDecimalElementByTagFromXml(employee, "ErPensionYTD");
+                                rpPayCode.AccountsUnits = 0;
+                                rpPayCode.PayeUnits = 0;
+                                break;
+                            case 5:
+                                rpPayCode.PayCode = "PenPreTaxEe";
+                                rpPayCode.Description = "PenPreTaxEe";
+                                rpPayCode.Type = "D";
+                                rpPayCode.AccountsAmount = rpEmployeeYtd.PensionPreTaxEeAccounts;//GetDecimalElementByTagFromXml(employee, "EePensionYTD");
+                                rpPayCode.PayeAmount = rpEmployeeYtd.PensionPreTaxEePaye;//GetDecimalElementByTagFromXml(employee, "EePensionYTD");
                                 rpPayCode.AccountsUnits = 0;
                                 rpPayCode.PayeUnits = 0;
                                 break;
@@ -758,8 +804,8 @@ namespace PayRunIOClassLibrary
                                 rpPayCode.PayCode = "PenPostTaxEe";
                                 rpPayCode.Description = "PenPostTaxEe";
                                 rpPayCode.Type = "D";
-                                rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(employee, "EePensionYTD");
-                                rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(employee, "EePensionYTD");
+                                rpPayCode.AccountsAmount = rpEmployeeYtd.PensionPostTaxEeAccounts;//GetDecimalElementByTagFromXml(employee, "EePensionYTD");
+                                rpPayCode.PayeAmount = rpEmployeeYtd.PensionPostTaxEePaye;//GetDecimalElementByTagFromXml(employee, "EePensionYTD");
                                 rpPayCode.AccountsUnits = 0;
                                 rpPayCode.PayeUnits = 0;
                                 break;
@@ -1338,12 +1384,13 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[3] = "T";
                                     payCodeDetails[6] = rpEmployeePeriod.ErNICTP.ToString();
                                     break;
-                                default:
+                                case 1:
                                     payCodeDetails[1] = "PenEr";
                                     payCodeDetails[2] = "PenEr";
                                     payCodeDetails[3] = "M";
                                     payCodeDetails[6] = erPensionTp.ToString();
                                     break;
+                                
                             }
                             payCodeDetails[0] = "0";
                             payCodeDetails[4] = "0";
@@ -1418,6 +1465,8 @@ namespace PayRunIOClassLibrary
 
 
                         }
+                        decimal penPreAmount = 0, penPostAmount = 0;
+                        bool wait = false;
                         foreach (RPDeduction rpDeduction in rpEmployeePeriod.Deductions)
                         {
                             string[] payCodeDetails = new string[12];
@@ -1466,36 +1515,64 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[3] = "T";                    // Tax    
                                     break;
                                 case "PENSION":
+                                    penPreAmount = rpDeduction.AmountTP;
+                                    wait = true;
+                                    break;
                                 case "PENSIONSS":
+                                    payCodeDetails[0] = "0";
+                                    payCodeDetails[1] = "PenPreTaxEe";         // Ee Pension
+                                    payCodeDetails[2] = "PenPreTaxEe";         // Ee Pension
+                                    payCodeDetails[6] = (penPreAmount + rpDeduction.AmountTP).ToString();
+                                    payCodeDetails[7] = "0";
+                                    payCodeDetails[8] = "0";
+                                    payCodeDetails[9] = "0";
+                                    payCodeDetails[10] = "0";
+                                    payCodeDetails[11] = "0";
+                                    wait = false;
+                                    break;
                                 case "PENSIONRAS":
+                                    penPostAmount = rpDeduction.AmountTP;
+                                    wait = true;
+                                    break;
                                 case "PENSIONTAXEX":
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "PenPostTaxEe";         // Ee Pension
                                     payCodeDetails[2] = "PenPostTaxEe";         // Ee Pension
+                                    payCodeDetails[6] = (penPostAmount + rpDeduction.AmountTP).ToString();
+                                    payCodeDetails[7] = "0";
+                                    payCodeDetails[8] = "0";
+                                    payCodeDetails[9] = "0";
+                                    payCodeDetails[10] = "0";
+                                    payCodeDetails[11] = "0";
+                                    wait = false;
                                     break;
                                 default:
                                     payCodeDetails[0] = "";
                                     break;
 
                             }
-                            //
-                            //Check if any of the values are not zero. If so write the first employee record
-                            //
-                            bool allZeros = false;
-                            if (Convert.ToDecimal(payCodeDetails[5]) == 0 && Convert.ToDecimal(payCodeDetails[6]) == 0 &&
-                                Convert.ToDecimal(payCodeDetails[7]) == 0 && Convert.ToDecimal(payCodeDetails[8]) == 0 &&
-                                Convert.ToDecimal(payCodeDetails[9]) == 0)
+                            if(!wait)
                             {
-                                allZeros = true;
+                                //
+                                //Check if any of the values are not zero. If so write the first employee record
+                                //
+                                bool allZeros = false;
+                                if (Convert.ToDecimal(payCodeDetails[5]) == 0 && Convert.ToDecimal(payCodeDetails[6]) == 0 &&
+                                    Convert.ToDecimal(payCodeDetails[7]) == 0 && Convert.ToDecimal(payCodeDetails[8]) == 0 &&
+                                    Convert.ToDecimal(payCodeDetails[9]) == 0)
+                                {
+                                    allZeros = true;
 
-                            }
-                            if (!allZeros)
-                            {
-                                //Write employee record
-                                WritePayHistoryCSV(rpParameters, payHistoryDetails, payCodeDetails, sw, writeHeader);
-                                writeHeader = false;
+                                }
+                                if (!allZeros)
+                                {
+                                    //Write employee record
+                                    WritePayHistoryCSV(rpParameters, payHistoryDetails, payCodeDetails, sw, writeHeader);
+                                    writeHeader = false;
 
+                                }
                             }
+                            
 
 
                         }
@@ -1709,6 +1786,10 @@ namespace PayRunIOClassLibrary
                     //Nest
                     CreateNestPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
                     break;
+                case "002":
+                    //Nest
+                    CreateWorkersTrustPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
+                    break;
                 default:
                     //No bank file required
                     break;
@@ -1775,7 +1856,7 @@ namespace PayRunIOClassLibrary
             string comma = ",";
             char columnA1 = 'H', columnA = 'D', columnAFooter = 'T';
             int columnCFooter = 3, columnBFooter = rpEmployeePeriodList.Count;
-            string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = "UNKNOWN", zeroContributions = "",
+            string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = rpEmployeePeriodList[0].Pensions[0].ProviderEmployerReference, zeroContributions = "",
             columnG1Frequency = rpEmployeePeriodList[0].Frequency.ToString(), columnF = "", columnH1 = "", columnI1 = "",
                                         columnD1EndDate = rpEmployeePeriodList[0].PeriodEndDate.ToString("yyyy-MM-dd"), columnJ1StartDate = rpEmployeePeriodList[0].PeriodStartDate.ToString("yyyy-MM-dd");
             //these are needed in order to create the nest file... columnBFooter is how many ees are on the file. 
@@ -1816,7 +1897,27 @@ namespace PayRunIOClassLibrary
                 sw.WriteLine(footer);
             }
         }
-        
+        private void CreateWorkersTrustPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        {
+            string pensionFileName = outgoingFolder + "\\" + "WorkersTrustPensionFile.csv";
+            string comma = ",";
+
+            using (StreamWriter sw = new StreamWriter(pensionFileName))
+            {
+                string csvLine = null;
+
+                foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+                {
+                    csvLine = rpEmployeePeriod.NINumber + comma + rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.PayRunDate + comma;
+                    foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+                    {
+                        csvLine = csvLine + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod;
+                    }
+                    sw.WriteLine(csvLine);
+                }
+            }
+        }
+
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, 
                                          List<P45> p45s, List<RPPayComponent> rpPayComponents, List<RPPensionContribution> rpPensionContributions)
         {
@@ -3161,6 +3262,13 @@ namespace PayRunIOClassLibrary
         public decimal BenefitInKindYTD { get; set; }
         public decimal SuperannuationYTD { get; set; }
         public decimal HolidayPayYTD { get; set; }
+        public decimal PensionablePayYtd { get; set; }
+        public decimal EePensionYtd { get; set; }
+        public decimal ErPensionYtd { get; set; }
+        public decimal PensionPreTaxEeAccounts { get; set; }
+        public decimal PensionPreTaxEePaye { get; set; }
+        public decimal PensionPostTaxEeAccounts { get; set; }
+        public decimal PensionPostTaxEePaye { get; set; }
         public List<RPPensionYtd> Pensions { get; set; }
         public decimal AeoYTD { get; set; }
         public DateTime? StudentLoanStartDate { get; set; }
@@ -3199,7 +3307,8 @@ namespace PayRunIOClassLibrary
                           DateTime? leavingDate, bool leaver, decimal taxPrevEmployment,
                           decimal taxablePayPrevEmployment, decimal taxThisEmployemnt, decimal taxablePayThisEmployment, decimal grossedUp, decimal grossedUpTax,
                           decimal netPayYTD, decimal grossPayYTD, decimal benefitInKindYTD, decimal superannuationYTD, decimal holidayPayYTD,
-                          List<RPPensionYtd> pensions,
+                          decimal pensionablePayYtd, decimal eePensionYtd, decimal erPensionYtd, decimal pensionPreTaxEeAccounts, decimal pensionPreTaxEePaye,
+                          decimal pensionPostTaxEeAccounts, decimal pensionPostTaxEePaye, List<RPPensionYtd> pensions,
                           decimal aeoYTD, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
                           string studentLoanPlanType, decimal studentLoanDeductionsYTD, DateTime? postgraduateLoanStartDate, DateTime? postgraduateLoanEndDate,
                           decimal postgraduateLoanDeductionsYTD,
@@ -3232,6 +3341,13 @@ namespace PayRunIOClassLibrary
             BenefitInKindYTD = benefitInKindYTD;
             SuperannuationYTD = superannuationYTD;
             HolidayPayYTD = holidayPayYTD;
+            PensionablePayYtd = pensionablePayYtd;
+            EePensionYtd = eePensionYtd;
+            ErPensionYtd = erPensionYtd;
+            PensionPreTaxEeAccounts = pensionPreTaxEeAccounts;
+            PensionPreTaxEePaye = pensionPreTaxEePaye;
+            PensionPostTaxEeAccounts = pensionPostTaxEeAccounts;
+            PensionPostTaxEePaye = pensionPostTaxEePaye;
             Pensions = pensions;
             AeoYTD = aeoYTD;
             StudentLoanStartDate = studentLoanStartDate;
@@ -3558,9 +3674,11 @@ namespace PayRunIOClassLibrary
     public class RPDeduction
     {
         public string EeRef { get; set; }
+        public string Seq { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }
-       public decimal Rate { get; set; }
+        public bool IsTaxable { get; set; }
+        public decimal Rate { get; set; }
         public decimal Units { get; set; }
         public decimal AmountTP { get; set; }
         public decimal AmountYTD { get; set; }
@@ -3569,13 +3687,15 @@ namespace PayRunIOClassLibrary
         public decimal PayeYearUnits { get; set; }
         public decimal PayrollAccrued { get; set; }
         public RPDeduction() { }
-        public RPDeduction(string eeRef, string code, string description, decimal rate,
+        public RPDeduction(string eeRef, string seq, string code, string description, bool isTaxable, decimal rate,
                            decimal units, decimal amountTP, decimal amountYTD, decimal accountsYearBalance,
                            decimal accountsYearUnits, decimal payeYearUnits, decimal payrollAccrued)
         {
             EeRef = eeRef;
+            Seq = seq;
             Code = code;
             Description = description;
+            IsTaxable = isTaxable;
             Rate = rate;
             Units = units;
             AmountTP = amountTP; //Amount
@@ -3590,15 +3710,17 @@ namespace PayRunIOClassLibrary
     public class RPPayslipDeduction
     {
         public string EeRef { get; set; }
+        public string Seq { get; set; }
         public string Code { get; set; }
         public string Description { get; set; }
         public decimal AmountTP { get; set; }
         public decimal AmountYTD { get; set; }
         public RPPayslipDeduction() { }
-        public RPPayslipDeduction(string eeRef, string code, string description,
-                           decimal amountTP, decimal amountYTD)
+        public RPPayslipDeduction(string eeRef, string seq, string code, string description,
+                                  decimal amountTP, decimal amountYTD)
         {
             EeRef = eeRef;
+            Seq = seq;
             Code = code;
             Description = description;
             AmountTP = amountTP; //Amount
@@ -3660,13 +3782,17 @@ namespace PayRunIOClassLibrary
         public decimal AmountTP { get; set; }
         public decimal UnitsYTD { get; set; }
         public decimal AmountYTD { get; set; }
+        public decimal AccountsYearBalance { get; set; }
+        public decimal AccountsYearUnits { get; set; }
+        public decimal PayrollAccrued { get; set; }
         public bool IsTaxable { get; set; }
         public bool IsPayCode { get; set; }
         public string EarningOrDeduction { get; set; }
         public RPPayComponent() { }
         public RPPayComponent(string payCode, string description, string eeRef, string fullname,
                               string surname, string surnameForename, decimal rate, decimal unitsTP, decimal amountTP,
-                               decimal unitsYTD, decimal amountYTD, bool isTaxable, bool isPayCode,
+                               decimal unitsYTD, decimal amountYTD, decimal accountsYearBalance, decimal accountsYearUnits,
+                               decimal payrollAccrued, bool isTaxable, bool isPayCode,
                                string earningOrDeduction)
         {
             PayCode = payCode;
@@ -3680,6 +3806,9 @@ namespace PayRunIOClassLibrary
             AmountTP = amountTP;
             UnitsYTD = unitsYTD;
             AmountYTD = amountYTD;
+            AccountsYearBalance = accountsYearBalance;
+            AccountsYearUnits = accountsYearUnits;
+            PayrollAccrued = payrollAccrued;
             IsTaxable = isTaxable;
             IsPayCode = isPayCode;
             EarningOrDeduction = earningOrDeduction;
