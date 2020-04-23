@@ -405,8 +405,8 @@ namespace PayRunIOClassLibrary
         }
         private RestApiHelper ApiHelper()
         {
-            string consumerKey = "1UH6t3ikiWbdxTNT2Dg";                             //Original developer key : "m5lsJMpBnkaJw086zwDw"
-            string consumerSecret = "jKUX3lrQUe4KhEiox6IZw8CXnWUdAkyTl1kthR8ayQ";   //Original developer secret : "GHM6x3xLEWujpLC5sGXKQ3r2j14RGI0eoLbab8w415Q"
+            string consumerKey = "9MaHMtmTUC6iMgymPl94g";                             //Original developer key : "m5lsJMpBnkaJw086zwDw"     "1UH6t3ikiWbdxTNT2Dg"
+            string consumerSecret = "44sem3aVCUCxjaFmnolPQhPii7rQQwEyqgTnSJB655Q";   //Original developer secret : "GHM6x3xLEWujpLC5sGXKQ3r2j14RGI0eoLbab8w415Q"     "jKUX3lrQUe4KhEiox6IZw8CXnWUdAkyTl1kthR8ayQ"
             string url = "https://api.test.payrun.io";
             RestApiHelper apiHelper = new PayRunIO.CSharp.SDK.RestApiHelper(
                     new PayRunIO.OAuth1.OAuthSignatureGenerator(),
