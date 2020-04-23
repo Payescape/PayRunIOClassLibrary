@@ -417,7 +417,7 @@ namespace PayRunIOClassLibrary
                     "application/xml");
             return apiHelper;
         }
-        public void ArchiveDirectory(XDocument xdoc, string directory)
+        public void ArchiveDirectory(XDocument xdoc, string directory, string originalDirName, string archiveDirName)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
@@ -429,13 +429,14 @@ namespace PayRunIOClassLibrary
 
                 int x = directory.LastIndexOf("\\");
                 string coNo = directory.Substring(x + 1, 4);
-                Directory.CreateDirectory(directory.Replace("Outputs", "PE-ArchivedOutputs"));
+                Directory.CreateDirectory(directory.Replace(originalDirName, archiveDirName));
                 DirectoryInfo dirInfo = new DirectoryInfo(directory);
                 FileInfo[] files = dirInfo.GetFiles();
                 foreach (FileInfo file in files)
                 {
-                    string destFileName = file.FullName.Replace("Outputs", "PE-ArchivedOutputs");
+                    string destFileName = file.FullName.Replace(originalDirName, archiveDirName);
                     destFileName = destFileName.Replace(".xml", "_" + now.ToString("yyyyMMddHHmmssfff") + ".xml");
+                    destFileName = destFileName.Replace(".csv", "_" + now.ToString("yyyyMMddHHmmssfff") + ".csv");
                     File.Move(file.FullName, destFileName);
 
                 }
@@ -483,21 +484,21 @@ namespace PayRunIOClassLibrary
             }
             return taxMonth;
         }
-        public string[] GetAListOfDirectories(XDocument xdoc)
+        public string[] GetAListOfDirectories(XDocument xdoc, string source)
         {
-            string path = xdoc.Root.Element("DataHomeFolder").Value + "Outputs";
+            string path = xdoc.Root.Element("DataHomeFolder").Value + source;
             string[] directories = Directory.GetDirectories(path);
 
             return directories;
         }
-        public FileInfo[] GetAllCompletedPayrollFiles(XDocument xdoc)
-        {
-            string path = xdoc.Root.Element("DataHomeFolder").Value + "Outputs";
-            DirectoryInfo folder = new DirectoryInfo(path);
-            FileInfo[] files = folder.GetFiles("*CompletedPayroll*.xml");
+        //public FileInfo[] GetAllCompletedPayrollFiles(XDocument xdoc)
+        //{
+        //    string path = xdoc.Root.Element("DataHomeFolder").Value + "Outputs";
+        //    DirectoryInfo folder = new DirectoryInfo(path);
+        //    FileInfo[] files = folder.GetFiles("*CompletedPayroll*.xml");
             
-            return files;
-        }
+        //    return files;
+        //}
         
         
         public RPParameters GetRPParameters(XmlDocument xmlReport)
@@ -1133,16 +1134,16 @@ namespace PayRunIOClassLibrary
             if (writeHeader)
             {
                 string csvHeader = "Co,RunDate,process,Batch,EeRef,LeaveDate,Leaver,Tax Previous Emt," +
-                              "Taxable Pay Previous Emt, Tax This Emt, Taxable Pay This Emt,Grossed Up," +
-                              "Grossed Up Tax, Net Pay,GrossYTD,Benefit in Kind,Superannuation," +
-                              "Holiday Pay, ErPensionYTD, EePensionYTD, AEOYTD, StudentLoanStartDate," +
-                              "StudentLoanEndDate, StudentLoanDeductions, NI Letter,Total," +
+                              "Taxable Pay Previous Emt,Tax This Emt,Taxable Pay This Emt,Grossed Up," +
+                              "Grossed Up Tax,Net Pay,GrossYTD,Benefit in Kind,Superannuation," +
+                              "Holiday Pay,ErPensionYTD,EePensionYTD,AEOYTD,StudentLoanStartDate," +
+                              "StudentLoanEndDate,StudentLoanDeductions,NI Letter,Total," +
                               "Earnings To LEL,Earnings To SET,Earnings To PET,Earnings To UST," +
                               "Earnings To AUST,Earnings To UEL,Earnings Above UEL," +
                               "Ee Contributions Pt1,Ee Contributions Pt2,Er Contributions," +
-                              "Ee Rebate,Er Rebate, Ee Reduction,PayCode,det,payCodeValue," +
+                              "Ee Rebate,Er Rebate,Ee Reduction,PayCode,det,payCodeValue," +
                               "payCodeDesc,Acc Year Bal,PAYE Year Bal,Acc Year Units," +
-                              "PAYE Year Units,Tax Code, Week1/ Month 1,Week Number, Month Number," +
+                              "PAYE Year Units,Tax Code,Week1/Month 1,Week Number,Month Number," +
                               "NI Earnings YTD,Student Loan Plan Type,Postgraduate Loan Start Date," +
                               "Postgraduate Loan End Date,Postgraduate Loan Deducted";
                 csvLine = csvHeader;
@@ -1220,7 +1221,7 @@ namespace PayRunIOClassLibrary
             {
 
                 //Loop through each employee and write the csv file.
-                string[] payHistoryDetails = new string[49];
+                string[] payHistoryDetails = new string[54];
 
                 foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
                 {
@@ -1370,6 +1371,11 @@ namespace PayRunIOClassLibrary
                         payHistoryDetails[46] = rpEmployeePeriod.EeContributionsTaxPeriodPt1.ToString();
                         payHistoryDetails[47] = rpEmployeePeriod.EeContributionsTaxPeriodPt2.ToString();
                         payHistoryDetails[48] = rpEmployeePeriod.ErNICTP.ToString();
+                        payHistoryDetails[49] = Convert.ToDateTime(rpEmployeePeriod.AEAssessment.AssessmentDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture);
+                        payHistoryDetails[50] = rpEmployeePeriod.AEAssessment.AssessmentCode;
+                        payHistoryDetails[51] = rpEmployeePeriod.AEAssessment.AssessmentEvent;
+                        payHistoryDetails[52] = rpEmployeePeriod.AEAssessment.TaxPeriod.ToString();
+                        payHistoryDetails[53] = rpEmployeePeriod.AEAssessment.TaxYear.ToString();
 
                        //Er NI & Er Pension
                         for (int i = 0; i < 2; i++)
@@ -1601,7 +1607,9 @@ namespace PayRunIOClassLibrary
                               "LeaveDate,Leaver,Tax Code,Week1/Month 1,Tax Code Change Type ID," +
                               "Tax Code Change Type,Tax Previous Emt,Taxable Pay Previous Emt,Tax This Emt," +
                               "Taxable Pay This Emt,PayCode,payCodeDesc,payCodeValue,det,rate,hours,Amount," +
-                              "Acc Year Bal,PAYE Year Bal,Acc Year Units,PAYE Year Units,Payroll Accrued";
+                              "Acc Year Bal,PAYE Year Bal,Acc Year Units,PAYE Year Units,Payroll Accrued," +
+                              "LastAutoEnrolmentAssessmentDate,AutoEnrolmentAssessment,AutoEnrolmentAssessmentEvent," +
+                              "AssessmentTaxPeriod,AssessmentTaxYear";
                 csvLine = csvHeader;
                 sw.WriteLine(csvLine);
                 csvLine = null;
@@ -1655,6 +1663,11 @@ namespace PayRunIOClassLibrary
             for (int i = 0; i < 12; i++)
             {
                 csvLine = csvLine + "\"" + payCodeDetails[i] + "\"" + ",";
+            }
+            //From payHistoryDetails[??] (LastAutoEnrolmentAssessmentDate) to payHistoryDetails[??] (Assessment Tax Year)
+            for(int i = 49; i < 54; i++)
+            {
+                csvLine = csvLine + "\"" + payHistoryDetails[i] + "\"" + ",";
             }
 
             csvLine = csvLine.TrimEnd(',');
@@ -1753,7 +1766,7 @@ namespace PayRunIOClassLibrary
 
 
         
-        public void ProcessBankAndPensionFiles(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters)
+        public void ProcessBankAndPensionFiles(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, List<RPPensionContribution> rpPensionContributions, RPEmployer rpEmployer, RPParameters rpParameters)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports" + "\\" + rpParameters.ErRef;
             string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
@@ -1779,22 +1792,134 @@ namespace PayRunIOClassLibrary
                     //No bank file required
                     break;
             }
-
-            switch (rpEmployer.PensionReportCode)
+            string previousSchemeName = null;
+            //bool firstOfThisScheme = true, lastOfThisScheme = false;
+            //int recordCount = 0;
+            //string pensionFileName = null;
+            //Create a list of pension file objects for each scheme name, then use it to write the pension
+            //file for that scheme then move on to the next scheme name.
+            //The rpPensionContributions object is already sorted in scheme name sequence
+            RPPensionFileScheme rpPensionFileScheme = new RPPensionFileScheme();
+            List<RPPensionContribution> rpPensionFileSchemePensionContributions = new List<RPPensionContribution>();
+            List<RPPensionFileScheme> rpPensionFileSchemes = new List<RPPensionFileScheme>();
+            foreach (RPPensionContribution rpPensionContribution in rpPensionContributions)
             {
-                case "001":
-                    //Nest
-                    CreateNestPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
-                    break;
-                case "002":
-                    //Nest
-                    CreateWorkersTrustPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
-                    break;
-                default:
-                    //No bank file required
-                    break;
+                if (rpPensionContribution.RPPensionPeriod.SchemeName != previousSchemeName)
+                {
+                    //We've moved to a new scheme.
+                    if (previousSchemeName != null)
+                    {
+                        //The rpPensionFileScheme object we've create should now contain a scheme name plus a list for employee contributions
+                        rpPensionFileScheme.RPPensionContributions = rpPensionFileSchemePensionContributions;
+                        rpPensionFileSchemes.Add(rpPensionFileScheme);
+                        rpPensionFileScheme = new RPPensionFileScheme();
+                        rpPensionFileSchemePensionContributions = new List<RPPensionContribution>();
+                    }
+                    previousSchemeName = rpPensionContribution.RPPensionPeriod.SchemeName;
+                    rpPensionFileScheme.SchemeName = rpPensionContribution.RPPensionPeriod.SchemeName;
+                    if(rpPensionFileScheme.SchemeName.ToUpper().Contains("AVIVA"))
+                    {
+                        rpPensionFileScheme.SchemeProvider = "AVIVA";
+                    }
+                    else if (rpPensionFileScheme.SchemeName.ToUpper().Contains("NEST"))
+                    {
+                        rpPensionFileScheme.SchemeProvider = "NEST";
+                    }
+                    else if (rpPensionFileScheme.SchemeName.ToUpper().Contains("WORKERS PENSION TRUST"))
+                    {
+                        rpPensionFileScheme.SchemeProvider = "WORKERS PENSION TRUST";
+                    }
+                    else
+                    {
+                        rpPensionFileScheme.SchemeProvider = "UNKOWN";
+                    }
+                }
+                rpPensionFileSchemePensionContributions.Add(rpPensionContribution);
             }
+            //After the last rpPensionContribution create the final pensionFileScheme and add it to the list.
+            //The rpPensionFileScheme object we've create should now contain a scheme name plus a list for employee contributions
+            rpPensionFileScheme.RPPensionContributions = rpPensionFileSchemePensionContributions;
+            rpPensionFileSchemes.Add(rpPensionFileScheme);
+            ProcessPensionFileSchemes(outgoingFolder, rpPensionFileSchemes, rpEmployer);
 
+            //Process the pension files from the list of PensionContibutions
+            //foreach (RPPensionContribution rpPensionContribution in rpPensionContributions)
+            //{
+            //    if (rpPensionContribution.RPPensionPeriod.SchemeName != previousSchemeName)
+            //    {
+            //        //We've moved to a new scheme. Write a footer if required.
+            //        //We only require footers for Nest so far.
+            //        if (previousSchemeName != null && previousSchemeName.ToUpper().Contains("NEST"))
+            //        {
+            //            lastOfThisScheme = true;
+            //            pensionFileName = outgoingFolder + "\\" + previousSchemeName + "PensionFile.csv";
+            //            NestPensionFile(firstOfThisScheme, lastOfThisScheme, outgoingFolder, rpPensionContribution, recordCount, pensionFileName);
+            //            lastOfThisScheme = false;
+            //        }
+            //        previousSchemeName = rpPensionContribution.RPPensionPeriod.SchemeName;
+            //        firstOfThisScheme = true;
+            //        recordCount = 0;
+            //    }
+            //    else
+            //    {
+            //        firstOfThisScheme = false;
+            //    }
+
+            //    pensionFileName = outgoingFolder + "\\" + rpPensionContribution.RPPensionPeriod.SchemeName.Replace(" ", "") + "PensionFile.csv";
+            //    if (rpPensionContribution.RPPensionPeriod.SchemeName.ToUpper().Contains("NEST"))
+            //    {
+            //        NestPensionFile(firstOfThisScheme, lastOfThisScheme, outgoingFolder, rpPensionContribution, recordCount, pensionFileName);
+            //    }
+            //    else if (rpPensionContribution.RPPensionPeriod.SchemeName.ToUpper().Contains("WORKERS PENSION TRUST"))
+            //    {
+            //        WPTPensionFile(firstOfThisScheme, lastOfThisScheme, outgoingFolder, rpPensionContribution, recordCount, pensionFileName);
+            //    }
+            //    else if (rpPensionContribution.RPPensionPeriod.SchemeName.ToUpper().Contains("AVIVA"))
+            //    {
+            //        AvivaPensionFile(firstOfThisScheme, lastOfThisScheme, outgoingFolder, rpPensionContribution, recordCount, pensionFileName);
+            //    }
+            //    recordCount++;
+
+            //}
+            //switch (rpEmployer.PensionReportCode)
+            //{
+            //    case "001":
+            //        //Nest
+            //        CreateNestPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
+            //        break;
+            //    case "002":
+            //        //Workers Trust
+            //        CreateWorkersTrustPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
+            //        break;
+            //    case "003":
+            //        //Aviva
+            //        CreateAvivaPensionFile(outgoingFolder, rpEmployeePeriodList, rpEmployer);
+            //        break;
+            //    default:
+            //        //No bank file required
+            //        break;
+            //}
+
+        }
+        private void ProcessPensionFileSchemes(string outgoingFolder, List<RPPensionFileScheme> rpPensionFileSchemes, RPEmployer rpEmployer)
+        {
+            foreach(RPPensionFileScheme rpPensionFileScheme in rpPensionFileSchemes)
+            {
+                switch(rpPensionFileScheme.SchemeProvider)
+                {
+                    case "AVIVA":
+                        CreateTheAvivaPensionFile(outgoingFolder, rpPensionFileScheme, rpEmployer);
+                        break;
+                    case "NEST":
+                        CreateTheNestPensionFile(outgoingFolder, rpPensionFileScheme, rpEmployer);
+                        break;
+                    case "WORKERS PENSION TRUST":
+                        CreateTheWorkersPensionTrustPensionFile(outgoingFolder, rpPensionFileScheme, rpEmployer);
+                        break;
+                    case "UNKNOWN":
+                        break;
+                }
+            }
         }
         private void CreateBarclaysBankFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
         {
@@ -1848,76 +1973,314 @@ namespace PayRunIOClassLibrary
                }
             }
         }
-        private void CreateNestPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
-        {
-            string pensionFileName = outgoingFolder + "\\" + "NestPensionFile.csv";
-            string pension = "NEST";
+        //private void CreateNestPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        //{
+        //    string pensionFileName = outgoingFolder + "\\" + "NestPensionFile.csv";
+        //    string pension = "NEST";
 
+        //    string comma = ",";
+        //    char columnA1 = 'H', columnA = 'D', columnAFooter = 'T';
+        //    int columnCFooter = 3, columnBFooter = rpEmployeePeriodList.Count; // No good I will need to count the number for Nest
+        //    string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = rpEmployeePeriodList[0].Pensions[0].ProviderEmployerReference, zeroContributions = "",
+        //    columnG1Frequency = rpEmployeePeriodList[0].Frequency.ToString(), columnF = "", columnH1 = "", columnI1 = "",
+        //                                columnD1EndDate = rpEmployeePeriodList[0].PeriodEndDate.ToString("yyyy-MM-dd"), columnJ1StartDate = rpEmployeePeriodList[0].PeriodStartDate.ToString("yyyy-MM-dd");
+        //    //these are needed in order to create the nest file... columnBFooter is how many ees are on the file. 
+        //    //SourceName may need changed, we have no place for it at the moment so this is default.. b1employerRef waiting on this from PR
+
+        //    string header = columnA1 + comma + columnB1EmployerReference + comma +
+        //                                    columnC1 + comma + columnD1EndDate + comma + columnE1SourceName +
+        //                                    comma + columnF + comma + columnG1Frequency + comma + columnH1 +
+        //                                    comma + columnI1 + comma + columnJ1StartDate;
+
+        //    using (StreamWriter sw = new StreamWriter(pensionFileName))
+        //    {
+        //        sw.WriteLine(header);
+        //        string csvLine = null;
+
+        //        foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+        //        {
+        //            foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+        //            {
+        //                zeroContributions = ""; //need to reset the value else it will always be 5 
+        //                bool contains = rpPensionPeriod.SchemeName.IndexOf(pension, StringComparison.OrdinalIgnoreCase) >= 0;
+        //                if (contains)
+        //                {
+        //                    if (rpPensionPeriod.EePensionTaxPeriod == 0 && rpPensionPeriod.ErPensionTaxPeriod == 0)
+        //                    {
+        //                        zeroContributions = "5";
+        //                    }
+        //                    csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+        //                    comma + rpEmployeePeriod.Reference + comma + rpPensionPeriod.PensionablePayTaxPeriod + comma +
+        //                    columnF + comma + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod +
+        //                    comma + zeroContributions;
+        //                    sw.WriteLine(csvLine);
+
+        //                }
+        //            }
+        //        }
+        //        string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
+        //        sw.WriteLine(footer);
+        //    }
+        //}
+        private void CreateTheNestPensionFile(string outgoingFolder, RPPensionFileScheme rpPensionFileScheme, RPEmployer rpEmployer)
+        {
+            string pensionFileName = outgoingFolder + "\\" + rpPensionFileScheme.SchemeName + "PensionFile.csv";
             string comma = ",";
-            char columnA1 = 'H', columnA = 'D', columnAFooter = 'T';
-            int columnCFooter = 3, columnBFooter = rpEmployeePeriodList.Count;
-            string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = rpEmployeePeriodList[0].Pensions[0].ProviderEmployerReference, zeroContributions = "",
-            columnG1Frequency = rpEmployeePeriodList[0].Frequency.ToString(), columnF = "", columnH1 = "", columnI1 = "",
-                                        columnD1EndDate = rpEmployeePeriodList[0].PeriodEndDate.ToString("yyyy-MM-dd"), columnJ1StartDate = rpEmployeePeriodList[0].PeriodStartDate.ToString("yyyy-MM-dd");
+            //char columnA1 = 'H', columnA = 'D', columnAFooter = 'T';
+            //int columnCFooter = 3, columnBFooter = rpPensionFileScheme.RPPensionContributions.Count; // No good I will need to count the number for Nest
+            //string columnC1 = "CS", columnE1SourceName = "My Source", columnB1EmployerReference = rpPensionFileScheme.RPPensionContributions[0].RPPensionPeriod.ProviderEmployerReference, zeroContributions = "",
+            //columnG1Frequency = rpPensionFileScheme.RPPensionContributions[0].Freq, columnF = "", columnH1 = "", columnI1 = "",
+                                        //columnD1EndDate = rpPensionFileScheme.RPPensionContributions[0].EndDate.ToString("yyyy-MM-dd"), columnJ1StartDate = rpPensionFileScheme.RPPensionContributions[0].StartDate.ToString("yyyy-MM-dd");
+            string providerEmployerReference = rpPensionFileScheme.RPPensionContributions[0].RPPensionPeriod.ProviderEmployerReference;
+            string startDate = rpPensionFileScheme.RPPensionContributions[0].StartDate.ToString("yyyy-MM-dd");
+            string endDate = rpPensionFileScheme.RPPensionContributions[0].EndDate.ToString("yyyy-MM-dd");
+            string frequency = rpPensionFileScheme.RPPensionContributions[0].Freq;
+            string blank = "";
+            string zeroContributions = "";
             //these are needed in order to create the nest file... columnBFooter is how many ees are on the file. 
             //SourceName may need changed, we have no place for it at the moment so this is default.. b1employerRef waiting on this from PR
 
-            string header = columnA1 + comma + columnB1EmployerReference + comma +
-                                            columnC1 + comma + columnD1EndDate + comma + columnE1SourceName +
-                                            comma + columnF + comma + columnG1Frequency + comma + columnH1 +
-                                            comma + columnI1 + comma + columnJ1StartDate;
+            //string header = columnA1 + comma + columnB1EmployerReference + comma +
+            //                                columnC1 + comma + columnD1EndDate + comma + columnE1SourceName +
+            //                                comma + columnF + comma + columnG1Frequency + comma + columnH1 +
+            //                                comma + columnI1 + comma + columnJ1StartDate;
+            string header = 'H' + comma + providerEmployerReference + comma +
+                                            "CS" + comma + endDate + comma + "My Source" +
+                                            comma + blank + comma + frequency + comma + blank +
+                                            comma + blank + comma + startDate;
 
             using (StreamWriter sw = new StreamWriter(pensionFileName))
             {
                 sw.WriteLine(header);
                 string csvLine = null;
 
-                foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+                foreach (RPPensionContribution rpPensionContribution in rpPensionFileScheme.RPPensionContributions)
                 {
-                    foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+                    zeroContributions = ""; //need to reset the value else it will always be 5 
+                    if (rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod == 0 && rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod == 0)
                     {
-                        zeroContributions = ""; //need to reset the value else it will always be 5 
-                        bool contains = rpPensionPeriod.SchemeName.IndexOf(pension, StringComparison.OrdinalIgnoreCase) >= 0;
-                        if (contains)
-                        {
-                            if (rpPensionPeriod.EePensionTaxPeriod == 0 && rpPensionPeriod.ErPensionTaxPeriod == 0)
-                            {
-                                zeroContributions = "5";
-                            }
-                            csvLine = columnA + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
-                            comma + rpEmployeePeriod.Reference + comma + rpPensionPeriod.PensionablePayTaxPeriod + comma +
-                            columnF + comma + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod +
-                            comma + zeroContributions;
-                            sw.WriteLine(csvLine);
-
-                        }
+                        zeroContributions = "5";
                     }
+                    //csvLine = columnA + comma + rpPensionContribution.Surname + comma + rpPensionContribution.NINumber +
+                    //comma + rpPensionContribution.EeRef + comma + rpPensionContribution.RPPensionPeriod.PensionablePayTaxPeriod + comma +
+                    //columnF + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod + comma + rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod +
+                    //comma + zeroContributions;
+                    csvLine = 'D' + comma + rpPensionContribution.Surname + comma + rpPensionContribution.NINumber +
+                    comma + rpPensionContribution.EeRef + comma + rpPensionContribution.RPPensionPeriod.PensionablePayTaxPeriod + comma +
+                    blank + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod + comma + rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod +
+                    comma + zeroContributions;
+                    sw.WriteLine(csvLine);
                 }
-                string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
+                //string footer = columnAFooter + comma + columnBFooter + comma + columnCFooter;
+                string footer = 'T' + comma + rpPensionFileScheme.RPPensionContributions.Count + comma + '3';
                 sw.WriteLine(footer);
             }
         }
-        private void CreateWorkersTrustPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
-        {
-            string pensionFileName = outgoingFolder + "\\" + "WorkersTrustPensionFile.csv";
-            string comma = ",";
+        //private void CreateWorkersTrustPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        //{
+        //    string pensionFileName = outgoingFolder + "\\" + "WorkersPensionTrustFile.csv";
+        //    string comma = ",";
+        //    string pension = "WORKERS PENSION TRUST";
 
+        //    using (StreamWriter sw = new StreamWriter(pensionFileName))
+        //    {
+        //        string csvLine = null;
+
+        //        foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+        //        {
+        //            foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+        //            {
+        //                if(rpPensionPeriod.SchemeName.ToUpper().Contains(pension))
+        //                {
+
+        //                }
+        //                bool contains = rpPensionPeriod.SchemeName.IndexOf(pension, StringComparison.OrdinalIgnoreCase) >= 0;
+        //                if (contains)
+        //                {
+        //                    if (rpPensionPeriod.EePensionTaxPeriod == 0 && rpPensionPeriod.ErPensionTaxPeriod == 0) //if ee has no contributions
+        //                    {
+        //                        continue;
+        //                    }
+
+        //                    csvLine = rpEmployeePeriod.NINumber + comma + rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname + comma +
+        //                                        rpEmployeePeriod.PayRunDate + comma + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod;
+
+        //                    sw.WriteLine(csvLine);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+        private void CreateTheWorkersPensionTrustPensionFile(string outgoingFolder, RPPensionFileScheme rpPensionFileScheme, RPEmployer rpEmployer)
+        {
+            string pensionFileName = outgoingFolder + "\\" + rpPensionFileScheme.SchemeName + "PensionFile.csv";
+            string comma = ",";
+            
             using (StreamWriter sw = new StreamWriter(pensionFileName))
             {
                 string csvLine = null;
 
-                foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+                foreach (RPPensionContribution rpPensionContribution in rpPensionFileScheme.RPPensionContributions)
                 {
-                    csvLine = rpEmployeePeriod.NINumber + comma + rpEmployeePeriod.Forename + " " + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.PayRunDate + comma;
-                    foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+                    if (rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod != 0 || rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod != 0) //if ee has either Ee or Er contributions
                     {
-                        csvLine = csvLine + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod;
+                        csvLine = rpPensionContribution.NINumber + comma + rpPensionContribution.ForenameSurname + comma +
+                                        rpPensionContribution.PayRunDate.ToString("yyyy/MM/dd") + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod +
+                                        comma + rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod;
+
+                        sw.WriteLine(csvLine);
                     }
-                    sw.WriteLine(csvLine);
+                }
+            }
+        }
+        //private void CreateAvivaPensionFile(string outgoingFolder, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer)
+        //{
+        //    string pensionFileName = outgoingFolder + "\\" + "AvivaPensionFile.csv";
+        //    string comma = ",";
+        //    string pension = "AVIVA";
+        //    string header = "PayrollMonth,Name,NInumber,AlternativeuniqueID,Employerregularcontributionamount,Employeeregulardeduction,Reasonforpartialornon-payment,Employerregularcontributionamount,Employeeoneoffcontribution,NewcategoryID";
+
+        //    using (StreamWriter sw = new StreamWriter(pensionFileName))
+        //    {
+        //        sw.WriteLine(header);
+        //        string csvLine = null;
+
+        //        foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+        //        {
+        //            foreach (RPPensionPeriod rpPensionPeriod in rpEmployeePeriod.Pensions)
+        //            {
+        //                if (rpPensionPeriod.SchemeName.ToUpper().Contains(pension))
+        //                {
+
+        //                }
+        //                bool contains = rpPensionPeriod.SchemeName.IndexOf(pension, StringComparison.OrdinalIgnoreCase) >= 0;
+        //                if (contains)
+        //                {
+        //                    if (rpPensionPeriod.EePensionTaxPeriod != 0 || rpPensionPeriod.ErPensionTaxPeriod != 0) //if ee has either Ee or Er contributions
+        //                    {
+        //                        csvLine = rpEmployeePeriod.PayRunDate.ToString("MMM-yy") + comma + rpEmployeePeriod.Surname + comma + rpEmployeePeriod.NINumber +
+        //                                  comma + rpEmployeePeriod.Reference + comma + rpPensionPeriod.ErPensionTaxPeriod + comma + rpPensionPeriod.EePensionTaxPeriod +
+        //                                  comma + comma + comma + comma;
+
+        //                        sw.WriteLine(csvLine);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+        private void CreateTheAvivaPensionFile(string outgoingFolder, RPPensionFileScheme rpPensionFileScheme, RPEmployer rpEmployer)
+        {
+            string pensionFileName = outgoingFolder + "\\" + rpPensionFileScheme.SchemeName + "PensionFile.csv";
+            string comma = ",";
+            string header = "PayrollMonth,Name,NInumber,AlternativeuniqueID,Employerregularcontributionamount,Employeeregulardeduction,Reasonforpartialornon-payment,Employerregularcontributionamount,Employeeoneoffcontribution,NewcategoryID";
+
+            using (StreamWriter sw = new StreamWriter(pensionFileName))
+            {
+                sw.WriteLine(header);
+                string csvLine = null;
+
+                foreach (RPPensionContribution rpPensionContribution in rpPensionFileScheme.RPPensionContributions)
+                {
+                    if (rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod != 0 || rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod != 0) //if ee has either Ee or Er contributions
+                    {
+                        csvLine = rpPensionContribution.PayRunDate.ToString("MMM-yy") + comma + rpPensionContribution.Surname + comma + rpPensionContribution.NINumber +
+                                    comma + rpPensionContribution.EeRef + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod + comma + 
+                                    rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod +
+                                    comma + comma + comma + comma;
+
+                        sw.WriteLine(csvLine);
+                    }
+
                 }
             }
         }
 
+        //private void NestPensionFile(bool first, bool last, string outgoingFolder, RPPensionContribution rpPensionContribution, int recordCount, string pensionFileName)
+        //{
+        //    string comma = ",";
+        //    string zeroContributions = "";
+
+            
+        //    string csvLine = null;
+        //    using (StreamWriter sw = new StreamWriter(pensionFileName, true))
+        //    {
+
+        //        if (last)
+        //        {
+        //            string footer = 'T' + comma + recordCount + comma + '3';
+        //            sw.WriteLine(footer);
+
+        //        }
+        //        else
+        //        {
+        //            if (first)
+        //            {
+        //                string header = 'H' + comma + rpPensionContribution.RPPensionPeriod.ProviderEmployerReference + comma +
+        //                                        "CS" + comma + rpPensionContribution.EndDate.ToString("yyyy-MM-dd") + comma + "My Source" +
+        //                                        comma + "" + comma + rpPensionContribution.Freq + comma + "" +
+        //                                        comma + "" + comma + rpPensionContribution.StartDate.ToString("yyyy-MM-dd");
+        //                sw.WriteLine(header);
+
+        //            }
+        //            zeroContributions = ""; //need to reset the value else it will always be 5 
+        //            if (rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod == 0 && rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod == 0)
+        //            {
+        //                zeroContributions = "5";
+        //            }
+        //            csvLine = 'D' + comma + rpPensionContribution.Surname + comma + rpPensionContribution.NINumber +
+        //            comma + rpPensionContribution.EeRef + comma + rpPensionContribution.RPPensionPeriod.PensionablePayTaxPeriod + comma +
+        //            "" + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod + comma + rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod +
+        //            comma + zeroContributions;
+        //            sw.WriteLine(csvLine);
+        //        }
+
+        //    }
+
+        //}
+        //private void WPTPensionFile(bool first, bool last, string outgoingFolder, RPPensionContribution rpPensionContribution, int recordCount, string pensionFileName)
+        //{
+        //    string comma = ",";
+        //    string csvLine = null;
+        //    using (StreamWriter sw = new StreamWriter(pensionFileName, true))
+        //    {
+
+        //        if (rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod != 0 || rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod != 0) //if ee has contributions
+        //        {
+        //            csvLine = rpPensionContribution.NINumber + comma + rpPensionContribution.ForenameSurname + comma +
+        //                                rpPensionContribution.PayRunDate.ToString("yyyy/MM/dd") + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod + comma +
+        //                                rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod;
+
+        //            sw.WriteLine(csvLine);
+        //        }
+
+        //    }
+        //}
+        //private void AvivaPensionFile(bool first, bool last, string outgoingFolder, RPPensionContribution rpPensionContribution, int recordCount, string pensionFileName)
+        //{
+        //    string comma = ",";
+        //    string header = "PayrollMonth,Name,NInumber,AlternativeuniqueID,Employerregularcontributionamount,Employeeregulardeduction,Reasonforpartialornon-payment,Employerregularcontributionamount,Employeeoneoffcontribution,NewcategoryID";
+        //    string csvLine = null;
+        //    using (StreamWriter sw = new StreamWriter(pensionFileName, true))
+        //    {
+
+        //        if (first)
+        //        {
+        //            sw.WriteLine(header);
+        //            csvLine = null;
+        //        }
+        //        if (rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod != 0 || rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod != 0) //if ee has either Ee or Er contributions
+        //        {
+        //            csvLine = rpPensionContribution.PayRunDate.ToString("MMM-yy") + comma + rpPensionContribution.Surname + comma + rpPensionContribution.NINumber +
+        //                        comma + rpPensionContribution.EeRef + comma + rpPensionContribution.RPPensionPeriod.ErPensionTaxPeriod + comma + rpPensionContribution.RPPensionPeriod.EePensionTaxPeriod +
+        //                        comma + comma + comma + comma;
+
+        //            sw.WriteLine(csvLine);
+        //        }
+
+        //    }
+
+        //}
         public void PrintStandardReports(XDocument xdoc, List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, 
                                          List<P45> p45s, List<RPPayComponent> rpPayComponents, List<RPPensionContribution> rpPensionContributions)
         {
@@ -2446,7 +2809,7 @@ namespace PayRunIOClassLibrary
                 FileInfo[] files = dirInfo.GetFiles();
                 foreach (FileInfo file in files)
                 {
-                    EmailZippedReport(xdoc, file, rpParameters);
+                    EmailZippedReport(xdoc, file, rpParameters, rpEmployer);
                     file.MoveTo(file.FullName.Replace("PE-Reports", "PE-Reports\\Archive"));
                 }
 
@@ -2457,7 +2820,7 @@ namespace PayRunIOClassLibrary
                 update_Progress(textLine, configDirName, logOneIn);
             }
         }
-        private void EmailZippedReport(XDocument xdoc, FileInfo file, RPParameters rpParameters)
+        private void EmailZippedReport(XDocument xdoc, FileInfo file, RPParameters rpParameters, RPEmployer rpEmployer)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
@@ -2472,21 +2835,24 @@ namespace PayRunIOClassLibrary
                 //Find amount due to HMRC in the file name.
                 int x = file.FullName.LastIndexOf('[');
                 int y = file.FullName.LastIndexOf(']');
-                string hmrcDesc = file.FullName.Substring(x, y - x);
-                hmrcDesc = hmrcDesc.Replace("[", "£");
+                string hmrcDesc = null;
+                if(rpEmployer.P32Required)
+                {
+                    hmrcDesc = file.FullName.Substring(x, y - x);
+                    hmrcDesc = hmrcDesc.Replace("[", "£");
+                }
+                
                 DateTime runDate = rpParameters.PayRunDate;
                 runDate = runDate.AddMonths(1);
                 int day = runDate.Day;
                 day = 20 - day;
                 runDate = runDate.AddDays(day);
                 string dueDate = runDate.ToLongDateString();
+                string taxYear = rpParameters.TaxYear.ToString() + "/" + (rpParameters.TaxYear + 1).ToString().Substring(2, 2);
                 //string emailPassword = "fjbykfgxxkdgclfp"; //fjbykfgxxkdgclfp
-                string mailSubject = String.Format("Payroll reports for tax year {0}, pay period {1}.", rpParameters.TaxYear, rpParameters.TaxPeriod);
-
-                string mailBody = String.Format("Hi,\r\n\r\nPlease find attached payroll reports for tax year {0}, pay period {1}.\r\n\r\n" +
-                                                "The amount payable to HMRC this month is {2}, this payment is due on or before {3}.\r\n\r\n" +
-                                                "Please review and confirm if all is correct.\r\n\r\nKind Regards,\r\n\r\nThe Payescape Team."
-                                                , rpParameters.TaxYear, rpParameters.TaxPeriod, hmrcDesc, dueDate);
+                string mailSubject = String.Format("Payroll reports for tax year {0}, pay period {1}.", taxYear, rpParameters.TaxPeriod);
+                string mailBody = null;
+                
                 // Get currrent day of week.
                 DayOfWeek today = DateTime.Today.DayOfWeek;
                 string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
@@ -2502,18 +2868,24 @@ namespace PayRunIOClassLibrary
                 //
                 //Get a list of email addresses to send the reports to
                 //
-                List<string> emailAddresses = new List<string>();
-                emailAddresses = GetListOfEmailAddresses(xdoc, sqlConnectionString, rpParameters);
-                foreach (string emailAddress in emailAddresses)
+                List<ContactInfo> contactInfoList = new List<ContactInfo>();
+                contactInfoList = GetListOfContactInfo(xdoc, sqlConnectionString, rpParameters);
+                foreach (ContactInfo contactInfo in contactInfoList)
                 {
                     RegexUtilities regexUtilities = new RegexUtilities();
-                    validEmailAddress = regexUtilities.IsValidEmail(emailAddress);
+                    validEmailAddress = regexUtilities.IsValidEmail(contactInfo.EmailAddress);
                     if (validEmailAddress)
                     {
-
-
+                        mailBody = String.Format("Hi {0},\r\n\r\nPlease find attached payroll reports for tax year {1}, pay period {2}.\r\n\r\n"
+                                                 , contactInfo.FirstName, taxYear, rpParameters.TaxPeriod);
+                        if(rpEmployer.P32Required)
+                        {
+                            mailBody = mailBody + string.Format("The amount payable to HMRC this month is {0}, this payment is due on or before {1}.\r\n\r\n"
+                                                                 , hmrcDesc, dueDate);
+                        }
+                        mailBody = mailBody + string.Format("Please review and confirm if all is correct.\r\n\r\nKind Regards,\r\n\r\nThe Payescape Team.");
                         MailMessage mailMessage = new MailMessage();
-                        mailMessage.To.Add(new MailAddress(emailAddress));
+                        mailMessage.To.Add(new MailAddress(contactInfo.EmailAddress));
                         mailMessage.From = new MailAddress(smtpEmailSettings.FromAddress);
                         //mailMessage.From = new MailAddress("jcborland@jbsoftwareservices.onmicrosoft.com");
                         mailMessage.Subject = mailSubject;
@@ -2547,7 +2919,7 @@ namespace PayRunIOClassLibrary
                             }
                             catch (Exception ex)
                             {
-                                textLine = string.Format("Error sending an email to, {0}.\r\n{1}.\r\n", emailAddress, ex);
+                                textLine = string.Format("Error sending an email to, {0}.\r\n{1}.\r\n", contactInfo.EmailAddress, ex);
                                 update_Progress(textLine, configDirName, logOneIn);
                             }
 
@@ -2644,7 +3016,7 @@ namespace PayRunIOClassLibrary
             return smtpEmailSettings;
 
         }
-        private List<string> GetListOfEmailAddresses(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
+        private List<ContactInfo> GetListOfContactInfo(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
@@ -2657,9 +3029,9 @@ namespace PayRunIOClassLibrary
             textLine = string.Format("Start getting a list of email addresses with connection string : {0}.", logConnectionString);
             update_Progress(textLine, configDirName, logOneIn);
 
-            List<string> emailAddresses = new List<string>();
+            List<ContactInfo> contactInfoList = new List<ContactInfo>();
             string companyNo = rpParameters.ErRef;                  //file.FullName.Substring(0, 4);
-            DataTable dtEmailAddresses = new DataTable();
+            DataTable dtContactInfo = new DataTable();
             try
             {
                 using (var connection = new SqlConnection(sqlConnectionString))
@@ -2671,7 +3043,7 @@ namespace PayRunIOClassLibrary
                     connection.Open();
                     command.Parameters.AddWithValue("CompanyNo", companyNo);
                     SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(command);
-                    sqlDataAdapter.Fill(dtEmailAddresses);
+                    sqlDataAdapter.Fill(dtContactInfo);
                 }
             }
             catch (Exception ex)
@@ -2679,15 +3051,18 @@ namespace PayRunIOClassLibrary
                 textLine = string.Format("Error getting the list of email addresses.\r\n{0}.\r\n", ex);
                 update_Progress(textLine, configDirName, logOneIn);
             }
-            foreach (DataRow drEmailAddresses in dtEmailAddresses.Rows)
+            foreach (DataRow drContactInfo in dtContactInfo.Rows)
             {
-                emailAddresses.Add(drEmailAddresses.ItemArray[0].ToString());
+                ContactInfo contactInfo = new ContactInfo();
+                contactInfo.EmailAddress = drContactInfo.ItemArray[0].ToString();
+                contactInfo.FirstName = drContactInfo.ItemArray[1].ToString();
+                contactInfoList.Add(contactInfo);
             }
 
             textLine = string.Format("Finished getting a list of email addresses with connection string : {0}.", logConnectionString);
             update_Progress(textLine, configDirName, logOneIn);
 
-            return emailAddresses;
+            return contactInfoList;
         }
         private DataRow GetCompanyReportCodes(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
         {
@@ -2699,7 +3074,7 @@ namespace PayRunIOClassLibrary
             int y = sqlConnectionString.LastIndexOf(";");
             string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
 
-            textLine = string.Format("Start getting the company report codes connection string : {0}.", logConnectionString);
+            textLine = string.Format("Start getting the company report codes with connection string : {0}.", logConnectionString);
             update_Progress(textLine, configDirName, logOneIn);
 
             string companyNo = rpParameters.ErRef;                  //file.FullName.Substring(0, 4);
@@ -2723,22 +3098,57 @@ namespace PayRunIOClassLibrary
                 textLine = string.Format("Error getting the company report codes.\r\n{0}.\r\n", ex);
                 update_Progress(textLine, configDirName, logOneIn);
             }
-            //string[] companyReportCodes = new string[2];
+            
             DataRow drCompanyReportCodes = dtCompanyReportCodes.Rows[0];
-            //foreach (DataRow drCompanyReportCodes in dtCompanyReportCodes.Rows)
-            //{
-            //    //Should only be 1 row
-            //    companyReportCodes[0] = drCompanyReportCodes.ItemArray[0].ToString();
-            //    companyReportCodes[1] = drCompanyReportCodes.ItemArray[1].ToString();
-                
-            //}
 
             textLine = string.Format("Finished getting company report codes with connection string : {0}.", logConnectionString);
             update_Progress(textLine, configDirName, logOneIn);
 
             return drCompanyReportCodes;
         }
-       
+        public bool GetIsUnity(XDocument xdoc, string sqlConnectionString, int companyNo)
+        {
+            bool isUnity = false;
+            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
+            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+            string textLine = null;
+
+            int x = sqlConnectionString.LastIndexOf(";Password=") + 10;
+            int y = sqlConnectionString.LastIndexOf(";");
+            string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
+
+            textLine = string.Format("Start getting IsUnity with connection string : {0}.", logConnectionString);
+            update_Progress(textLine, configDirName, logOneIn);
+
+            DataTable dtCompanyReportCodes = new DataTable();
+            try
+            {
+                using (var connection = new SqlConnection(sqlConnectionString))
+                using (var command = new SqlCommand("SelectIsUnity", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                })
+                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("CompanyNo", companyNo);
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(command);
+                    sqlDataAdapter.Fill(dtCompanyReportCodes);
+                }
+            }
+            catch (Exception ex)
+            {
+                textLine = string.Format("Error getting IsUnity.\r\n{0}.\r\n", ex);
+                update_Progress(textLine, configDirName, logOneIn);
+            }
+
+            isUnity = Convert.ToBoolean(dtCompanyReportCodes.Rows[0].ItemArray[0]);
+            
+            textLine = string.Format("Finished getting IsUnity with connection string : {0}.", logConnectionString);
+            update_Progress(textLine, configDirName, logOneIn);
+
+            return isUnity;
+        }
+
     }
     public class ReadConfigFile
     {
@@ -3101,6 +3511,7 @@ namespace PayRunIOClassLibrary
         public decimal TaxablePayYTD { get; set; }
         public decimal TaxablePayTP { get; set; }
         public decimal HolidayAccruedTd { get; set; }
+        public RPAEAssessment AEAssessment { get; set; }
         public List<RPPensionPeriod> Pensions { get; set; }
         public decimal ErPensionTotalTP { get; set; }
         public decimal ErPensionTotalYtd {get;set;}
@@ -3141,6 +3552,7 @@ namespace PayRunIOClassLibrary
                           decimal erNICYTD, decimal eeRebate, decimal erRebate, decimal eeReduction, DateTime leavingDate, bool leaver,
                           string taxCode, bool week1Month1, string taxCodeChangeTypeID, string taxCodeChangeType, decimal taxPrev,
                           decimal taxablePayPrevious, decimal taxThis, decimal taxablePayYTD, decimal taxablePayTP, decimal holidayAccruedTd,
+                          RPAEAssessment aeAssessment,
                           List<RPPensionPeriod> pensions,
                           decimal erPensionTotalTP, decimal erPensionTotalYtd,
                           //decimal erPensionYTD, decimal eePensionYTD, decimal erPensionTP, decimal eePensionTP, decimal erContributionPercent,
@@ -3210,6 +3622,7 @@ namespace PayRunIOClassLibrary
             TaxablePayYTD = taxablePayYTD;
             TaxablePayTP = taxablePayTP;
             HolidayAccruedTd = holidayAccruedTd;
+            AEAssessment = aeAssessment;
             Pensions = pensions;
             ErPensionTotalTP = erPensionTotalTP;
             ErPensionTotalYtd = erPensionTotalYtd;
@@ -3427,6 +3840,7 @@ namespace PayRunIOClassLibrary
             ErContributionPercent = erContributionPercent;
         }
     }
+    
     public class RPPensionYtd
     {
         public int Key { get; set; }
@@ -3450,22 +3864,52 @@ namespace PayRunIOClassLibrary
     public class RPPensionContribution
     {
         public string EeRef { get; set; }
+        public string Surname { get; set; } 
         public string Fullname { get; set; }
         public string SurnameForename { get; set; }
+        public string ForenameSurname { get; set; }
         public string NINumber { get; set; }
+        public string Freq { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime PayRunDate { get; set; }
         public RPPensionPeriod RPPensionPeriod { get; set; }
 
         public RPPensionContribution() { }
-        public RPPensionContribution(string eeRef, string fullname, string surnameForename, 
-                                     string niNumber, RPPensionPeriod rpPensionPeriod)
+        public RPPensionContribution(string eeRef, string surname, string fullname, string surnameForename, 
+                                     string forenameSurname, string niNumber, string freq,
+                                     DateTime startDate, DateTime endDate,DateTime payRunDate,
+                                     RPPensionPeriod rpPensionPeriod)
         {
             EeRef = eeRef;
+            Surname = surname;
             Fullname = fullname;
             SurnameForename = surnameForename;
+            ForenameSurname = forenameSurname;
             NINumber = niNumber;
+            Freq = freq;
+            StartDate = startDate;
+            EndDate = endDate;
+            PayRunDate = payRunDate;
             RPPensionPeriod = rpPensionPeriod;
         }
     }
+    public class RPPensionFileScheme
+    {
+        public string SchemeName { get; set; }
+        public string SchemeProvider { get; set; }
+        public List<RPPensionContribution> RPPensionContributions { get; set; }
+
+        public RPPensionFileScheme() { }
+        public RPPensionFileScheme(string schemeName, string schemeProvider,
+                                   List<RPPensionContribution> rpPensionContributions)
+        {
+            SchemeName = schemeName;
+            SchemeProvider = schemeProvider;
+            RPPensionContributions = rpPensionContributions;
+        }
+    }
+
     public class RPNicYtd
     {
         public string NILetter { get; set; }
@@ -3968,6 +4412,55 @@ namespace PayRunIOClassLibrary
             PostGraduateLoan = postGraduateLoan;
             NetIncomeTax = netIncomeTax;
             GrossNICs = grossNICs;
+        }
+    }
+    public class RPAEAssessment
+    {
+        public int Age { get; set; }
+        public int StatePensionAge { get; set; }
+        public DateTime? StatePensionDate { get; set; }
+        public DateTime? AssessmentDate { get; set; }
+        public decimal QualifyingEarnings { get; set; }
+        public string AssessmentCode { get; set; }
+        public string AssessmentEvent { get; set; }
+        public string AssessmentResult { get; set; }
+        public string AssessmentOverride { get; set; }
+        public DateTime? OptOutWindowEndDate { get; set; }
+        public DateTime? ReenrolmentDate { get; set; }
+        public bool IsMemberOfAlternativePensionScheme { get; set; }
+        public int TaxYear { get; set; }
+        public int TaxPeriod { get; set; }
+        public RPAEAssessment() { }
+        public RPAEAssessment(int age, int statePensionAge, DateTime? statePensionDate, DateTime? assessmentDate, decimal qualifyingEarnings,
+                              string assessmentCode, string assessmentEvent, string assessmentResult,
+                              string assessmentOverride, DateTime? optOutWindowEndDate, DateTime? reenrolmentDate,
+                              bool isMemberOfAlternativePensionScheme, int taxYear, int taxPeriod)
+        {
+            Age = age;
+            StatePensionAge = statePensionAge;
+            StatePensionDate = statePensionDate;
+            AssessmentDate = assessmentDate;
+            QualifyingEarnings = qualifyingEarnings;
+            AssessmentCode = assessmentCode;
+            AssessmentEvent = assessmentEvent;
+            AssessmentResult = assessmentResult;
+            AssessmentOverride = assessmentOverride;
+            OptOutWindowEndDate = optOutWindowEndDate;
+            ReenrolmentDate = reenrolmentDate;
+            IsMemberOfAlternativePensionScheme = isMemberOfAlternativePensionScheme;
+            TaxYear = taxYear;
+            TaxPeriod = taxPeriod;
+        }
+    }
+    public class ContactInfo
+    {
+        public string FirstName { get; set; }
+        public string EmailAddress { get; set; }
+        public ContactInfo() { }
+        public ContactInfo(string firstName, string emailAddress)
+        {
+            FirstName = firstName;
+            EmailAddress = emailAddress;
         }
     }
     public class SMTPEmailSettings
