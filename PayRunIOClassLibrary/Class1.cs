@@ -15,6 +15,9 @@ using System.Net.Mail;
 using PayRunIO.CSharp.SDK;
 using PicoXLSX;
 using DevExpress.XtraReports.UI;
+using Amazon;
+using Amazon.S3;
+using Amazon.S3.Transfer;
 
 namespace PayRunIOClassLibrary
 {
@@ -2573,6 +2576,7 @@ namespace PayRunIOClassLibrary
                 FileInfo[] files = dirInfo.GetFiles();
                 foreach (FileInfo file in files)
                 {
+                    UploadZippedReportToAmazonS3(xdoc, file, rpParameters, rpEmployer);
                     EmailZippedReport(xdoc, file, rpParameters, rpEmployer);
                     file.MoveTo(file.FullName.Replace("PE-Reports", "PE-Reports\\Archive"));
                 }
@@ -2583,6 +2587,40 @@ namespace PayRunIOClassLibrary
                 textLine = string.Format("Error emailing zipped pdf reports for report folder, {0}.\r\n{1}.\r\n", reportFolder, ex);
                 update_Progress(textLine, configDirName, logOneIn);
             }
+        }
+        private void UploadZippedReportToAmazonS3(XDocument xdoc, FileInfo file, RPParameters rpParameters, RPEmployer rpEmployer)
+        {
+            string bucketName = "payescape-share";
+            RegionEndpoint bucketRegion = Amazon.RegionEndpoint.EUWest1;
+            IAmazonS3 s3Client;
+
+            s3Client = new AmazonS3Client(bucketRegion);
+
+            UploadFileAsync(s3Client, file, bucketName).Wait();
+
+        }
+        private static async Task UploadFileAsync(IAmazonS3 s3Client, FileInfo file, string bucketName)
+        {
+            try
+            {
+                var fileTransferUtility =
+                    new TransferUtility(s3Client);
+
+                // Option 1. Upload a file. The file name is used as the object key name.
+                await fileTransferUtility.UploadAsync(file.FullName, bucketName);
+                string message = "Upload complete.";
+
+                
+            }
+            catch (AmazonS3Exception e)
+            {
+                string message = e.Message;
+            }
+            catch (Exception e)
+            {
+                string message = e.Message;
+            }
+
         }
         private void EmailZippedReport(XDocument xdoc, FileInfo file, RPParameters rpParameters, RPEmployer rpEmployer)
         {
