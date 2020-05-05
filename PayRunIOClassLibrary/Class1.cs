@@ -2618,11 +2618,14 @@ namespace PayRunIOClassLibrary
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
             string reportFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
-            
+            string awsAccessKey = xdoc.Root.Element("AwsAccessKey").Value;
+            string awsAccessSecret = xdoc.Root.Element("AwsAccessSecret").Value;
+
             bool live = Convert.ToBoolean(xdoc.Root.Element("Live").Value);
             string bucketName = "payescape-share";
             RegionEndpoint bucketRegion = RegionEndpoint.EUWest2;
-            IAmazonS3 s3Client = new AmazonS3Client("AKIA3DEWYEX3PA7OLPKL", "B+EePYKDa8Rxk5k2RRo5N0geKbyWjABrTBnOUnjL", RegionEndpoint.EUWest2);
+            //IAmazonS3 s3Client = new AmazonS3Client("AKIA3DEWYEX3PA7OLPKL", "B+EePYKDa8Rxk5k2RRo5N0geKbyWjABrTBnOUnjL", RegionEndpoint.EUWest2);
+            IAmazonS3 s3Client = new AmazonS3Client(awsAccessKey,awsAccessSecret, RegionEndpoint.EUWest2);
             string folderPath;
             if (live)
             {
@@ -3014,22 +3017,6 @@ namespace PayRunIOClassLibrary
         // Using XDocument instead of XmlReader
         //
         string fileName = "PayescapeWGtoPR.xml";
-        string xmlSoftwareHomeFolder = "C:\\Payescape\\Service\\";
-        string xmlDataHomeFolder = "C:\\Payescape\\Data\\";
-        string xmlSFTPHostName = "sftp.bluemarblepayroll.com";
-        string xmlUser = "payescape123";
-        string xmlPasswordFile = "payescape.ppk";
-        string xmlInterval = "10";
-        string xmlLogOneIn = "100";
-        string xmlOffFrom = "22:30:00";
-        string xmlOffTo = "00:30:00";
-        string xmlRunConstantly = "False";
-        string xmlFilePrefix = "WGtoPR_";
-        string xmlArchive = "True";
-        string xmlDataSource = "APPSERVER1\\MSSQL";
-        string xmlDatabase = "Payescape";
-        string xmlUsername = "PayrollEngineLogin";
-        string xmlPassword = "JB20soft14";
         XDocument xdoc = new XDocument();
 
         public ReadConfigFile() { }
@@ -3038,225 +3025,17 @@ namespace PayRunIOClassLibrary
         public XDocument ConfigRecord(string dirName)
         {
             string fullName = dirName + fileName;
-            string passwordFile = dirName + xmlPasswordFile;
-
             try
             {
-                bool updateRequired = false;
-                bool exists = false;
                 xdoc = XDocument.Load(fullName);
-                exists = xdoc.Root.Descendants("SoftwareHomeFolder").Any();
-                if (exists)
-                {
-                    xmlSoftwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("DataHomeFolder").Any();
-                if (exists)
-                {
-                    xmlDataHomeFolder = xdoc.Root.Element("DataHomeFolder").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("OffFrom").Any();
-                if (exists)
-                {
-                    xmlOffFrom = xdoc.Root.Element("OffFrom").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("OffTo").Any();
-                if (exists)
-                {
-                    xmlOffTo = xdoc.Root.Element("OffTo").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("RunConstantly").Any();
-                if (exists)
-                {
-                    xmlRunConstantly = xdoc.Root.Element("RunConstantly").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("SFTPHostName").Any();
-                if (exists)
-                {
-                    xmlSFTPHostName = xdoc.Root.Element("SFTPHostName").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("User").Any();
-                if (exists)
-                {
-                    xmlUser = xdoc.Root.Element("User").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("PasswordFile").Any();
-                if (exists)
-                {
-                    xmlPasswordFile = xdoc.Root.Element("PasswordFile").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("Interval").Any();
-                if (exists)
-                {
-                    xmlInterval = xdoc.Root.Element("Interval").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("LogOneIn").Any();
-                if (exists)
-                {
-                    xmlLogOneIn = xdoc.Root.Element("LogOneIn").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("FilePrefix").Any();
-                if (exists)
-                {
-                    xmlFilePrefix = xdoc.Root.Element("FilePrefix").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                exists = xdoc.Root.Descendants("Archive").Any();
-                if (exists)
-                {
-                    xmlArchive = xdoc.Root.Element("Archive").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                if (updateRequired)
-                {
-                    CreateConfigFile(dirName, fullName);
-                }
-                exists = xdoc.Root.Descendants("DataSource").Any();
-                if (exists)
-                {
-                    xmlDataSource = xdoc.Root.Element("DataSource").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                if (updateRequired)
-                {
-                    CreateConfigFile(dirName, fullName);
-                }
-                exists = xdoc.Root.Descendants("Database").Any();
-                if (exists)
-                {
-                    xmlDatabase = xdoc.Root.Element("Database").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                if (updateRequired)
-                {
-                    CreateConfigFile(dirName, fullName);
-                }
-                exists = xdoc.Root.Descendants("Username").Any();
-                if (exists)
-                {
-                    xmlUsername = xdoc.Root.Element("Username").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                if (updateRequired)
-                {
-                    CreateConfigFile(dirName, fullName);
-                }
-                exists = xdoc.Root.Descendants("Password").Any();
-                if (exists)
-                {
-                    xmlPassword = xdoc.Root.Element("Password").Value;
-                }
-                else
-                {
-                    updateRequired = true;
-                }
-                if (updateRequired)
-                {
-                    CreateConfigFile(dirName, fullName);
-                }
             }
-
-            catch (Exception ex)
+            catch
             {
-
-                if (ex.ToString().Contains("Could not find a part of the path") || ex.ToString().Contains("Could not find file"))
-                {
-                    CreateConfigFile(dirName, fullName);
-
-                }
-                xdoc = XDocument.Load(fullName);
             }
 
             return xdoc;
         }
-        private void CreateConfigFile(string dirName, string fullName)
-        {
-            // Create Folder and dummy config xml file.
-            Directory.CreateDirectory(dirName);
-
-
-            // Create a dummy config xml file.
-            new XDocument
-                (
-                new XElement
-                    ("Configuration",
-                     new XElement("SoftwareHomeFolder", xmlSoftwareHomeFolder),
-                     new XElement("DataHomeFolder", xmlDataHomeFolder),
-                     new XElement("Interval", xmlInterval),
-                     new XElement("LogOneIn", xmlLogOneIn),
-                     new XElement("RunConstantly", xmlRunConstantly),
-                     new XElement("OffFrom", xmlOffFrom),
-                     new XElement("OffTo", xmlOffTo),
-                     new XElement("SFTPHostName", xmlSFTPHostName),
-                     new XElement("User", xmlUser),
-                     new XElement("PasswordFile", xmlPasswordFile),
-                     new XElement("FilePrefix", xmlFilePrefix),
-                     new XElement("Archive", xmlArchive),
-                     new XElement("DataSource", xmlDataSource),
-                     new XElement("Database", xmlDatabase),
-                     new XElement("Username", xmlUsername),
-                     new XElement("Password", xmlPassword)
-                    )
-                   )
-             .Save(fullName);
-            xdoc = XDocument.Load(fullName);
-        }
-
+        
     }
 
     //Report (RP) Parameters
