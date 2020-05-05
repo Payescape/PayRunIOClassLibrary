@@ -18,6 +18,7 @@ using DevExpress.XtraReports.UI;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Transfer;
+using Amazon.S3.Model;
 
 namespace PayRunIOClassLibrary
 {
@@ -841,7 +842,7 @@ namespace PayRunIOClassLibrary
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
                         rpPayCode.PayCode = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName + "-Ee";
-                        rpPayCode.Description = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName;
+                        rpPayCode.Description = rpPayCode.PayCode;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpPensionYtd.EePensionYtd;
                         rpPayCode.PayeAmount = rpPensionYtd.EePensionYtd;
@@ -856,7 +857,7 @@ namespace PayRunIOClassLibrary
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
                         rpPayCode.PayCode = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName + "-Er";
-                        rpPayCode.Description = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName;
+                        rpPayCode.Description = rpPayCode.PayCode;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpPensionYtd.ErPensionYtd;
                         rpPayCode.PayeAmount = rpPensionYtd.ErPensionYtd;
@@ -871,7 +872,7 @@ namespace PayRunIOClassLibrary
                         rpPayCode.EeRef = rpEmployeeYtd.EeRef;
                         rpPayCode.Code = "0";
                         rpPayCode.PayCode = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName + "-Pay";
-                        rpPayCode.Description = rpPensionYtd.Code + "-" + rpPensionYtd.SchemeName;
+                        rpPayCode.Description = rpPayCode.PayCode;
                         rpPayCode.Type = "P";
                         rpPayCode.AccountsAmount = rpPensionYtd.PensionablePayYtd;
                         rpPayCode.PayeAmount = rpPensionYtd.PensionablePayYtd;
@@ -1848,6 +1849,7 @@ namespace PayRunIOClassLibrary
             //The rpPensionFileScheme object we've create should now contain a scheme name plus a list for employee contributions
             rpPensionFileScheme.RPPensionContributions = rpPensionFileSchemePensionContributions;
             rpPensionFileSchemes.Add(rpPensionFileScheme);
+            ProcessPensionFileSchemes(outgoingFolder, rpPensionFileSchemes, rpEmployer);
           }
         private void ProcessPensionFileSchemes(string outgoingFolder, List<RPPensionFileScheme> rpPensionFileSchemes, RPEmployer rpEmployer)
         {
@@ -2576,7 +2578,6 @@ namespace PayRunIOClassLibrary
                 FileInfo[] files = dirInfo.GetFiles();
                 foreach (FileInfo file in files)
                 {
-                    UploadZippedReportToAmazonS3(xdoc, file, rpParameters, rpEmployer);
                     EmailZippedReport(xdoc, file, rpParameters, rpEmployer);
                     file.MoveTo(file.FullName.Replace("PE-Reports", "PE-Reports\\Archive"));
                 }
@@ -2588,40 +2589,93 @@ namespace PayRunIOClassLibrary
                 update_Progress(textLine, configDirName, logOneIn);
             }
         }
-        private void UploadZippedReportToAmazonS3(XDocument xdoc, FileInfo file, RPParameters rpParameters, RPEmployer rpEmployer)
+        public void UploadZippedReportsToAmazonS3(XDocument xdoc, RPEmployer rpEmployer, RPParameters rpParameters)
         {
-            string bucketName = "payescape-share";
-            RegionEndpoint bucketRegion = Amazon.RegionEndpoint.EUWest1;
-            IAmazonS3 s3Client;
+            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
+            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+            string textLine = null;
 
-            s3Client = new AmazonS3Client(bucketRegion);
-
-            UploadFileAsync(s3Client, file, bucketName).Wait();
-
-        }
-        private static async Task UploadFileAsync(IAmazonS3 s3Client, FileInfo file, string bucketName)
-        {
+            string reportFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-ReportsNoPassword";
             try
             {
-                var fileTransferUtility =
-                    new TransferUtility(s3Client);
+                DirectoryInfo dirInfo = new DirectoryInfo(reportFolder);
+                FileInfo[] files = dirInfo.GetFiles();
+                foreach (FileInfo file in files)
+                {
+                    UploadZippedReportToAmazonS3(xdoc, file, rpParameters, rpEmployer);
+                    file.MoveTo(file.FullName.Replace("PE-ReportsNoPassword", "PE-ReportsNoPassword\\Archive"));
+                }
 
-                // Option 1. Upload a file. The file name is used as the object key name.
-                await fileTransferUtility.UploadAsync(file.FullName, bucketName);
-                string message = "Upload complete.";
-
-                
             }
-            catch (AmazonS3Exception e)
+            catch (Exception ex)
             {
-                string message = e.Message;
+                textLine = string.Format("Error uploading zipped pdf reports to Amazon S3 for report folder, {0}.\r\n{1}.\r\n", reportFolder, ex);
+                update_Progress(textLine, configDirName, logOneIn);
             }
-            catch (Exception e)
+        }
+        private void UploadZippedReportToAmazonS3(XDocument xdoc, FileInfo file, RPParameters rpParameters, RPEmployer rpEmployer)
+        {
+            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
+            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+            string reportFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+            
+            bool live = Convert.ToBoolean(xdoc.Root.Element("Live").Value);
+            string bucketName = "payescape-share";
+            RegionEndpoint bucketRegion = RegionEndpoint.EUWest2;
+            IAmazonS3 s3Client = new AmazonS3Client("AKIA3DEWYEX3PA7OLPKL", "B+EePYKDa8Rxk5k2RRo5N0geKbyWjABrTBnOUnjL", RegionEndpoint.EUWest2);
+            string folderPath;
+            if (live)
             {
-                string message = e.Message;
+                folderPath = "PE-ReportsLive/";
             }
+            else
+            {
+                folderPath = "PE-ReportsTest/";
+            }
+            
+            PutObjectRequest request = new PutObjectRequest()
+            {
+                InputStream = file.OpenRead(),
+                BucketName = bucketName,
+                Key = folderPath + file.ToString()
+            };
+            PutObjectResponse response = s3Client.PutObject(request);
+            
+            //Create a folder in S3 - Don't really need this I don't think since I'll create all the reports in one folder. Each zipped file is a set of reports.
+            //PutObjectRequest request = new PutObjectRequest()
+            //{
+            //    BucketName=bucketName,
+            //    Key=folderPath
+            //};
+            //PutObjectResponse response = s3Client.PutObject(request);
+            //Copy a file into S3 bucket.
+            
+            //UploadFileAsync(s3Client, file, bucketName).Wait();
 
         }
+        //private static async Task UploadFileAsync(IAmazonS3 s3Client, FileInfo file, string bucketName)
+        //{
+        //    try
+        //    {
+        //        var fileTransferUtility =
+        //            new TransferUtility(s3Client);
+
+        //        // Option 1. Upload a file. The file name is used as the object key name.
+        //        await fileTransferUtility.UploadAsync(file.FullName, bucketName);
+        //        string message = "Upload complete.";
+
+                
+        //    }
+        //    catch (AmazonS3Exception e)
+        //    {
+        //        string message = e.Message;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        string message = e.Message;
+        //    }
+
+        //}
         private void EmailZippedReport(XDocument xdoc, FileInfo file, RPParameters rpParameters, RPEmployer rpEmployer)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
@@ -2712,7 +2766,9 @@ namespace PayRunIOClassLibrary
                             bool emailSent = false;
                             try
                             {
-
+                                textLine = string.Format("Attempting sending an email to, {0} from {1} with password:{2}, port:{3}, host:{4}.", contactInfo.EmailAddress,
+                                                          smtpEmailSettings.SMTPUsername, smtpEmailSettings.SMTPPassword, smtpEmailSettings.SMTPPort, smtpEmailSettings.SMTPHost);
+                                update_Progress(textLine, configDirName, logOneIn);
 
                                 smtpClient.Send(mailMessage);
                                 emailSent = true;
@@ -3668,13 +3724,40 @@ namespace PayRunIOClassLibrary
             ErPensionYtd=erPensionYtd;
         }
     }
+    public class RPAddress
+    {
+        public string Line1 { get; set; }
+        public string Line2 { get; set; }
+        public string Line3 { get; set; }
+        public string Line4 { get; set; }
+        public string Postcode { get; set; }
+        public string Country { get; set; }
+        
+        public RPAddress() { }
+        public RPAddress(string line1, string line2, string line3, string line4,
+                         string postcode, string country)
+        {
+            Line1 = line1;
+            Line2 = line2;
+            Line3 = line3;
+            Line4 = line4;
+            Postcode = postcode;
+            Country = country;
+        }
+    }
     public class RPPensionContribution
     {
         public string EeRef { get; set; }
+        public string Title { get; set; }
+        public string Forename { get; set; }
         public string Surname { get; set; } 
         public string Fullname { get; set; }
         public string SurnameForename { get; set; }
         public string ForenameSurname { get; set; }
+        public DateTime DOB { get; set; }
+        public RPAddress RPAddress { get; set; }
+        public string EmailAddress { get; set; }
+        public string Gender { get; set; }
         public string NINumber { get; set; }
         public string Freq { get; set; }
         public DateTime StartDate { get; set; }
@@ -3683,16 +3766,25 @@ namespace PayRunIOClassLibrary
         public RPPensionPeriod RPPensionPeriod { get; set; }
 
         public RPPensionContribution() { }
-        public RPPensionContribution(string eeRef, string surname, string fullname, string surnameForename, 
-                                     string forenameSurname, string niNumber, string freq,
+        public RPPensionContribution(string eeRef, string title, string forename,
+                                     string surname, string fullname, string surnameForename, 
+                                     string forenameSurname, DateTime dob, RPAddress rpAddress,
+                                     string emailAddress, string gender,
+                                     string niNumber, string freq,
                                      DateTime startDate, DateTime endDate,DateTime payRunDate,
                                      RPPensionPeriod rpPensionPeriod)
         {
             EeRef = eeRef;
+            Title = title;
+            Forename = forename;
             Surname = surname;
             Fullname = fullname;
             SurnameForename = surnameForename;
             ForenameSurname = forenameSurname;
+            DOB = dob;
+            RPAddress = rpAddress;
+            EmailAddress = emailAddress;
+            Gender = gender;
             NINumber = niNumber;
             Freq = freq;
             StartDate = startDate;
