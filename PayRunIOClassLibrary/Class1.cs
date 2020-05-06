@@ -2618,14 +2618,23 @@ namespace PayRunIOClassLibrary
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
             string reportFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Reports";
+            string awsBucketName = xdoc.Root.Element("AwsBucketName").Value;
             string awsAccessKey = xdoc.Root.Element("AwsAccessKey").Value;
             string awsAccessSecret = xdoc.Root.Element("AwsAccessSecret").Value;
+            bool awsInDevelopment = Convert.ToBoolean(xdoc.Root.Element("InDevelopment").Value);
 
             bool live = Convert.ToBoolean(xdoc.Root.Element("Live").Value);
-            string bucketName = "payescape-share";
+            string bucketName = awsBucketName;
             RegionEndpoint bucketRegion = RegionEndpoint.EUWest2;
-            //IAmazonS3 s3Client = new AmazonS3Client("AKIA3DEWYEX3PA7OLPKL", "B+EePYKDa8Rxk5k2RRo5N0geKbyWjABrTBnOUnjL", RegionEndpoint.EUWest2);
-            IAmazonS3 s3Client = new AmazonS3Client(awsAccessKey,awsAccessSecret, RegionEndpoint.EUWest2);
+            IAmazonS3 s3Client;
+            if(awsInDevelopment)
+            {
+                s3Client = new AmazonS3Client(awsAccessKey, awsAccessSecret, RegionEndpoint.EUWest2);
+            }
+            else
+            {
+                s3Client = new AmazonS3Client(RegionEndpoint.EUWest2);
+            }
             string folderPath;
             if (live)
             {
