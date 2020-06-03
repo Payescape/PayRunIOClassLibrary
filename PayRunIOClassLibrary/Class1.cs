@@ -897,7 +897,11 @@ namespace PayRunIOClassLibrary
                             rpPayCode.PayCode = GetElementByTagFromXml(payCode, "Code");
                             rpPayCode.Description = GetElementByTagFromXml(payCode, "Description");
                             bool isPayCode = GetBooleanElementByTagFromXml(payCode, "IsPayCode");
-                            if (isPayCode)
+                            rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(payCode, "AccountsAmount");
+                            rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(payCode, "PayeAmount");
+                            rpPayCode.AccountsUnits = GetDecimalElementByTagFromXml(payCode, "AccountsUnits");
+                            rpPayCode.PayeUnits = GetDecimalElementByTagFromXml(payCode, "PayeUnits");
+                            if (rpPayCode.PayeAmount > 0)
                             {
                                 rpPayCode.Type = "E";
                             }
@@ -906,10 +910,6 @@ namespace PayRunIOClassLibrary
                                 rpPayCode.Type = "D";
                             }
 
-                            rpPayCode.AccountsAmount = GetDecimalElementByTagFromXml(payCode, "AccountsAmount");
-                            rpPayCode.PayeAmount = GetDecimalElementByTagFromXml(payCode, "PayeAmount");
-                            rpPayCode.AccountsUnits = GetDecimalElementByTagFromXml(payCode, "AccountsUnits");
-                            rpPayCode.PayeUnits = GetDecimalElementByTagFromXml(payCode, "PayeUnits");
 
                             //
                             //Check if any of the values are not zero. If so write the first employee record
@@ -1017,7 +1017,7 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[8] = rpEmployeeYtd.GrossedUp.ToString();
                     payYTDDetails[9] = rpEmployeeYtd.GrossedUpTax.ToString();
                     payYTDDetails[10] = rpEmployeeYtd.NetPayYTD.ToString();
-                    payYTDDetails[11] = rpEmployeeYtd.GrossPayYTD.ToString();
+                    payYTDDetails[11] = (rpEmployeeYtd.TaxablePayPrevEmployment + rpEmployeeYtd.TaxablePayThisEmployment).ToString(); //rpEmployeeYtd.GrossPayYTD.ToString();
                     payYTDDetails[12] = rpEmployeeYtd.BenefitInKindYTD.ToString();
                     payYTDDetails[13] = rpEmployeeYtd.SuperannuationYTD.ToString();
                     payYTDDetails[14] = rpEmployeeYtd.HolidayPayYTD.ToString();
@@ -1252,7 +1252,7 @@ namespace PayRunIOClassLibrary
                         payHistoryDetails[2] = rpEmployeePeriod.PeriodStartDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                         payHistoryDetails[3] = rpEmployeePeriod.PeriodEndDate.ToString("dd/MM/yy", CultureInfo.InvariantCulture);
                         payHistoryDetails[4] = rpEmployeePeriod.PayrollYear.ToString();
-                        payHistoryDetails[5] = rpEmployeePeriod.Gross.ToString();
+                        payHistoryDetails[5] = rpEmployeePeriod.TaxablePayTP.ToString(); //rpEmployeePeriod.Gross.ToString();
                         payHistoryDetails[6] = rpEmployeePeriod.NetPayTP.ToString();
                         payHistoryDetails[7] = rpEmployeePeriod.DayHours.ToString();
                         if (rpEmployeePeriod.StudentLoanStartDate != null)
@@ -1273,7 +1273,7 @@ namespace PayRunIOClassLibrary
                         }
                         //decimal studentLoan = rpEmployeePeriod.StudentLoan * -1;
                         //payHistoryDetails[10] = studentLoan.ToString();
-                        payHistoryDetails[10] = (rpEmployeePeriod.StudentLoan * -1).ToString();
+                        payHistoryDetails[10] = (rpEmployeePeriod.StudentLoanYTD).ToString();
                         payHistoryDetails[11] = rpEmployeePeriod.NILetter;
                         payHistoryDetails[12] = rpEmployeePeriod.CalculationBasis;
                         payHistoryDetails[13] = rpEmployeePeriod.Total.ToString();
@@ -1443,13 +1443,16 @@ namespace PayRunIOClassLibrary
                             payCodeDetails[1] = rpAddition.Description;
                             payCodeDetails[2] = rpAddition.Code.TrimStart(' ');
                             payCodeDetails[3] = "E"; //Earnings
-                            payCodeDetails[4] = rpAddition.Rate.ToString();
+                            if (rpAddition.Rate == 0)
+                            {
+                                payCodeDetails[4] = rpAddition.AmountTP.ToString();  // Make Rate equal to amount if rate is zero.
+                            }
+                            else
+                            {
+                                payCodeDetails[4] = rpAddition.Rate.ToString();
+                            }
                             payCodeDetails[5] = rpAddition.Units.ToString();
                             payCodeDetails[6] = rpAddition.AmountTP.ToString();
-                            if (payCodeDetails[4] == "0.00")
-                            {
-                                payCodeDetails[4] = payCodeDetails[6];  // Make Rate equal to amount if rate is zero.
-                            }
                             payCodeDetails[7] = rpAddition.AccountsYearBalance.ToString();
                             payCodeDetails[8] = rpAddition.AmountYTD.ToString();
                             payCodeDetails[9] = rpAddition.AccountsYearUnits.ToString();
@@ -1498,13 +1501,17 @@ namespace PayRunIOClassLibrary
                             }
                             
                             payCodeDetails[3] = "D"; //Earnings
-                            payCodeDetails[4] = rpDeduction.Rate.ToString();
+                            if (rpDeduction.Rate == 0)
+                            {
+                                payCodeDetails[4] = rpDeduction.AmountTP.ToString();  // Make Rate equal to amount if rate is zero.
+                            }
+                            else
+                            {
+                                payCodeDetails[4] = rpDeduction.Rate.ToString();
+                            }
+                            
                             payCodeDetails[5] = rpDeduction.Units.ToString();
                             payCodeDetails[6] = rpDeduction.AmountTP.ToString();
-                            if (payCodeDetails[4] == "0.00")
-                            {
-                                payCodeDetails[4] = payCodeDetails[6];  // Make Rate equal to amount if rate is zero.
-                            }
                             payCodeDetails[7] = rpDeduction.AccountsYearBalance.ToString();
                             payCodeDetails[8] = rpDeduction.AmountYTD.ToString();
                             payCodeDetails[9] = rpDeduction.AccountsYearUnits.ToString();
@@ -1516,6 +1523,7 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = payHistoryDetails[29];  // Tax Code
                                     payCodeDetails[2] = payHistoryDetails[29];  // Tax Code
+                                    payCodeDetails[4] = "0";                    // Rate
                                     payCodeDetails[7] = "0";
                                     payCodeDetails[8] = "0";
                                     payCodeDetails[3] = "T";                    // Tax    
@@ -1524,6 +1532,7 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "NIEeeLERtoUER-A";      // Ee NI
                                     payCodeDetails[2] = "NIEeeLERtoUER";        // Ee NI
+                                    payCodeDetails[4] = "0";                    // Rate
                                     payCodeDetails[7] = "0";
                                     payCodeDetails[8] = "0";
                                     payCodeDetails[3] = "T";                    // Tax    
@@ -1536,6 +1545,7 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "PenPreTaxEe";         // Ee Pension
                                     payCodeDetails[2] = "PenPreTaxEe";         // Ee Pension
+                                    payCodeDetails[4] = "0";                   // Rate 
                                     payCodeDetails[6] = (penPreAmount + rpDeduction.AmountTP).ToString();
                                     payCodeDetails[7] = "0";
                                     payCodeDetails[8] = "0";
@@ -1552,6 +1562,7 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[0] = "0";
                                     payCodeDetails[1] = "PenPostTaxEe";         // Ee Pension
                                     payCodeDetails[2] = "PenPostTaxEe";         // Ee Pension
+                                    payCodeDetails[4] = "0";                    // Rate
                                     payCodeDetails[6] = (penPostAmount + rpDeduction.AmountTP).ToString();
                                     payCodeDetails[7] = "0";
                                     payCodeDetails[8] = "0";
@@ -3338,6 +3349,7 @@ namespace PayRunIOClassLibrary
         public DateTime? StudentLoanStartDate { get; set; }
         public DateTime? StudentLoanEndDate { get; set; }
         public decimal StudentLoan { get; set; }
+        public decimal StudentLoanYTD { get; set; }
         public string NILetter { get; set; }
         public string CalculationBasis { get; set; }
         public decimal Total { get; set; }
@@ -3401,7 +3413,7 @@ namespace PayRunIOClassLibrary
                           string country, string sortCode, string bankAccNo, DateTime dateOfBirth, DateTime startingDate, string gender, string buildingSocRef,
                           string niNumber, string paymentMethod, DateTime payRunDate, DateTime periodStartDate, DateTime periodEndDate, int payrollYear,
                           decimal gross, decimal netPayTP, decimal dayHours, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
-                          decimal studentLoan, string niLetter, string calculationBasis, decimal total,
+                          decimal studentLoan, decimal studentLoanYTD, string niLetter, string calculationBasis, decimal total,
                           decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET, decimal earningsToUST, decimal earningsToAUST,
                           decimal earningsToUEL, decimal earningsAboveUEL, decimal eeContributionsPt1, decimal eeContributionsPt2,
                           decimal erNICYTD, decimal eeRebate, decimal erRebate, decimal eeReduction, DateTime leavingDate, bool leaver,
@@ -3450,6 +3462,7 @@ namespace PayRunIOClassLibrary
             StudentLoanStartDate = studentLoanStartDate;
             StudentLoanEndDate = studentLoanEndDate;
             StudentLoan = studentLoan;
+            StudentLoanYTD = studentLoanYTD;
             NILetter = niLetter;
             CalculationBasis = calculationBasis;
             Total = total;
@@ -3676,6 +3689,7 @@ namespace PayRunIOClassLibrary
         public string AEWorkerGroup { get; set; }
         public string AEStatus { get; set; }
         public decimal TotalPayTaxPeriod { get; set; }
+        public int StatePensionAge { get; set; }
         public RPPensionPeriod() { }
         public RPPensionPeriod(int key, string code, string schemeName, DateTime? startJoinDate, bool isJoiner,
                                string providerEmployerReference,
@@ -3685,7 +3699,7 @@ namespace PayRunIOClassLibrary
                                decimal pensionablePayPayRunDate, decimal eeContributionPercent,
                                decimal erContributionPercent,
                                DateTime? aeAssessmentDate, string aeWorkerGroup, string aeStatus,
-                               decimal totalPayTaxPeriod)
+                               decimal totalPayTaxPeriod, int statePensionAge)
         {
             Key = key;
             Code = code;
@@ -3708,6 +3722,7 @@ namespace PayRunIOClassLibrary
             AEWorkerGroup = aeWorkerGroup;
             AEStatus = aeStatus;
             TotalPayTaxPeriod = totalPayTaxPeriod;
+            StatePensionAge = statePensionAge;
         }
     }
     
