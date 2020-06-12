@@ -557,6 +557,14 @@ namespace PayRunIOClassLibrary
 
             return new Tuple<List<RPEmployeeYtd>, RPParameters>(rpEmployeeYtdList, rpParameters);
         }
+        public void ArchiveRTIOutputs(string directory, FileInfo file)
+        {
+            //Move RTI file to PE-ArchivedRTI from Outputs
+            string archiveDirName = directory.Replace("Outputs", "PE-ArchivedRTI");
+            Directory.CreateDirectory(directory.Replace(directory, archiveDirName));
+            string destinationFilename = file.FullName.Replace("Outputs", "PE-ArchivedRTI");
+            File.Move(file.FullName, destinationFilename);
+        }
         private List<RPEmployeeYtd> PrepareYTDCSV(XDocument xdoc, XmlDocument xmlReport)
         {
             string outgoingFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Outgoing";
@@ -1165,14 +1173,17 @@ namespace PayRunIOClassLibrary
                 case "Monthly":
                     batch = "M";
                     break;
-                case "TwoWeekly":
-                    batch = "M";
+                case "Fortnightly":
+                    batch = "F";
                     break;
                 case "FourWeekly":
-                    batch = "M";
+                    batch = "FW";
+                    break;
+                case "Quarterly":
+                    batch = "Q";
                     break;
                 case "Yearly":
-                    batch = "M";
+                    batch = "A";
                     break;
                 default:
                     batch = "W";
@@ -1640,14 +1651,17 @@ namespace PayRunIOClassLibrary
                 case "Monthly":
                     batch = "M";
                     break;
-                case "TwoWeekly":
-                    batch = "M";
+                case "Fortnightly":
+                    batch = "F";
                     break;
                 case "FourWeekly":
-                    batch = "M";
+                    batch = "FW";
+                    break;
+                case "Quarterly":
+                    batch = "Q";
                     break;
                 case "Yearly":
-                    batch = "M";
+                    batch = "Y";
                     break;
                 default:
                     batch = "W";
@@ -2096,6 +2110,9 @@ namespace PayRunIOClassLibrary
                                 break;
                             case ("Four Weekly"):
                                 frequency = "FW";
+                                break;
+                            case ("Quarterly"):
+                                frequency = "Q";
                                 break;
                             case ("Annual"):
                                 frequency = "A";
