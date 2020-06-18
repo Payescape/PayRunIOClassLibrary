@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.IO;
 using System.Data.SqlClient;
@@ -13,11 +11,9 @@ using Microsoft.VisualBasic.FileIO;
 using System.Globalization;
 using System.Net.Mail;
 using PayRunIO.CSharp.SDK;
-using PicoXLSX;
 using DevExpress.XtraReports.UI;
 using Amazon;
 using Amazon.S3;
-using Amazon.S3.Transfer;
 using Amazon.S3.Model;
 
 namespace PayRunIOClassLibrary
@@ -645,6 +641,7 @@ namespace PayRunIOClassLibrary
                     rpEmployeeYtd.AeoYTD = GetDecimalElementByTagFromXml(employee, "AeoYTD");
                     rpEmployeeYtd.StudentLoanStartDate = GetDateElementByTagFromXml(employee, "StudentLoanStartDate");
                     rpEmployeeYtd.StudentLoanEndDate = GetDateElementByTagFromXml(employee, "StudentLoanEndDate");
+                    rpEmployeeYtd.StudentLoanPlanType = GetElementByTagFromXml(employee, "StudentLoanPlanType");
                     rpEmployeeYtd.StudentLoanDeductionsYTD = GetDecimalElementByTagFromXml(employee, "StudentLoanDeductionsYTD");
                     rpEmployeeYtd.PostgraduateLoanStartDate = GetDateElementByTagFromXml(employee, "PostgraduateLoanStartDate");
                     rpEmployeeYtd.PostgraduateLoanEndDate = GetDateElementByTagFromXml(employee, "PostgraduateLoanEndDate");
@@ -1084,8 +1081,24 @@ namespace PayRunIOClassLibrary
                     payYTDDetails[38] = rpEmployeeYtd.WeekNumber.ToString();
                     payYTDDetails[39] = rpEmployeeYtd.MonthNumber.ToString();
                     payYTDDetails[40] = rpEmployeeYtd.NicYtd.NiableYtd.ToString();
-                    payYTDDetails[41] = rpEmployeeYtd.StudentLoanPlanType; //Student Loan Plan Type
-
+                    switch (rpEmployeeYtd.StudentLoanPlanType)
+                    {
+                        case "Plan1":
+                            payYTDDetails[41] = "01";
+                            break;
+                        case "Plan2":
+                            payYTDDetails[41] = "02";
+                            break;
+                        case "Plan3":
+                            payYTDDetails[41] = "03";
+                            break;
+                        case "Plan4":
+                            payYTDDetails[41] = "04";
+                            break;
+                        default:
+                            payYTDDetails[41] = "";
+                            break;
+                    }
                     if (rpEmployeeYtd.PostgraduateLoanStartDate != null)
                     {
                         payYTDDetails[42] = Convert.ToDateTime(rpEmployeeYtd.PostgraduateLoanStartDate).ToString("dd/MM/yy", CultureInfo.InvariantCulture); //Postgraduate Loan Start Date
@@ -1500,18 +1513,9 @@ namespace PayRunIOClassLibrary
                             string[] payCodeDetails = new string[12];
                             payCodeDetails = new string[12];
                             payCodeDetails[0] = "";
-                            if(rpDeduction.Code == "SLOAN")
-                            {
-                                payCodeDetails[1] = "StudentLoan";
-                                payCodeDetails[2] = "StudentLoan";
-                            }
-                            else
-                            {
-                                payCodeDetails[1] = rpDeduction.Description;
-                                payCodeDetails[2] = rpDeduction.Code.TrimStart(' ');
-                            }
-                            
-                            payCodeDetails[3] = "D"; //Earnings
+                            payCodeDetails[1] = rpDeduction.Description;
+                            payCodeDetails[2] = rpDeduction.Code.TrimStart(' ');
+                            payCodeDetails[3] = "D"; //Deductions
                             if (rpDeduction.Rate == 0)
                             {
                                 payCodeDetails[4] = rpDeduction.AmountTP.ToString();  // Make Rate equal to amount if rate is zero.
@@ -1581,6 +1585,11 @@ namespace PayRunIOClassLibrary
                                     payCodeDetails[10] = "0";
                                     payCodeDetails[11] = "0";
                                     wait = false;
+                                    break;
+                                case "SLOAN":
+                                    payCodeDetails[1] = "StudentLoan";
+                                    payCodeDetails[2] = "StudentLoan";
+                                    payCodeDetails[4] = "0";                    // Rate
                                     break;
                                 default:
                                     payCodeDetails[0] = "";
