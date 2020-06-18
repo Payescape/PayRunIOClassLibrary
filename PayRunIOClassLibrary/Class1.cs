@@ -24,7 +24,7 @@ namespace PayRunIOClassLibrary
         public PayRunIOWebGlobeClass() { }
 
         //Testing making a change to the class 
-        
+        // Contacts to move to Payrun.io meta data:https://payrun.atlassian.net/browse/PEINT-330
         public void UpdateContactDetails(XDocument xdoc)
         {
             string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
@@ -512,10 +512,10 @@ namespace PayRunIOClassLibrary
         public RPEmployer GetRPEmployer(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
         {
             RPEmployer rpEmployer = new RPEmployer();
-            string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
-            string dataBase = xdoc.Root.Element("Database").Value;
-            string userID = xdoc.Root.Element("Username").Value;
-            string password = xdoc.Root.Element("Password").Value;
+            string dataSource = xdoc?.Root?.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
+            string dataBase = xdoc?.Root?.Element("Database").Value;
+            string userID = xdoc?.Root?.Element("Username").Value;
+            string password = xdoc?.Root?.Element("Password").Value;
             string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
             
             foreach (XmlElement employer in xmlReport.GetElementsByTagName("Employer"))
@@ -525,16 +525,27 @@ namespace PayRunIOClassLibrary
                 rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
                
             }
-            //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
-            try
+
+            if (xdoc?.Root != null && !string.IsNullOrEmpty(dataSource))
             {
-                DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
-                rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
-                rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
-                rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
+                //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
+                try
+                {
+                    DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
+                    rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
+                    rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
+                    rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
+                }
+                catch
+                {
+                    rpEmployer.BankFileCode = "000";
+                    rpEmployer.PensionReportFileType = "Unknown";
+                }
             }
-            catch
+            else
             {
+                // This will become part of the translation map.
+                // https://payrun.atlassian.net/browse/PEINT-329
                 rpEmployer.BankFileCode = "000";
                 rpEmployer.PensionReportFileType = "Unknown";
             }
