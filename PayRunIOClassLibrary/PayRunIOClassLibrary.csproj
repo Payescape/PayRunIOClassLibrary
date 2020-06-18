@@ -162,6 +162,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\PayRunIO.CSharp.SDK.20.21.3.9\lib\net452\PayRunIO.CSharp.SDK.dll</HintPath>
     </Reference>
+    <Reference Include="PayRunIO.OAuth1, Version=19.20.3.226, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\PayRunIO.OAuth1.20.21.3.9\lib\net452\PayRunIO.OAuth1.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -171,6 +175,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WinSCPnet">
+      <HintPath>..\..\..\..\JBSoft\C## Projects\Visual Studio 2013\WinSCP\WinSCP.V5.17.6\WinSCPnet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
