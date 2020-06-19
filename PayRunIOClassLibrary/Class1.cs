@@ -781,7 +781,7 @@ namespace PayRunIOClassLibrary
                             case 2:
                                 rpPayCode.PayCode = "NIEeeLERtoUER";
                                 rpPayCode.Description = "NIEeeLERtoUER-A";
-                                rpPayCode.Type = "E";
+                                rpPayCode.Type = "T";
                                 rpPayCode.AccountsAmount = rpEmployeeYtd.EeNiLERtoUERAccountsAmount;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsAmount");
                                 rpPayCode.PayeAmount = rpEmployeeYtd.EeNiLERtoUERPayeAmount;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeAmount");
                                 rpPayCode.AccountsUnits = rpEmployeeYtd.EeNiLERtoUERAccountsUnits;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsUnit");
