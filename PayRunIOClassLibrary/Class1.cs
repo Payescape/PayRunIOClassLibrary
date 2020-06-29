@@ -21,6 +21,7 @@ namespace PayRunIOClassLibrary
     public class PayRunIOWebGlobeClass
     {
         //Changed by Jim Borland on 29/1/2020 at 10:20 an a bit more.
+        //Change to force a commit.
         public PayRunIOWebGlobeClass() { }
 
         //Testing making a change to the class 
