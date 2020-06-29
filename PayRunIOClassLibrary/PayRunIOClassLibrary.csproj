@@ -105,15 +105,12 @@
     <Reference Include="DevExpress.XtraCharts.v20.1.UI, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.Win.Charts.20.1.4\lib\net452\DevExpress.XtraCharts.v20.1.UI.dll</HintPath>
     </Reference>
-<<<<<<< HEAD
     <Reference Include="DevExpress.XtraReports.v20.1.Extensions, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DotNetZip, Version=1.13.4.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+    <Reference Include="DotNetZip, Version=1.13.4.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL" />
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\PayRunIOProcessReports\packages\DotNetZip.1.13.8\lib\net40\DotNetZip.dll</HintPath>
-=======
     <Reference Include="DevExpress.XtraCharts.v20.1.Wizard, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.Win.Charts.20.1.4\lib\net452\DevExpress.XtraCharts.v20.1.Wizard.dll</HintPath>
->>>>>>> Rel1.0.6/PullTimsRequestAndFixReferences
     </Reference>
     <Reference Include="DevExpress.XtraDiagram.v20.1, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.Win.Diagram.20.1.4\lib\net452\DevExpress.XtraDiagram.v20.1.dll</HintPath>
