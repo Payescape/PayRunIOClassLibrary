@@ -461,13 +461,6 @@ namespace PayRunIOClassLibrary
             
             return xmlReport;
         }
-
-        public void ProcessYtdReport(XDocument xdoc, XmlDocument xmlYTDReport, RPParameters rpParameters)
-        {
-            List<RPEmployeeYtd> rpEmployeeYtdList = PrepareYTDCSV(xdoc, xmlYTDReport);
-            CreateYTDCSV(xdoc, rpEmployeeYtdList, rpParameters);
-
-        }
         private int GetTaxMonth(DateTime thisDate)
         {
             int taxMonth = thisDate.Month - 3;
@@ -507,6 +500,7 @@ namespace PayRunIOClassLibrary
                 rpParameters.TaxPeriod = GetIntElementByTagFromXml(parameter, "TaxPeriod");
                 rpParameters.PeriodNo = GetIntElementByTagFromXml(parameter, "PeriodNumber");
                 rpParameters.PaySchedule = GetElementByTagFromXml(parameter, "PaySchedule");
+                rpParameters.PayRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(parameter, "PaymentDate"));
             }
             return rpParameters;
         }
@@ -784,7 +778,7 @@ namespace PayRunIOClassLibrary
                             case 2:
                                 rpPayCode.PayCode = "NIEeeLERtoUER";
                                 rpPayCode.Description = "NIEeeLERtoUER-A";
-                                rpPayCode.Type = "E";
+                                rpPayCode.Type = "T";
                                 rpPayCode.AccountsAmount = rpEmployeeYtd.EeNiLERtoUERAccountsAmount;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsAmount");
                                 rpPayCode.PayeAmount = rpEmployeeYtd.EeNiLERtoUERPayeAmount;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERPayeAmount");
                                 rpPayCode.AccountsUnits = rpEmployeeYtd.EeNiLERtoUERAccountsUnits;//GetDecimalElementByTagFromXml(employee, "EeNiLERtoUERAccountsUnit");
@@ -983,7 +977,8 @@ namespace PayRunIOClassLibrary
             string coNo = rpParameters.ErRef;
             //Create csv version and write it to the same folder.
             //string csvFileName = "V:\\Payescape\\PayRunIO\\WG\\" + coNo + "_YearToDates_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
-            string csvFileName = outgoingFolder + "\\" + coNo + "\\" + coNo + "_YearToDates_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
+            string csvFileName = outgoingFolder + "\\" + coNo + "_" + rpParameters.PayRunDate.ToString("yyyyMMdd") + "\\" + coNo + "_YearToDates_" + 
+                                                  rpParameters.PayRunDate.ToString("yyyyMMdd") + DateTime.Now.ToString("HHmmssfff") + ".csv"; //DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
             bool writeHeader = true;
             using (StreamWriter sw = new StreamWriter(csvFileName))
             {
@@ -1250,10 +1245,15 @@ namespace PayRunIOClassLibrary
             string coNo = rpParameters.ErRef;
             //Write the whole xml file to the folder.
             //string xmlFileName = "V:\\Payescape\\PayRunIO\\WG\\" + coNo + "_PayHistory_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".xml";
-            string dirName = outgoingFolder + "\\" + coNo + "\\";
+            string dirName = outgoingFolder + "\\" + coNo + "_" + rpParameters.PayRunDate.ToString("yyyyMMdd") + "\\";
             Directory.CreateDirectory(dirName);
-            //Create csv version and write it to the same folder.
-            string csvFileName = outgoingFolder + "\\" + coNo + "\\" + coNo + "_PayHistory_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
+            //Create csv version and write it to the same folder. 
+            //Use the PayDate for the yyyyMMdd part of the name, then were going compare is to today's yyyyMMdd and only transfer it up to
+            //the SFTP server if it's 1 day or less before today's date.
+            string payDate = rpParameters.PayRunDate.ToString("yyyyMMdd");
+            string nowTime = DateTime.Now.ToString("HHmmssfff");
+            string csvFileName = outgoingFolder + "\\" + coNo + "_" + rpParameters.PayRunDate.ToString("yyyyMMdd") + "\\" + coNo + "_PayHistory_" + 
+                                                  rpParameters.PayRunDate.ToString("yyyyMMdd") + DateTime.Now.ToString("HHmmssfff") + ".csv";//DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
             bool writeHeader = true;
             using (StreamWriter sw = new StreamWriter(csvFileName))
             {
@@ -1431,7 +1431,7 @@ namespace PayRunIOClassLibrary
                                 case 1:
                                     payCodeDetails[1] = "PenEr";
                                     payCodeDetails[2] = "PenEr";
-                                    payCodeDetails[3] = "M";
+                                    payCodeDetails[3] = "D";
                                     payCodeDetails[6] = erPensionTp.ToString();
                                     break;
                                 
