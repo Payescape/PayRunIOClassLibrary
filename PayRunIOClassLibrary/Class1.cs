@@ -349,7 +349,7 @@ namespace PayRunIOClassLibrary
         }
         
         
-        public XmlDocument RunReport(string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
+        public XmlDocument RunReport(XDocument xdoc, string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
                                  string prm4, string val4, string prm5, string val5, string prm6, string val6)
         {
             string url = null;
@@ -392,7 +392,7 @@ namespace PayRunIOClassLibrary
             try
             {
                 //Mark this is the full url = "https://api.test.payrun.io/Report/PayescapeEmployeePeriod/run?EmployerKey=1104&TaxYear=2018&AccPeriodStart=2018/01/01&AccPeriodEnd=2019/03/08&TaxPeriod=49&PayScheduleKey=Weekly"
-                var apiHelper = ApiHelper();
+                var apiHelper = ApiHelper(xdoc);
                 //string testurl = "EmployerKey=1958&TaxYear=2019&AccPeriodStart=2019-04-06&AccPeriodEnd=2020-04-05&TaxPeriod=27&PayScheduleKey=Weekly";
                 //xmlReport = apiHelper.GetRawXml("/Report/" + rptRef + "/run?" + testurl);
                 xmlReport = apiHelper.GetRawXml("/Report/" + rptRef + "/run?" + url);
@@ -404,11 +404,11 @@ namespace PayRunIOClassLibrary
             }
             return xmlReport;
         }
-        private RestApiHelper ApiHelper()
+        private RestApiHelper ApiHelper(XDocument xdoc)
         {
-            string consumerKey = "9MaHMtmTUC6iMgymPl94g";                             //Original developer key : "m5lsJMpBnkaJw086zwDw"     "1UH6t3ikiWbdxTNT2Dg"
-            string consumerSecret = "44sem3aVCUCxjaFmnolPQhPii7rQQwEyqgTnSJB655Q";   //Original developer secret : "GHM6x3xLEWujpLC5sGXKQ3r2j14RGI0eoLbab8w415Q"     "jKUX3lrQUe4KhEiox6IZw8CXnWUdAkyTl1kthR8ayQ"
-            string url = "https://api.test.payrun.io";
+            string consumerKey = xdoc.Root.Element("PayRunConsumerKey").Value;
+            string consumerSecret = xdoc.Root.Element("PayRunConsumerSecret").Value;
+            string url = xdoc.Root.Element("PayRunUrl").Value;
             RestApiHelper apiHelper = new RestApiHelper(
                     new PayRunIO.OAuth1.OAuthSignatureGenerator(),
                     consumerKey,
@@ -451,7 +451,7 @@ namespace PayRunIOClassLibrary
             }
 
         }
-        public XmlDocument GetP32Report(RPParameters rpParameters)
+        public XmlDocument GetP32Report(XDocument xdoc, RPParameters rpParameters)
         {
             //Run the next period report to get the next pay period.
             string rptRef = "P32";
@@ -459,7 +459,7 @@ namespace PayRunIOClassLibrary
             string parameter2 = "TaxYear";
             
             //Get the P32Sum report
-            XmlDocument xmlReport = RunReport(rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.TaxYear.ToString(),
+            XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.TaxYear.ToString(),
                                               null, null, null, null, null, null, null, null);
 
             
@@ -524,27 +524,16 @@ namespace PayRunIOClassLibrary
                 rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
                
             }
-
-            if (xdoc?.Root != null && !string.IsNullOrEmpty(dataSource))
+            //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
+            try
             {
-                //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
-                try
-                {
-                    DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
-                    rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
-                    rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
-                    rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
-                }
-                catch
-                {
-                    rpEmployer.BankFileCode = "000";
-                    rpEmployer.PensionReportFileType = "Unknown";
-                }
+                DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
+                rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
+                rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
+                rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
             }
-            else
+            catch
             {
-                // This will become part of the translation map.
-                // https://payrun.atlassian.net/browse/PEINT-329
                 rpEmployer.BankFileCode = "000";
                 rpEmployer.PensionReportFileType = "Unknown";
             }
@@ -2011,7 +2000,7 @@ namespace PayRunIOClassLibrary
             string zeroContributions = "";
             List<RPPensionContribution> joinersThisPeriod = new List<RPPensionContribution>();
             string header = 'H' + comma + providerEmployerReference + comma +
-                                            "CS" + comma + endDate + comma + "My Source" +
+                                            "CS" + comma + endDate + comma + rpEmployer.NESTPensionText +
                                             comma + blank + comma + frequency + comma + blank +
                                             comma + blank + comma + startDate;
 
@@ -2980,6 +2969,7 @@ namespace PayRunIOClassLibrary
                 }
                 
                 DateTime runDate = rpParameters.PayRunDate;
+                runDate = runDate.AddDays(-5);
                 runDate = runDate.AddMonths(1);
                 int day = runDate.Day;
                 day = 20 - day;
@@ -3366,12 +3356,14 @@ namespace PayRunIOClassLibrary
         public string PensionReportFileType { get; set; }
         public string PensionReportAEWorkersGroup { get; set; }
         public bool P32Required { get; set; }
+        public string NESTPensionText { get; set; }
+        public int? HREscapeCompanyNo { get; set; }
 
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
                            string bankFileCode,
                            string pensionReportFileType, string pensionReportAEWorkersGroup,
-                           bool p32Required)
+                           bool p32Required, string nestPensionText, int? hrEscapeCompanyNo)
         {
             Name = name;
             PayeRef = payeRef;
@@ -3380,6 +3372,8 @@ namespace PayRunIOClassLibrary
             PensionReportFileType = pensionReportFileType;
             PensionReportAEWorkersGroup = pensionReportAEWorkersGroup; ;
             P32Required = p32Required;
+            NESTPensionText = nestPensionText;
+            HREscapeCompanyNo = hrEscapeCompanyNo;
         }
     }
 
