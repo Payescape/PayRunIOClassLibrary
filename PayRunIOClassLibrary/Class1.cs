@@ -524,20 +524,29 @@ namespace PayRunIOClassLibrary
                 rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
                
             }
-            //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
-            try
+
+            if (xdoc != null && xdoc.Root != null)
             {
-                DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
-                rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
-                rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
-                rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
+                //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
+                try
+                {
+                    DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
+                    rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
+                    rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
+                    rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
+                }
+                catch
+                {
+                    rpEmployer.BankFileCode = "000";
+                    rpEmployer.PensionReportFileType = "Unknown";
+                }
             }
-            catch
+            else
             {
                 rpEmployer.BankFileCode = "000";
                 rpEmployer.PensionReportFileType = "Unknown";
             }
-
+  
             return rpEmployer;
         }
         public Tuple<List<RPEmployeeYtd>, RPParameters> PrepareYTDReport(XDocument xdoc, FileInfo file)
