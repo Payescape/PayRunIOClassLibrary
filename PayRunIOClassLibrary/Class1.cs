@@ -522,6 +522,8 @@ namespace PayRunIOClassLibrary
                 rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
                 rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
                 rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
+                rpEmployer.NESTPensionText = drCompanyReportCodes.ItemArray[3].ToString();
+                rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[4]);
             }
             catch
             {
