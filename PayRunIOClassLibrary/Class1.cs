@@ -529,6 +529,8 @@ namespace PayRunIOClassLibrary
             {
                 rpEmployer.BankFileCode = "000";
                 rpEmployer.PensionReportFileType = "Unknown";
+                rpEmployer.NESTPensionText = "My Source";
+                rpEmployer.HREscapeCompanyNo = null;
             }
 
             return rpEmployer;
