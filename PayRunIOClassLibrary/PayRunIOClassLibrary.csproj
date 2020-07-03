@@ -163,13 +163,20 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\PayRunIOProcessReports\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.CSharp.SDK, Version=19.20.3.226, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\PayRunIO.CSharp.SDK.20.21.3.9\lib\net452\PayRunIO.CSharp.SDK.dll</HintPath>
+    <Reference Include="PayRunIO.Core.Enums, Version=20.21.3.15, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Payescape.PayRunIO.ReportTransforms\packages\PayRunIO.Core.Enums.20.21.3.15\lib\net452\PayRunIO.Core.Enums.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.OAuth1, Version=19.20.3.226, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\PayRunIO.OAuth1.20.21.3.9\lib\net452\PayRunIO.OAuth1.dll</HintPath>
+    <Reference Include="PayRunIO.CSharp.SDK, Version=20.21.3.15, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Payescape.PayRunIO.ReportTransforms\packages\PayRunIO.CSharp.SDK.20.21.3.15\lib\net452\PayRunIO.CSharp.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="PayRunIO.Models, Version=20.21.3.15, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Payescape.PayRunIO.ReportTransforms\packages\PayRunIO.Models.20.21.3.15\lib\net452\PayRunIO.Models.dll</HintPath>
+    </Reference>
+    <Reference Include="PayRunIO.OAuth1, Version=20.21.3.15, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Payescape.PayRunIO.ReportTransforms\packages\PayRunIO.OAuth1.20.21.3.15\lib\net452\PayRunIO.OAuth1.dll</HintPath>
+    </Reference>
+    <Reference Include="PayRunIO.Utilities, Version=20.21.3.15, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Payescape.PayRunIO.ReportTransforms\packages\PayRunIO.Utilities.20.21.3.15\lib\net452\PayRunIO.Utilities.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
