@@ -527,12 +527,13 @@ namespace PayRunIOClassLibrary
                     rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
                     rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
                     rpEmployer.NESTPensionText = drCompanyReportCodes.ItemArray[3].ToString();
-                    rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[3]);
+                    rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[4]);
                 }
                 catch
                 {
                     rpEmployer.BankFileCode = "000";
                     rpEmployer.PensionReportFileType = "Unknown";
+                    rpEmployer.PensionReportAEWorkersGroup = "A";
                     rpEmployer.NESTPensionText = "My Source";
                     rpEmployer.HREscapeCompanyNo = null;
                 }
@@ -541,6 +542,7 @@ namespace PayRunIOClassLibrary
             {
                 rpEmployer.BankFileCode = "000";
                 rpEmployer.PensionReportFileType = "Unknown";
+                rpEmployer.PensionReportAEWorkersGroup = "A";
                 rpEmployer.NESTPensionText = "My Source";
                 rpEmployer.HREscapeCompanyNo = null;
             }
