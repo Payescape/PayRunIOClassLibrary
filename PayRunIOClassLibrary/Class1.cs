@@ -517,6 +517,13 @@ namespace PayRunIOClassLibrary
                
             }
 
+            rpEmployer.BankFileCode = "000";
+            rpEmployer.PensionReportFileType = "Unknown";
+            rpEmployer.PensionReportAEWorkersGroup = "A";
+            rpEmployer.NESTPensionText = "My Source";
+            rpEmployer.HREscapeCompanyNo = null;
+            rpEmployer.ReportPassword = null;
+
             if (xdoc != null && xdoc.Root != null)
             {
                 //Get the bank file code for a table on the database for now. It should be supplied by WebGlobe and then PR eventually.
@@ -527,26 +534,18 @@ namespace PayRunIOClassLibrary
                     rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
                     rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
                     rpEmployer.NESTPensionText = drCompanyReportCodes.ItemArray[3].ToString();
-                    rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[4]);
+                    if (drCompanyReportCodes.ItemArray[4] != System.DBNull.Value)
+                    {
+                        rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[4]);
+                    }
+                    rpEmployer.ReportPassword = drCompanyReportCodes.ItemArray[5].ToString();
+
                 }
                 catch
                 {
-                    rpEmployer.BankFileCode = "000";
-                    rpEmployer.PensionReportFileType = "Unknown";
-                    rpEmployer.PensionReportAEWorkersGroup = "A";
-                    rpEmployer.NESTPensionText = "My Source";
-                    rpEmployer.HREscapeCompanyNo = null;
+                   
                 }
             }
-            else
-            {
-                rpEmployer.BankFileCode = "000";
-                rpEmployer.PensionReportFileType = "Unknown";
-                rpEmployer.PensionReportAEWorkersGroup = "A";
-                rpEmployer.NESTPensionText = "My Source";
-                rpEmployer.HREscapeCompanyNo = null;
-            }
-  
             return rpEmployer;
         }
         
@@ -966,12 +965,14 @@ namespace PayRunIOClassLibrary
         public bool P32Required { get; set; }
         public string NESTPensionText { get; set; }
         public int? HREscapeCompanyNo { get; set; }
+        public string ReportPassword { get; set; }
 
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
                            string bankFileCode,
                            string pensionReportFileType, string pensionReportAEWorkersGroup,
-                           bool p32Required, string nestPensionText, int? hrEscapeCompanyNo)
+                           bool p32Required, string nestPensionText, int? hrEscapeCompanyNo,
+                           string reportPassword)
         {
             Name = name;
             PayeRef = payeRef;
@@ -982,6 +983,7 @@ namespace PayRunIOClassLibrary
             P32Required = p32Required;
             NESTPensionText = nestPensionText;
             HREscapeCompanyNo = hrEscapeCompanyNo;
+            ReportPassword = reportPassword;
         }
     }
 
