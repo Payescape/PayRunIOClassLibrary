@@ -1787,13 +1787,14 @@ namespace PayRunIOClassLibrary
         public string PayCode { get; set; }
         public string Description { get; set; }
         public string Type { get; set; }
-        public decimal AccountsAmount{ get; set; }
+        public decimal TotalAmount{ get; set; }
+        public decimal AccountsAmount { get; set; }
         public decimal PayeAmount{ get; set; }
         public decimal AccountsUnits { get; set; }
         public decimal PayeUnits { get; set; }
         public bool IsPayCode { get; set; }
         public RPPayCode() { }
-        public RPPayCode(string eeRef, string code, string payCode, string description, string type,
+        public RPPayCode(string eeRef, string code, string payCode, string description, string type, decimal totalAmount,
                          decimal accountsAmount, decimal payeAmount, decimal accountsUnits, decimal payeUnits,
                          bool isPayCode)
         {
@@ -1802,6 +1803,7 @@ namespace PayRunIOClassLibrary
             PayCode = payCode;
             Description = description;
             Type=type;
+            TotalAmount = totalAmount;
             AccountsAmount = accountsAmount;
             PayeAmount = payeAmount;
             AccountsUnits = accountsUnits;
