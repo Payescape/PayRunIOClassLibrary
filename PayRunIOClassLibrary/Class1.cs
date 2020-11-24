@@ -445,16 +445,30 @@ namespace PayRunIOClassLibrary
         }
         public XmlDocument GetP32Report(XDocument xdoc, RPParameters rpParameters)
         {
-            //Run the next period report to get the next pay period.
             string rptRef = "P32";
             string parameter1 = "EmployerKey";
             string parameter2 = "TaxYear";
             
-            //Get the P32Sum report
+            //Get the P32 report
             XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.TaxYear.ToString(),
                                               null, null, null, null, null, null, null, null);
 
             
+            return xmlReport;
+        }
+        public XmlDocument GetCombinedPayrollRunReport(XDocument xdoc, RPParameters rpParameters)
+        {
+            string rptRef = "CombinedPayrollRun";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "PayScheduleKey";
+            string parameter3 = "StartDate";
+            string parameter4 = "EndDate";
+
+            //Get the Combined Payroll Run report
+            XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
+                                              parameter3, "2020/04/06", parameter4, "2021/04/05", null, null, null, null);
+
+
             return xmlReport;
         }
         private int GetTaxMonth(DateTime thisDate)
@@ -523,6 +537,11 @@ namespace PayRunIOClassLibrary
             rpEmployer.NESTPensionText = "My Source";
             rpEmployer.HREscapeCompanyNo = null;
             rpEmployer.ReportPassword = null;
+            rpEmployer.ZipReports = true;
+            rpEmployer.ReportsInExcelFormat = true;
+            rpEmployer.PayRunDetailsYTDRequired = false;
+            rpEmployer.PayrollTotalsSummaryRequired = false;
+                 
 
             if (xdoc != null && xdoc.Root != null)
             {
@@ -539,16 +558,44 @@ namespace PayRunIOClassLibrary
                         rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[4]);
                     }
                     rpEmployer.ReportPassword = drCompanyReportCodes.ItemArray[5].ToString();
-
+                    if (drCompanyReportCodes.ItemArray[6] != System.DBNull.Value)
+                    {
+                        rpEmployer.ZipReports = Convert.ToBoolean(drCompanyReportCodes.ItemArray[6]);
+                    }
+                    if (drCompanyReportCodes.ItemArray[7] != System.DBNull.Value)
+                    {
+                        rpEmployer.ReportsInExcelFormat = Convert.ToBoolean(drCompanyReportCodes.ItemArray[7]);
+                    }
+                    if (drCompanyReportCodes.ItemArray[8] != System.DBNull.Value)
+                    {
+                        rpEmployer.PayRunDetailsYTDRequired = Convert.ToBoolean(drCompanyReportCodes.ItemArray[8]);
+                    }
+                    if (drCompanyReportCodes.ItemArray[9] != System.DBNull.Value)
+                    {
+                        rpEmployer.PayrollTotalsSummaryRequired = Convert.ToBoolean(drCompanyReportCodes.ItemArray[9]);
+                    }
                 }
-                catch
+                catch(Exception ex)
                 {
                    
                 }
             }
             return rpEmployer;
         }
-        
+        public RPEmployer GetRPEmployer(XmlDocument xmlReport, RPParameters rpParameters)
+        {
+            RPEmployer rpEmployer = new RPEmployer();
+            foreach (XmlElement employer in xmlReport.GetElementsByTagName("Employer"))
+            {
+                rpEmployer.Name = GetElementByTagFromXml(employer, "Name");
+                rpEmployer.PayeRef = GetElementByTagFromXml(employer, "EmployerPayeRef");
+                
+            }
+
+            
+            return rpEmployer;
+        }
+
         public void ArchiveRTIOutputs(string directory, FileInfo file)
         {
             //Move RTI file to PE-ArchivedRTI from Outputs
@@ -676,6 +723,11 @@ namespace PayRunIOClassLibrary
             }
             return hmrcTotal;
         }
+        public static void EmptyDirectory(DirectoryInfo directory)
+        {
+            foreach (System.IO.FileInfo file in directory.GetFiles()) file.Delete();
+            foreach (System.IO.DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
+        }
         public void DeleteFilesThenFolder(XDocument xdoc, string sourceFolder)
         {
             int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
@@ -689,6 +741,7 @@ namespace PayRunIOClassLibrary
                 foreach (FileInfo file in files)
                 {
                     file.Delete();
+                    
                 }
                 Directory.Delete(sourceFolder);
             }
@@ -966,13 +1019,19 @@ namespace PayRunIOClassLibrary
         public string NESTPensionText { get; set; }
         public int? HREscapeCompanyNo { get; set; }
         public string ReportPassword { get; set; }
-
+        public bool ZipReports { get; set; }
+        public bool ReportsInExcelFormat { get; set; }
+        public bool PayRunDetailsYTDRequired { get; set; }
+        public bool PayrollTotalsSummaryRequired { get; set; }
+        
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
                            string bankFileCode,
                            string pensionReportFileType, string pensionReportAEWorkersGroup,
                            bool p32Required, string nestPensionText, int? hrEscapeCompanyNo,
-                           string reportPassword)
+                           string reportPassword, bool zipReports, bool reportsInExcelFormat,
+                           bool payRunDetailsYTDRequired,
+                           bool payrollTotalsSummaryRequired)
         {
             Name = name;
             PayeRef = payeRef;
@@ -984,6 +1043,11 @@ namespace PayRunIOClassLibrary
             NESTPensionText = nestPensionText;
             HREscapeCompanyNo = hrEscapeCompanyNo;
             ReportPassword = reportPassword;
+            ZipReports = zipReports;
+            ReportsInExcelFormat = reportsInExcelFormat;
+            PayRunDetailsYTDRequired = payRunDetailsYTDRequired;
+            PayrollTotalsSummaryRequired = payrollTotalsSummaryRequired;
+            
         }
     }
 
@@ -1021,7 +1085,7 @@ namespace PayRunIOClassLibrary
         public DateTime? StudentLoanStartDate { get; set; }
         public DateTime? StudentLoanEndDate { get; set; }
         public decimal StudentLoan { get; set; }
-        public decimal StudentLoanYTD { get; set; }
+        public decimal StudentLoanYtd { get; set; }
         public string NILetter { get; set; }
         public string CalculationBasis { get; set; }
         public decimal Total { get; set; }
@@ -1051,9 +1115,11 @@ namespace PayRunIOClassLibrary
         public decimal TaxablePayTP { get; set; }
         public decimal HolidayAccruedTd { get; set; }
         public RPAEAssessment AEAssessment { get; set; }
-        public List<RPPensionPeriod> Pensions { get; set; }
+        public decimal EePensionTotalTP { get; set; }
+        public decimal EePensionTotalYtd { get; set; }
         public decimal ErPensionTotalTP { get; set; }
-        public decimal ErPensionTotalYtd {get;set;}
+        public decimal ErPensionTotalYtd { get; set; }
+        public List<RPPensionPeriod> Pensions { get; set; }
         public DateTime DirectorshipAppointmentDate { get; set; }
         public bool Director { get; set; }
         public decimal EeContributionsTaxPeriodPt1 { get; set; }
@@ -1065,17 +1131,38 @@ namespace PayRunIOClassLibrary
         public decimal TotalPayYTD { get; set; }
         public decimal TotalDedTP { get; set; }
         public decimal TotalDedYTD { get; set; }
+        public decimal TotalOtherDedTP { get; set; }        //For the Pay Run Details YTD report there is an Other Deduction column. Include all deductions excluding Pension, Tax, NI, AEO & Student Loans
+        public decimal TotalOtherDedYTD { get; set; }
         public string PensionCode { get; set; }
         public decimal PreTaxAddDed { get; set; }
         public decimal GUCosts { get; set; }
         public decimal AbsencePay { get; set; }
+        public decimal AbsencePayYtd { get; set; }
         public decimal HolidayPay { get; set; }
         public decimal PreTaxPension { get; set; }
         public decimal Tax { get; set; }
         public decimal NetNI { get; set; }
         public decimal PostTaxAddDed { get; set; }
         public decimal PostTaxPension { get; set; }
-        public decimal AOE { get; set; }
+        public decimal AEO { get; set; }
+        public decimal AEOYtd { get; set; }
+        public decimal TotalPayComponentAdditions { get; set; }
+        public decimal TotalPayComponentDeductions { get; set; }
+        public decimal BenefitsInKind { get; set; }
+        public decimal SSPSetOff { get; set; }
+        public decimal SSPAdd { get; set; }
+        public decimal SMPSetOff { get; set; }
+        public decimal SMPAdd { get; set; }
+        public decimal OSPPSetOff { get; set; }
+        public decimal OSPPAdd { get; set; }
+        public decimal SAPSetOff { get; set; }
+        public decimal SAPAdd { get; set; }
+        public decimal ShPPSetOff { get; set; }
+        public decimal ShPPAdd { get; set; }
+        public decimal SPBPSetOff { get; set; }
+        public decimal SPBPAdd { get; set; }
+        
+        public decimal Zero { get; set; }
         public List<RPAddition> Additions { get; set; }
         public List<RPDeduction> Deductions { get; set; }
         public List<RPPayslipDeduction> PayslipDeductions { get; set; }
@@ -1085,22 +1172,22 @@ namespace PayRunIOClassLibrary
                           string country, string sortCode, string bankAccNo, DateTime dateOfBirth, DateTime startingDate, string gender, string buildingSocRef,
                           string niNumber, string paymentMethod, DateTime payRunDate, DateTime periodStartDate, DateTime periodEndDate, int payrollYear,
                           decimal gross, decimal netPayTP, decimal dayHours, DateTime? studentLoanStartDate, DateTime? studentLoanEndDate,
-                          decimal studentLoan, decimal studentLoanYTD, string niLetter, string calculationBasis, decimal total,
+                          decimal studentLoan, decimal studentLoanYtd, string niLetter, string calculationBasis, decimal total,
                           decimal earningsToLEL, decimal earningsToSET, decimal earningsToPET, decimal earningsToUST, decimal earningsToAUST,
                           decimal earningsToUEL, decimal earningsAboveUEL, decimal eeContributionsPt1, decimal eeContributionsPt2,
                           decimal erNICYTD, decimal eeRebate, decimal erRebate, decimal eeReduction, DateTime leavingDate, bool leaver,
                           string taxCode, bool week1Month1, string taxCodeChangeTypeID, string taxCodeChangeType, decimal taxPrev,
                           decimal taxablePayPrevious, decimal taxThis, decimal taxablePayYTD, decimal taxablePayTP, decimal holidayAccruedTd,
                           RPAEAssessment aeAssessment,
-                          List<RPPensionPeriod> pensions,
-                          decimal erPensionTotalTP, decimal erPensionTotalYtd,
-                          //decimal erPensionYTD, decimal eePensionYTD, decimal erPensionTP, decimal eePensionTP, decimal erContributionPercent,
-                          //decimal eeContributionPercent, decimal pensionablePay, DateTime erPensionPayRunDate, DateTime eePensionPayRunDate,
+                          decimal eePensionTotalTP, decimal eePensionTotalYtd, decimal erPensionTotalTP, decimal erPensionTotalYtd, List<RPPensionPeriod> pensions,
                           DateTime directorshipAppointmentDate, bool director, decimal eeContributionsTaxPeriodPt1, decimal eeContributionsTaxPeriodPt2,
-                          decimal erNICTP, string frequency, decimal netPayYTD, decimal totalPayTP, decimal totalPayYTD, decimal totalDedTP, 
-                          decimal totalDedYTD, string pensionCode, decimal preTaxAddDed, decimal guCosts, decimal absencePay,
+                          decimal erNICTP, string frequency, decimal netPayYTD, decimal totalPayTP, decimal totalPayYTD, decimal totalDedTP, decimal totalDedYTD,
+                          decimal totalOtherDedTP, decimal totalOtherDedYTD, string pensionCode, decimal preTaxAddDed, decimal guCosts, decimal absencePay, decimal absencePayYtd,
                           decimal holidayPay, decimal preTaxPension, decimal tax, decimal netNI,
-                          decimal postTaxAddDed, decimal postTaxPension, decimal aoe, 
+                          decimal postTaxAddDed, decimal postTaxPension, decimal aeo, decimal aeoYtd, 
+                          decimal totalPayComponentAdditions, decimal totalPayComponentDeductions, decimal benefitsInKind,
+                          decimal sspSetOff, decimal sspAdd, decimal smpSetOff, decimal smpAdd, decimal osppSetOff, decimal osppAdd, decimal sapSetOff, decimal sapAdd,
+                          decimal shppSetOff, decimal shppAdd, decimal spbpSetOff, decimal spbpAdd, decimal zero,
                           List<RPAddition> additions, List<RPDeduction> deductions, List<RPPayslipDeduction> payslipDeductions)
         {
             Reference = reference;
@@ -1134,7 +1221,7 @@ namespace PayRunIOClassLibrary
             StudentLoanStartDate = studentLoanStartDate;
             StudentLoanEndDate = studentLoanEndDate;
             StudentLoan = studentLoan;
-            StudentLoanYTD = studentLoanYTD;
+            StudentLoanYtd = studentLoanYtd;
             NILetter = niLetter;
             CalculationBasis = calculationBasis;
             Total = total;
@@ -1164,9 +1251,11 @@ namespace PayRunIOClassLibrary
             TaxablePayTP = taxablePayTP;
             HolidayAccruedTd = holidayAccruedTd;
             AEAssessment = aeAssessment;
-            Pensions = pensions;
+            EePensionTotalTP = eePensionTotalTP;
+            EePensionTotalYtd = eePensionTotalYtd;
             ErPensionTotalTP = erPensionTotalTP;
             ErPensionTotalYtd = erPensionTotalYtd;
+            Pensions = pensions;
             DirectorshipAppointmentDate = directorshipAppointmentDate;
             Director = director;
             EeContributionsTaxPeriodPt1 = eeContributionsTaxPeriodPt1;
@@ -1178,17 +1267,37 @@ namespace PayRunIOClassLibrary
             TotalPayYTD = totalPayYTD;
             TotalDedTP = totalDedTP;
             TotalDedYTD = totalDedYTD;
+            TotalOtherDedTP = totalOtherDedTP;
+            TotalOtherDedYTD = totalOtherDedYTD;
             PensionCode = pensionCode;
             PreTaxAddDed = preTaxAddDed;
             GUCosts = guCosts;
             AbsencePay = absencePay;
+            AbsencePayYtd = absencePayYtd;
             HolidayPay = holidayPay;
             PreTaxPension = preTaxPension;
             Tax = tax;
             NetNI = netNI;
             PostTaxAddDed = postTaxAddDed;
             PostTaxPension = postTaxPension;
-            AOE = aoe;
+            AEO = aeo;
+            AEOYtd = aeoYtd;
+            TotalPayComponentAdditions = totalPayComponentAdditions;
+            TotalPayComponentDeductions = totalPayComponentDeductions;
+            BenefitsInKind = benefitsInKind;
+            SSPSetOff = sspSetOff;
+            SSPAdd = sspAdd;
+            SMPSetOff = smpSetOff;
+            SMPAdd = smpAdd;
+            OSPPSetOff = osppSetOff;
+            OSPPAdd = osppAdd;
+            SAPSetOff = sapSetOff;
+            SAPAdd = sapAdd;
+            ShPPSetOff = shppSetOff;
+            ShPPAdd = shppAdd;
+            SPBPSetOff = spbpSetOff;
+            SPBPAdd = spbpAdd;
+            Zero = zero;
             Additions = additions;
             Deductions = deductions;
             PayslipDeductions = payslipDeductions;
@@ -1343,6 +1452,7 @@ namespace PayRunIOClassLibrary
         public int Key { get; set; }
         public string Code { get; set; }
         public string SchemeName { get; set; }
+        public string ProviderName { get; set; }
         public DateTime? StartJoinDate { get; set; }
         public bool IsJoiner { get; set; }
         public string ProviderEmployerReference { get; set; }
@@ -1363,7 +1473,7 @@ namespace PayRunIOClassLibrary
         public decimal TotalPayTaxPeriod { get; set; }
         public int StatePensionAge { get; set; }
         public RPPensionPeriod() { }
-        public RPPensionPeriod(int key, string code, string schemeName, DateTime? startJoinDate, bool isJoiner,
+        public RPPensionPeriod(int key, string code, string providerName, string schemeName, DateTime? startJoinDate, bool isJoiner,
                                string providerEmployerReference,
                                decimal eePensionYtd, decimal erPensionYtd,
                                decimal pensionablePayYtd, decimal eePensionTaxPeriod, decimal erPensionTaxPeriod,
@@ -1376,6 +1486,7 @@ namespace PayRunIOClassLibrary
             Key = key;
             Code = code;
             SchemeName = schemeName;
+            ProviderName = providerName;
             StartJoinDate = startJoinDate;
             IsJoiner = isJoiner;
             ProviderEmployerReference = providerEmployerReference;
@@ -1499,14 +1610,14 @@ namespace PayRunIOClassLibrary
     public class RPPensionFileScheme
     {
         public string SchemeName { get; set; }
-        public string SchemeProvider { get; set; }
+        public string ProviderName { get; set; }
         public List<RPPensionContribution> RPPensionContributions { get; set; }
 
         public RPPensionFileScheme() { }
-        public RPPensionFileScheme(string schemeName, string schemeProvider, List<RPPensionContribution> rpPensionContributions)
+        public RPPensionFileScheme(string schemeName, string providerName, List<RPPensionContribution> rpPensionContributions)
         {
             SchemeName = schemeName;
-            SchemeProvider = schemeProvider;
+            ProviderName = providerName;
             RPPensionContributions = rpPensionContributions;
         }
     }
@@ -2067,6 +2178,162 @@ namespace PayRunIOClassLibrary
             TaxPeriod = taxPeriod;
             WorkersGroup = workersGroup;
             Status = status;
+        }
+    }
+    public class RPSummaryEmployee
+    {
+        public string Code { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string LastNameFirstName { get; set; }
+        public string FirstNameLastName { get; set; }
+        public string Branch { get; set; }
+        public string Department { get; set; }
+        public string TaxCode { get; set; }
+        public string TaxBasis { get; set; }
+        public string NiLetter { get; set; }
+        public decimal PreTaxAddDed { get; set; }
+        public decimal GUCosts { get; set; }
+        public decimal AbsencePay { get; set; }
+        public decimal HolidayPay { get; set; }
+        public decimal PreTaxPension { get; set; }
+        public decimal TaxablePay { get; set; }
+        public decimal Tax { get; set; }
+        public decimal NetEeNi { get; set; }
+        public decimal PostTaxAddDed { get; set; }
+        public decimal PostTaxPension { get; set; }
+        public decimal AEO { get; set; }
+        public decimal StudentLoan { get; set; }
+        public RPNetPayCashAnalysis NetPay { get; set; }
+        public decimal ErNi { get; set; }
+        public decimal ErPension { get; set; }
+        public string PaymentType { get; set; }
+
+        public RPSummaryEmployee() { }
+        public RPSummaryEmployee(string code, string lastrName, string firstName, string lastNameFirstName, string firstNameLastName,
+                        string branch, string department,
+                        string taxCode, string taxBasis, string niLetter,
+                        decimal preTaxAddDed, decimal guCosts, decimal absencePay, decimal holidayPay, decimal preTaxPension,
+                        decimal taxablePay, decimal tax, decimal netEeNi, decimal postTaxAddDed,
+                        decimal postTaxPension, decimal aeo, decimal studentLoan, RPNetPayCashAnalysis netPay,
+                        decimal erNi, decimal erPension, string paymentType)
+        {
+            Code = code;
+            LastName = lastrName;
+            FirstName = firstName;
+            LastNameFirstName = lastNameFirstName;
+            FirstNameLastName = firstNameLastName;
+            Branch = branch;
+            Department = department;
+            TaxCode = taxCode;
+            TaxBasis = taxBasis;
+            NiLetter = niLetter;
+            PreTaxAddDed = preTaxAddDed;
+            GUCosts = guCosts;
+            AbsencePay = absencePay;
+            HolidayPay = holidayPay;
+            PreTaxPension = preTaxPension;
+            TaxablePay = taxablePay;
+            Tax = tax;
+            NetEeNi = netEeNi;
+            PostTaxAddDed = postTaxAddDed;
+            PostTaxPension = postTaxPension;
+            AEO = aeo;
+            StudentLoan = studentLoan;
+            NetPay = netPay;
+            ErNi = erNi;
+            ErPension = erPension;
+            PaymentType = paymentType;
+        }
+    }
+    public class RPNetPayCashAnalysis
+    {
+        public Decimal NetPay { get; set; }
+        public int TwentyPounds { get; set; }
+        public int TenPounds { get; set; }
+        public int FivePounds { get; set; }
+        public int TwoPounds { get; set; }
+        public int OnePounds { get; set; }
+        public int FiftyPence { get; set; }
+        public int TwentyPence { get; set; }
+        public int TenPence { get; set; }
+        public int FivePence { get; set; }
+        public int TwoPence { get; set; }
+        public int OnePence { get; set; }
+
+        public RPNetPayCashAnalysis() { }
+        public RPNetPayCashAnalysis(decimal netPay, int twentyPounds, int tenPounds, int fivePounds,
+                                  int twoPounds, int onePounds,
+                                  int fiftyPence, int twentyPence, int tenPence, int fivePence,
+                                  int twoPence, int onePence)
+        {
+            NetPay = netPay;
+            TwentyPounds = twentyPounds;
+            TenPounds = tenPounds;
+            FivePounds = fivePounds;
+            TwoPounds = twoPounds;
+            OnePounds = onePounds;
+            FiftyPence = fiftyPence;
+            TwentyPence = twentyPence;
+            TenPence = tenPence;
+            FivePence = fivePence;
+            TwoPence = twoPence;
+            OnePence = onePence;
+        }
+    }
+    public class RPSummaryPayRuns
+    {
+        public int MaxDepartments { get; set; }
+        public List<RPSummaryPayRun> RPSummaryPayRun { get; set; }
+        public RPSummaryPayRuns() { }
+        public RPSummaryPayRuns(int maxDepartments, List<RPSummaryPayRun> rpSummaryPayRun)
+        {
+            MaxDepartments = maxDepartments;
+            RPSummaryPayRun = rpSummaryPayRun;
+        }
+    }
+    public class RPSummaryPayRun
+    {
+        public DateTime PaymentDate { get; set; }
+        public int TaxPeriod { get; set; }
+        public int TaxYear { get; set; }
+        public int PAYEMonth { get; set; }
+        public List<RPBranch> RPBranches { get; set; }
+        public RPSummaryPayRun() { }
+        public RPSummaryPayRun(DateTime paymentDate, int taxPeriod, int taxYear,
+                      int payeMonth, List<RPBranch> rpBranches)
+        {
+            PaymentDate = paymentDate;
+            TaxPeriod = taxPeriod;
+            TaxYear = TaxYear;
+            RPBranches = rpBranches;
+            PAYEMonth = payeMonth;
+        }
+    }
+
+    public class RPBranch
+    {
+        public string Name { get; set; }
+        public List<RPDepartment> RPDepartments { get; set; }
+
+        public RPBranch() { }
+        public RPBranch(string name, List<RPDepartment> rpDepartments)
+        {
+            Name = name;
+            RPDepartments = rpDepartments;
+        }
+    }
+    public class RPDepartment
+    {
+        public string Name { get; set; }
+        public List<RPSummaryEmployee> Employees { get; set; }
+
+        public RPDepartment() { }
+        public RPDepartment(string name, List<RPSummaryEmployee> employees)
+        {
+            Name = name;
+            Employees = employees;
+
         }
     }
     public class ContactInfo
