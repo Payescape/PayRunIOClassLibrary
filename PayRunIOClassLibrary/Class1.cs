@@ -396,6 +396,58 @@ namespace PayRunIOClassLibrary
             }
             return xmlReport;
         }
+        public string RunTransformReport(XDocument xdoc, string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
+                                 string prm4, string val4, string prm5, string val5, string prm6, string val6)
+        {
+            string url = null;
+            if (prm2 == null)
+            {
+                url = prm1 + "=" + val1;
+
+            }
+            else if (prm3 == null)
+            {
+                url = prm1 + "=" + val1 + "&" + prm2 + "=" + val2;
+
+            }
+            else if (prm4 == null)
+            {
+                url = prm1 + "=" + val1 + "&" + prm2 + "=" + val2
+                            + "&" + prm3 + "=" + val3;
+
+            }
+            else if (prm5 == null)
+            {
+                url = prm1 + "=" + val1 + "&" + prm2 + "=" + val2
+                            + "&" + prm3 + "=" + val3 + "&" + prm4 + "=" + val4;
+
+            }
+            else if (prm6 == null)
+            {
+                url = prm1 + "=" + val1 + "&" + prm2 + "=" + val2
+                            + "&" + prm3 + "=" + val3 + "&" + prm4 + "=" + val4
+                            + "&" + prm5 + "=" + val5;
+
+            }
+            else
+            {
+                url = prm1 + "=" + val1 + "&" + prm2 + "=" + val2
+                           + "&" + prm3 + "=" + val3 + "&" + prm4 + "=" + val4
+                           + "&" + prm5 + "=" + val5 + "&" + prm6 + "=" + val6;
+            }
+            string csvReport = null;
+            try
+            {
+                var apiHelper = ApiHelper(xdoc);
+                csvReport = apiHelper.GetRawText("/Report/" + rptRef + "/run?" + url);
+                
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("Error running a report.\r\n" + ex);
+            }
+            return csvReport;
+        }
         private RestApiHelper ApiHelper(XDocument xdoc)
         {
             string consumerKey = xdoc.Root.Element("PayRunConsumerKey").Value;
@@ -455,6 +507,33 @@ namespace PayRunIOClassLibrary
 
             
             return xmlReport;
+        }
+        public string GetSmartPensionsReport(XDocument xdoc, RPParameters rpParameters)
+        {
+            string rptRef = "PAPDIS";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "PayScheduleKey";
+            string parameter3 = "TaxYear";
+            string parameter4 = "PaymentDate";
+            string parameter5 = "PensionKey";
+            string parameter6 = "TransformDefinitionKey";
+
+            //Testing
+            //rpParameters.ErRef = "1107";
+            //rpParameters.PaySchedule = "Weekly";
+            //rpParameters.PayRunDate = new DateTime(2020,10,22);
+
+            //Get the Smart Pensions report
+            string  csvReport = RunTransformReport(xdoc, rptRef,
+                                parameter1, rpParameters.ErRef,
+                                parameter2, rpParameters.PaySchedule,
+                                parameter3, rpParameters.TaxYear.ToString(), 
+                                parameter4, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
+                                parameter5, rpParameters.PensionKey.ToString(), 
+                                parameter6, "PAPDIS-CSV");
+
+
+            return csvReport;
         }
         public XmlDocument GetCombinedPayrollRunReport(XDocument xdoc, RPParameters rpParameters)
         {
@@ -534,7 +613,7 @@ namespace PayRunIOClassLibrary
             rpEmployer.BankFileCode = "000";
             rpEmployer.PensionReportFileType = "Unknown";
             rpEmployer.PensionReportAEWorkersGroup = "A";
-            rpEmployer.NESTPensionText = "My Source";
+            rpEmployer.NESTPensionText = "My source";
             rpEmployer.HREscapeCompanyNo = null;
             rpEmployer.ReportPassword = null;
             rpEmployer.ZipReports = true;
@@ -549,15 +628,30 @@ namespace PayRunIOClassLibrary
                 try
                 {
                     DataRow drCompanyReportCodes = GetCompanyReportCodes(xdoc, sqlConnectionString, rpParameters);
-                    rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
-                    rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
-                    rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
-                    rpEmployer.NESTPensionText = drCompanyReportCodes.ItemArray[3].ToString();
+                    if(drCompanyReportCodes.ItemArray[0] != System.DBNull.Value)
+                    {
+                        rpEmployer.BankFileCode = drCompanyReportCodes.ItemArray[0].ToString();
+                    }
+                    if (drCompanyReportCodes.ItemArray[1] != System.DBNull.Value)
+                    {
+                        rpEmployer.PensionReportFileType = drCompanyReportCodes.ItemArray[1].ToString();
+                    }
+                    if (drCompanyReportCodes.ItemArray[2] != System.DBNull.Value)
+                    {
+                        rpEmployer.PensionReportAEWorkersGroup = drCompanyReportCodes.ItemArray[2].ToString();
+                    }
+                    if (drCompanyReportCodes.ItemArray[3] != System.DBNull.Value)
+                    {
+                        rpEmployer.NESTPensionText = drCompanyReportCodes.ItemArray[3].ToString();
+                    }
                     if (drCompanyReportCodes.ItemArray[4] != System.DBNull.Value)
                     {
                         rpEmployer.HREscapeCompanyNo = Convert.ToInt32(drCompanyReportCodes.ItemArray[4]);
                     }
-                    rpEmployer.ReportPassword = drCompanyReportCodes.ItemArray[5].ToString();
+                    if (drCompanyReportCodes.ItemArray[5] != System.DBNull.Value)
+                    {
+                        rpEmployer.ReportPassword = drCompanyReportCodes.ItemArray[5].ToString();
+                    }
                     if (drCompanyReportCodes.ItemArray[6] != System.DBNull.Value)
                     {
                         rpEmployer.ZipReports = Convert.ToBoolean(drCompanyReportCodes.ItemArray[6]);
@@ -676,7 +770,7 @@ namespace PayRunIOClassLibrary
                 }
                 catch
                 {
-
+                    
                 }
             }
 
@@ -989,12 +1083,13 @@ namespace PayRunIOClassLibrary
         public int PeriodNo { get; set; }
         public string PaySchedule { get; set; }
         public DateTime PayRunDate { get; set; }
-
+        public int PensionKey { get; set; }
 
         public RPParameters() { }
         public RPParameters(string erRef, int taxYear, DateTime accYearStart,
                             DateTime accYearEnd, int taxPeriod, int periodNo,
-                            string paySchedule, DateTime payRundate)
+                            string paySchedule, DateTime payRundate,
+                            int pensionKey)
         {
             ErRef = erRef;
             TaxYear = taxYear;
@@ -1004,6 +1099,7 @@ namespace PayRunIOClassLibrary
             PeriodNo = periodNo;
             PaySchedule = paySchedule;
             PayRunDate = payRundate;
+            PensionKey = pensionKey;
         }
     }
     //Report (RP) Employer
@@ -1609,13 +1705,15 @@ namespace PayRunIOClassLibrary
     }
     public class RPPensionFileScheme
     {
+        public int Key { get; set; }
         public string SchemeName { get; set; }
         public string ProviderName { get; set; }
         public List<RPPensionContribution> RPPensionContributions { get; set; }
 
         public RPPensionFileScheme() { }
-        public RPPensionFileScheme(string schemeName, string providerName, List<RPPensionContribution> rpPensionContributions)
+        public RPPensionFileScheme(int key, string schemeName, string providerName, List<RPPensionContribution> rpPensionContributions)
         {
+            Key = key;
             SchemeName = schemeName;
             ProviderName = providerName;
             RPPensionContributions = rpPensionContributions;
