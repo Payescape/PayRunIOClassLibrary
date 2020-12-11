@@ -10,7 +10,7 @@ using System.Xml;
 using Microsoft.VisualBasic.FileIO;
 using System.Globalization;
 using PayRunIO.CSharp.SDK;
-
+using DevExpress.XtraReports.UI;
 
 
 namespace PayRunIOClassLibrary
@@ -508,6 +508,22 @@ namespace PayRunIOClassLibrary
             
             return xmlReport;
         }
+        public XmlDocument GetNoteAndCoinRequirementReport(XDocument xdoc, RPParameters rpParameters)
+        {
+            string rptRef = "PSCOIN2";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "PayScheduleKey";
+            string parameter3 = "PaymentDate";
+
+            //Get the Note And Coin Requirement report
+            XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef, 
+                                              parameter2, rpParameters.PaySchedule,
+                                              parameter3, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
+                                              null, null, null, null, null, null);
+
+
+            return xmlReport;
+        }
         public string GetSmartPensionsReport(XDocument xdoc, RPParameters rpParameters)
         {
             string rptRef = "PAPDIS";
@@ -576,10 +592,6 @@ namespace PayRunIOClassLibrary
 
             RPParameters rpParameters = new RPParameters();
 
-            var rootElement = XElement.Parse(xmlReport.InnerXml);
-            var header = rootElement.Elements("Parameters").ToArray();
-            var header1 = rootElement.Elements("Parameters");
-            
             foreach (XmlElement parameter in xmlReport.GetElementsByTagName("Parameters"))
             {
                 rpParameters.ErRef = GetElementByTagFromXml(parameter, "EmployerCode");
@@ -620,7 +632,7 @@ namespace PayRunIOClassLibrary
             rpEmployer.ReportsInExcelFormat = true;
             rpEmployer.PayRunDetailsYTDRequired = false;
             rpEmployer.PayrollTotalsSummaryRequired = false;
-                 
+            rpEmployer.NoteAndCoinRequired = false;   
 
             if (xdoc != null && xdoc.Root != null)
             {
@@ -667,6 +679,10 @@ namespace PayRunIOClassLibrary
                     if (drCompanyReportCodes.ItemArray[9] != System.DBNull.Value)
                     {
                         rpEmployer.PayrollTotalsSummaryRequired = Convert.ToBoolean(drCompanyReportCodes.ItemArray[9]);
+                    }
+                    if (drCompanyReportCodes.ItemArray[10] != System.DBNull.Value)
+                    {
+                        rpEmployer.NoteAndCoinRequired = Convert.ToBoolean(drCompanyReportCodes.ItemArray[10]);
                     }
                 }
                 catch(Exception ex)
@@ -1043,6 +1059,21 @@ namespace PayRunIOClassLibrary
 
             return isUnity;
         }
+        public XtraReport CreatePDFReport(XmlDocument xmlReport, string reportName, string assemblyName)
+        {
+            //Load report
+            reportName = reportName + ".repx";
+            var reportLayout = ResourceHelper.ReadResourceFileToStream(
+                assemblyName, reportName);
+            XtraReport xtraReport = XtraReport.FromStream(reportLayout);
+            XmlReader xmlReader = new XmlNodeReader(xmlReport);
+            DataSet set = new DataSet();
+            set.ReadXml(xmlReader);
+
+            xtraReport.DataSource = set;
+
+            return xtraReport;
+        }
 
     }
     public class ReadConfigFile
@@ -1084,12 +1115,13 @@ namespace PayRunIOClassLibrary
         public string PaySchedule { get; set; }
         public DateTime PayRunDate { get; set; }
         public int PensionKey { get; set; }
+        public bool PaidInCash { get; set; }
 
         public RPParameters() { }
         public RPParameters(string erRef, int taxYear, DateTime accYearStart,
                             DateTime accYearEnd, int taxPeriod, int periodNo,
                             string paySchedule, DateTime payRundate,
-                            int pensionKey)
+                            int pensionKey, bool paidInCash)
         {
             ErRef = erRef;
             TaxYear = taxYear;
@@ -1100,6 +1132,7 @@ namespace PayRunIOClassLibrary
             PaySchedule = paySchedule;
             PayRunDate = payRundate;
             PensionKey = pensionKey;
+            PaidInCash = paidInCash;
         }
     }
     //Report (RP) Employer
@@ -1119,15 +1152,16 @@ namespace PayRunIOClassLibrary
         public bool ReportsInExcelFormat { get; set; }
         public bool PayRunDetailsYTDRequired { get; set; }
         public bool PayrollTotalsSummaryRequired { get; set; }
-        
+        public bool NoteAndCoinRequired { get; set; }
+
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
                            string bankFileCode,
                            string pensionReportFileType, string pensionReportAEWorkersGroup,
                            bool p32Required, string nestPensionText, int? hrEscapeCompanyNo,
                            string reportPassword, bool zipReports, bool reportsInExcelFormat,
-                           bool payRunDetailsYTDRequired,
-                           bool payrollTotalsSummaryRequired)
+                           bool payRunDetailsYTDRequired, bool payrollTotalsSummaryRequired,
+                           bool noteAndCoinRequired)
         {
             Name = name;
             PayeRef = payeRef;
@@ -1143,7 +1177,7 @@ namespace PayRunIOClassLibrary
             ReportsInExcelFormat = reportsInExcelFormat;
             PayRunDetailsYTDRequired = payRunDetailsYTDRequired;
             PayrollTotalsSummaryRequired = payrollTotalsSummaryRequired;
-            
+            NoteAndCoinRequired = noteAndCoinRequired;
         }
     }
 
