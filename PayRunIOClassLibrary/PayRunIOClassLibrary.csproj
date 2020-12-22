@@ -253,9 +253,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NoteAndCoinRequirementReport.repx" />
-    <EmbeddedResource Include="NewCombinedPayrollRunReport.repx" />
+    <EmbeddedResource Include="CombinedPayrollRunReport.repx" />
     <None Include="packages.config" />
     <None Include="PayRunIOClassLibrary.snk" />
+    <EmbeddedResource Include="PensionContributionsToDateReport.repx" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\AWSSDK.S3.3.5.4.1\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />

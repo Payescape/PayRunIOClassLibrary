@@ -546,7 +546,7 @@ namespace PayRunIOClassLibrary
                                 parameter3, rpParameters.TaxYear.ToString(), 
                                 parameter4, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
                                 parameter5, rpParameters.PensionKey.ToString(), 
-                                parameter6, "PAPDIS-CSV");
+                                parameter6, "PE-PAPDIS1-CSV");
 
 
             return csvReport;
