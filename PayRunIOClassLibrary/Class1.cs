@@ -11,7 +11,7 @@ using Microsoft.VisualBasic.FileIO;
 using System.Globalization;
 using PayRunIO.CSharp.SDK;
 using DevExpress.XtraReports.UI;
-
+using PicoXLSX;
 
 namespace PayRunIOClassLibrary
 {
@@ -39,7 +39,7 @@ namespace PayRunIOClassLibrary
                     //Get a table of contacts from the csv file.
                     DataTable dtContacts = GetDataTableFromCSVFile(xdoc, file.FullName);
                     //Insert the data into an SQL Database.
-                    bool success = InsertDataIntoSQLServerUsingSQLBulkCopy(dtContacts, sqlConnectionString, file.FullName, xdoc);
+                    bool success = InsertDataIntoSQLServerUsingSQLBulkCopy(dtContacts, sqlConnectionString, xdoc);
                     if (success)
                     {
                         //We've successfully written the contact data to a temporary table with the name "tmp_CompanyNo_Contacts". e.g. "tmp_2137_Contacts"
@@ -59,7 +59,7 @@ namespace PayRunIOClassLibrary
 
             }
         }
-        private bool InsertDataIntoSQLServerUsingSQLBulkCopy(DataTable csvDataTable, string sqlConnectionString, string csvFileName, XDocument xdoc)
+        private bool InsertDataIntoSQLServerUsingSQLBulkCopy(DataTable csvDataTable, string sqlConnectionString, XDocument xdoc)
         {
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
             string textLine;
@@ -102,7 +102,7 @@ namespace PayRunIOClassLibrary
                         try
                         {
                             textLine = string.Format("About to create tmpContacts table.");
-                            update_Progress(textLine, configDirName, 1);
+                            Update_Progress(textLine, configDirName);
 
                             sqlStatement = "CREATE TABLE " + tableName + "(";
                             foreach (DataColumn dataColumn in csvDataTable.Columns)
@@ -116,12 +116,12 @@ namespace PayRunIOClassLibrary
                             createTable.ExecuteNonQuery();
 
                             textLine = string.Format("Sucessfully created tmpContacts table.");
-                            update_Progress(textLine, configDirName, 1);
+                            Update_Progress(textLine, configDirName);
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             textLine = string.Format("Failed to create tmpContacts table.");
-                            update_Progress(textLine, configDirName, 1);
+                            Update_Progress(textLine, configDirName);
 
                             return false;
 
@@ -132,7 +132,7 @@ namespace PayRunIOClassLibrary
                         using (SqlBulkCopy bulkData = new SqlBulkCopy(sqlConnection))
                         {
                             textLine = string.Format("About to bulk write to tmpContacts table.");
-                            update_Progress(textLine, configDirName, 1);
+                            Update_Progress(textLine, configDirName);
 
                             bulkData.DestinationTableName = tableName;
 
@@ -146,16 +146,16 @@ namespace PayRunIOClassLibrary
                             bulkData.WriteToServer(csvDataTable);
 
                             textLine = string.Format("Successfull bulk write to tmpContacts table.");
-                            update_Progress(textLine, configDirName, 1);
+                            Update_Progress(textLine, configDirName);
 
                             return true;
 
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         textLine = string.Format("Failed bulk write to tmpContacts table.");
-                        update_Progress(textLine, configDirName, 1);
+                        Update_Progress(textLine, configDirName);
 
                         return false;
 
@@ -176,9 +176,8 @@ namespace PayRunIOClassLibrary
         }
         private DataTable GetDataTableFromCSVFile(XDocument xdoc, string csvFileName)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             string delimiter = ",";
             DataTable csvDataTable = new DataTable();
@@ -217,7 +216,7 @@ namespace PayRunIOClassLibrary
                             else
                             {
                                 textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
-                                update_Progress(textLine, configDirName, logOneIn);
+                                Update_Progress(textLine, configDirName);
                             }
 
                         }
@@ -243,16 +242,15 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
 
             }
             return csvDataTable;
         }
         private bool InsertUpdateContacts(XDocument xdoc, string sqlConnectionString, string companyNo)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             bool success = false;
             //
@@ -275,7 +273,7 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error inserting/updating contacts.\r\n{0}.\r\n", ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
 
 
@@ -283,9 +281,8 @@ namespace PayRunIOClassLibrary
         }
         private void DeleteTemporaryContacts(XDocument xdoc, string sqlConnectionString)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             //
             //Try using a stored procedure
@@ -306,12 +303,12 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error deleting temporary contacts.\r\n{0}.\r\n", ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
 
 
         }
-        public void update_Progress(string textLine, string configDirName, int logOneIn)
+        public void Update_Progress(string textLine, string configDirName)
         {
             //Get the month and year from today's date
             DateTime now = DateTime.Now;
@@ -328,23 +325,11 @@ namespace PayRunIOClassLibrary
 
         }
 
-        public void ArchiveCompletedPayrollFile(XDocument xdoc, FileInfo completedPayrollFile)
-        {
-            DateTime now = DateTime.Now;
-            string nowString = now.ToString("yyyyMMddHHmmssfff");
 
-            string destFileName = completedPayrollFile.FullName.Replace("Outputs", "PE-ArchivedOutputs").Replace(".xml", "_" + nowString + ".xml");
-            //destFileName = destFileName.Replace(".xml", "_" + nowString + ".xml");
-            
-
-            File.Move(completedPayrollFile.FullName, destFileName);
-        }
-        
-        
         public XmlDocument RunReport(XDocument xdoc, string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
                                  string prm4, string val4, string prm5, string val5, string prm6, string val6)
         {
-            string url = null;
+            string url;
             if (prm2 == null)
             {
                 url = prm1 + "=" + val1;
@@ -390,7 +375,7 @@ namespace PayRunIOClassLibrary
                 xmlReport = apiHelper.GetRawXml("/Report/" + rptRef + "/run?" + url);
 
             }
-            catch (Exception ex)
+            catch
             {
                 //MessageBox.Show("Error running a report.\r\n" + ex);
             }
@@ -399,7 +384,7 @@ namespace PayRunIOClassLibrary
         public string RunTransformReport(XDocument xdoc, string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
                                  string prm4, string val4, string prm5, string val5, string prm6, string val6)
         {
-            string url = null;
+            string url;
             if (prm2 == null)
             {
                 url = prm1 + "=" + val1;
@@ -442,7 +427,7 @@ namespace PayRunIOClassLibrary
                 csvReport = apiHelper.GetRawText("/Report/" + rptRef + "/run?" + url);
                 
             }
-            catch (Exception ex)
+            catch
             {
                 //MessageBox.Show("Error running a report.\r\n" + ex);
             }
@@ -464,9 +449,8 @@ namespace PayRunIOClassLibrary
         }
         public void ArchiveDirectory(XDocument xdoc, string directory, string originalDirName, string archiveDirName)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             try
             {
@@ -491,7 +475,7 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error archiving the Outputs directory, {0}.\r\n{1}.\r\n", directory, ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
 
         }
@@ -571,11 +555,11 @@ namespace PayRunIOClassLibrary
             int taxMonth = thisDate.Month - 3;
             if (thisDate.Day < 6)
             {
-                taxMonth = taxMonth - 1;
+                taxMonth -= 1;
             }
             if (taxMonth < 1)
             {
-                taxMonth = taxMonth + 12;
+                taxMonth += 12;
             }
             return taxMonth;
         }
@@ -632,7 +616,8 @@ namespace PayRunIOClassLibrary
             rpEmployer.ReportsInExcelFormat = true;
             rpEmployer.PayRunDetailsYTDRequired = false;
             rpEmployer.PayrollTotalsSummaryRequired = false;
-            rpEmployer.NoteAndCoinRequired = false;   
+            rpEmployer.NoteAndCoinRequired = false;
+            rpEmployer.HoldPayHistory = false;
 
             if (xdoc != null && xdoc.Root != null)
             {
@@ -684,8 +669,12 @@ namespace PayRunIOClassLibrary
                     {
                         rpEmployer.NoteAndCoinRequired = Convert.ToBoolean(drCompanyReportCodes.ItemArray[10]);
                     }
+                    if (drCompanyReportCodes.ItemArray[11] != System.DBNull.Value)
+                    {
+                        rpEmployer.HoldPayHistory = Convert.ToBoolean(drCompanyReportCodes.ItemArray[11]);
+                    }
                 }
-                catch(Exception ex)
+                catch
                 {
                    
                 }
@@ -840,9 +829,8 @@ namespace PayRunIOClassLibrary
         }
         public void DeleteFilesThenFolder(XDocument xdoc, string sourceFolder)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             try
             {
@@ -858,7 +846,7 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error deleting files from source folder, {0}.\r\n{1}.\r\n", sourceFolder, ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
         }
         
@@ -869,9 +857,8 @@ namespace PayRunIOClassLibrary
             string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
 
 
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
             bool success = false;
             SMTPEmailSettings smtpEmailSettings = new SMTPEmailSettings();
             DataTable dtSMTPEmailSettings = new DataTable();
@@ -895,7 +882,7 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error getting email settings with SQL connection string, {0}.\r\n{1}.\r\n", logConnectionString, ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
             if (success)
             {
@@ -914,13 +901,12 @@ namespace PayRunIOClassLibrary
                 smtpEmailSettings.SMTPUsername = drSMTPEmailSettings.ItemArray[3].ToString();
                 smtpEmailSettings.Subject = null;               //I'm not using this yet. May never use it.
 
-                string softwareHomeFolder = xdoc.Root.Element("SoftwareHomeFolder").Value;
-
+                
                 textLine = string.Format("Getting SMTP email settings with connection string : {0}.", logConnectionString);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
 
                 textLine = string.Format("Got SMTP email settings, host is : {0}.", smtpEmailSettings.SMTPHost);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
 
             }
 
@@ -929,16 +915,15 @@ namespace PayRunIOClassLibrary
         }
         public List<ContactInfo> GetListOfContactInfo(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             int x = sqlConnectionString.LastIndexOf(";Password=") + 10;
             int y = sqlConnectionString.LastIndexOf(";");
             string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
 
             textLine = string.Format("Start getting a list of email addresses with connection string : {0}.", logConnectionString);
-            update_Progress(textLine, configDirName, logOneIn);
+            Update_Progress(textLine, configDirName);
 
             List<ContactInfo> contactInfoList = new List<ContactInfo>();
             string companyNo = rpParameters.ErRef;                  //file.FullName.Substring(0, 4);
@@ -960,7 +945,7 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error getting the list of email addresses.\r\n{0}.\r\n", ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
             foreach (DataRow drContactInfo in dtContactInfo.Rows)
             {
@@ -971,22 +956,21 @@ namespace PayRunIOClassLibrary
             }
 
             textLine = string.Format("Finished getting a list of email addresses with connection string : {0}.", logConnectionString);
-            update_Progress(textLine, configDirName, logOneIn);
+            Update_Progress(textLine, configDirName);
 
             return contactInfoList;
         }
         private DataRow GetCompanyReportCodes(XDocument xdoc, string sqlConnectionString, RPParameters rpParameters)
         {
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             int x = sqlConnectionString.LastIndexOf(";Password=") + 10;
             int y = sqlConnectionString.LastIndexOf(";");
             string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
 
             textLine = string.Format("Start getting the company report codes with connection string : {0}.", logConnectionString);
-            update_Progress(textLine, configDirName, logOneIn);
+            Update_Progress(textLine, configDirName);
 
             string companyNo = rpParameters.ErRef;                  //file.FullName.Substring(0, 4);
             DataTable dtCompanyReportCodes = new DataTable();
@@ -1007,29 +991,28 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error getting the company report codes.\r\n{0}.\r\n", ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
             
             DataRow drCompanyReportCodes = dtCompanyReportCodes.Rows[0];
 
             textLine = string.Format("Finished getting company report codes with connection string : {0}.", logConnectionString);
-            update_Progress(textLine, configDirName, logOneIn);
+            Update_Progress(textLine, configDirName);
 
             return drCompanyReportCodes;
         }
         public bool GetIsUnity(XDocument xdoc, string sqlConnectionString, int companyNo)
         {
-            bool isUnity = false;
-            int logOneIn = Convert.ToInt32(xdoc.Root.Element("LogOneIn").Value);
+            bool isUnity;
             string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine = null;
+            string textLine;
 
             int x = sqlConnectionString.LastIndexOf(";Password=") + 10;
             int y = sqlConnectionString.LastIndexOf(";");
             string logConnectionString = sqlConnectionString.Substring(0, x + 2) + "*********" + sqlConnectionString.Substring(y - 2);
 
             textLine = string.Format("Start getting IsUnity with connection string : {0}.", logConnectionString);
-            update_Progress(textLine, configDirName, logOneIn);
+            Update_Progress(textLine, configDirName);
 
             DataTable dtCompanyReportCodes = new DataTable();
             try
@@ -1049,20 +1032,20 @@ namespace PayRunIOClassLibrary
             catch (Exception ex)
             {
                 textLine = string.Format("Error getting IsUnity.\r\n{0}.\r\n", ex);
-                update_Progress(textLine, configDirName, logOneIn);
+                Update_Progress(textLine, configDirName);
             }
 
             isUnity = Convert.ToBoolean(dtCompanyReportCodes.Rows[0].ItemArray[0]);
             
             textLine = string.Format("Finished getting IsUnity with connection string : {0}.", logConnectionString);
-            update_Progress(textLine, configDirName, logOneIn);
+            Update_Progress(textLine, configDirName);
 
             return isUnity;
         }
         public XtraReport CreatePDFReport(XmlDocument xmlReport, string reportName, string assemblyName)
         {
             //Load report
-            reportName = reportName + ".repx";
+            reportName += ".repx";
             var reportLayout = ResourceHelper.ReadResourceFileToStream(
                 assemblyName, reportName);
             XtraReport xtraReport = XtraReport.FromStream(reportLayout);
@@ -1074,6 +1057,148 @@ namespace PayRunIOClassLibrary
 
             return xtraReport;
         }
+        public List<string> CreateListOfFixedColumns()
+        {
+            //Create a list of the required fixed columns.
+            List<string> fixCol = new List<string>();
+            fixCol.Add("PayRunDate");
+            fixCol.Add("EeRef");
+            fixCol.Add("Name");
+            fixCol.Add("Dept");
+            fixCol.Add("CostCentre");
+            fixCol.Add("Branch");
+            fixCol.Add("Status");
+            fixCol.Add("TaxCode");
+            fixCol.Add("NILetter");
+            fixCol.Add("PreTaxAddDed");
+            fixCol.Add("GrossedUpTaxThisRun");
+            fixCol.Add("EeNIPdByEr");
+            fixCol.Add("GUStudentLoan");
+            fixCol.Add("GUNIReduction");
+            fixCol.Add("PenPreTaxEeGU");
+            fixCol.Add("TotalAbsencePay");
+            fixCol.Add("HolidayPay");
+            fixCol.Add("PenPreTaxEe");
+            fixCol.Add("TaxablePay");
+            fixCol.Add("Tax");
+            fixCol.Add("NI");
+            fixCol.Add("PostTaxAddDed");
+            fixCol.Add("PostTaxPension");
+            fixCol.Add("AEO");
+            fixCol.Add("StudentLoan");
+            fixCol.Add("NetPay");
+            fixCol.Add("ErNI");
+            fixCol.Add("PenEr");
+            fixCol.Add("TotalGrossUp");
+            fixCol.Add("TotalNICs");
+            fixCol.Add("TotalPens");
+
+            return fixCol;
+        }
+        public List<string> CreateListOfVariableColumns(List<RPPreSamplePayCode> rpPreSamplePayCodes)
+        {
+            //Create a list of the required variable columns.
+            List<string> varCol = new List<string>();
+
+            foreach (RPPreSamplePayCode rpPreSamplePayCode in rpPreSamplePayCodes)
+            {
+                if (rpPreSamplePayCode.Code != "TAX" && rpPreSamplePayCode.Code != "NI")
+                {
+                    if (rpPreSamplePayCode.InUse)
+                    {
+                        varCol.Add(rpPreSamplePayCode.Description);
+                    }
+                }
+            }
+
+            return varCol;
+        }
+        public Workbook CreateFixedWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod)
+        {
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PayRunDate);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Reference);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Fullname);
+            workbook.CurrentWorksheet.AddNextCell("Department");
+            workbook.CurrentWorksheet.AddNextCell("Cost Centre");
+            workbook.CurrentWorksheet.AddNextCell("Branch");
+            workbook.CurrentWorksheet.AddNextCell("Calc");
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.TaxCode);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.NILetter);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PreTaxAddDed);
+            workbook.CurrentWorksheet.AddNextCell(0.00);//GrossedUpTaxThisRun
+            workbook.CurrentWorksheet.AddNextCell(0.00);//EeNIPdByEr
+            workbook.CurrentWorksheet.AddNextCell(0.00);//GUStudentLoan
+            workbook.CurrentWorksheet.AddNextCell(0.00);//GUNIReduction
+            workbook.CurrentWorksheet.AddNextCell(0.00);//PenPreTaxEeGU
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.AbsencePay);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.HolidayPay);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PreTaxPension);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.TaxablePayTP);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Tax);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.NetNI);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PostTaxAddDed);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PostTaxPension);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.AEO);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.StudentLoan);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.NetPayTP);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.ErNICTP);
+
+            decimal erPensionTP = 0;
+            decimal eePensionTP = 0;
+            foreach (RPPensionPeriod pensionPeriod in rpEmployeePeriod.Pensions)
+            {
+                erPensionTP += pensionPeriod.ErPensionTaxPeriod;
+                eePensionTP += pensionPeriod.EePensionTaxPeriod;
+            }
+            workbook.CurrentWorksheet.AddNextCell(erPensionTP);
+            workbook.CurrentWorksheet.AddNextCell(0.00);//TotalGrossUP
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.ErNICTP + rpEmployeePeriod.NetNI);
+            workbook.CurrentWorksheet.AddNextCell(erPensionTP + eePensionTP);
+
+            return workbook;
+        }
+        public Workbook CreateVariableWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod, List<string> varCol)
+        {
+            foreach (string col in varCol)
+            {
+                //Add in the variable additions.
+                bool colFound = false;
+                foreach (RPAddition rpAddition in rpEmployeePeriod.Additions)
+                {
+                    if (col == rpAddition.Description)
+                    {
+                        workbook.CurrentWorksheet.AddNextCell(rpAddition.AmountTP);
+                        colFound = true;
+                        break;
+                    }
+
+                }
+                //If the column has not been found in additions check the variable deductions.
+                if (!colFound)
+                {
+                    foreach (RPDeduction rpDeduction in rpEmployeePeriod.Deductions)
+                    {
+                        if (col == rpDeduction.Description)
+                        {
+                            workbook.CurrentWorksheet.AddNextCell(rpDeduction.AmountTP);
+                            colFound = true;
+                            break;
+                        }
+
+                    }
+                    //If the column hasn't been found in additions or deduction set it to zero.
+                    if (!colFound)
+                    {
+                        workbook.CurrentWorksheet.AddNextCell(0.00m);
+                    }
+                }
+
+
+
+            }
+
+            return workbook;
+        }
 
     }
     public class ReadConfigFile
@@ -1081,7 +1206,7 @@ namespace PayRunIOClassLibrary
         //
         // Using XDocument instead of XmlReader
         //
-        string fileName = "PayescapeWGtoPR.xml";
+        readonly string fileName = "PayescapeWGtoPR.xml";
         XDocument xdoc = new XDocument();
 
         public ReadConfigFile() { }
@@ -1153,6 +1278,7 @@ namespace PayRunIOClassLibrary
         public bool PayRunDetailsYTDRequired { get; set; }
         public bool PayrollTotalsSummaryRequired { get; set; }
         public bool NoteAndCoinRequired { get; set; }
+        public bool HoldPayHistory { get; set; }
 
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
@@ -1161,7 +1287,7 @@ namespace PayRunIOClassLibrary
                            bool p32Required, string nestPensionText, int? hrEscapeCompanyNo,
                            string reportPassword, bool zipReports, bool reportsInExcelFormat,
                            bool payRunDetailsYTDRequired, bool payrollTotalsSummaryRequired,
-                           bool noteAndCoinRequired)
+                           bool noteAndCoinRequired, bool holdPayHistory)
         {
             Name = name;
             PayeRef = payeRef;
@@ -1178,6 +1304,7 @@ namespace PayRunIOClassLibrary
             PayRunDetailsYTDRequired = payRunDetailsYTDRequired;
             PayrollTotalsSummaryRequired = payrollTotalsSummaryRequired;
             NoteAndCoinRequired = noteAndCoinRequired;
+            HoldPayHistory = holdPayHistory;
         }
     }
 
@@ -1701,6 +1828,7 @@ namespace PayRunIOClassLibrary
         public DateTime EndDate { get; set; }
         public DateTime PayRunDate { get; set; }
         public string SchemeFileType { get; set; }
+        public string AEAssessmentOverride { get; set; }
         public RPPensionPeriod RPPensionPeriod { get; set; }
 
         public RPPensionContribution() { }
@@ -1712,7 +1840,7 @@ namespace PayRunIOClassLibrary
                                      string emailAddress, string gender,
                                      string niNumber, string freq,
                                      DateTime startDate, DateTime endDate,DateTime payRunDate,
-                                     string schemeFileType,
+                                     string schemeFileType, string aeAssessmentOverride,
                                      RPPensionPeriod rpPensionPeriod)
         {
             EeRef = eeRef;
@@ -1734,6 +1862,7 @@ namespace PayRunIOClassLibrary
             EndDate = endDate;
             PayRunDate = payRunDate;
             SchemeFileType = schemeFileType;
+            AEAssessmentOverride = aeAssessmentOverride;
             RPPensionPeriod = rpPensionPeriod;
         }
     }
@@ -2121,12 +2250,13 @@ namespace PayRunIOClassLibrary
         public int TaxYear { get; set; }
         public DateTime TaxYearStartDate { get; set; }
         public DateTime TaxYearEndDate { get; set; }
-        public int AnnualEmploymentAllowance { get; set; }
+        public decimal ApprenticeshipLevyAllowance { get; set; }
+        public decimal AnnualEmploymentAllowance { get; set; }
         public List<RPP32ReportMonth> RPP32ReportMonths { get; set; }
         public RPP32Report() { }
         public RPP32Report(string employerName, string employerPayeRef, string paymentRef,
                                   int taxYear, DateTime taxYearStartDate, DateTime taxYearEndDate,
-                                  int annualEmploymentAllowance,
+                                  decimal apprenticeshipLevyAllowance, decimal annualEmploymentAllowance,
                                   List<RPP32ReportMonth> rpP32ReportMonths)
         {
             EmployerName = employerName;
@@ -2135,6 +2265,7 @@ namespace PayRunIOClassLibrary
             TaxYear = taxYear;
             TaxYearStartDate = taxYearStartDate;
             TaxYearEndDate = taxYearEndDate;
+            ApprenticeshipLevyAllowance = apprenticeshipLevyAllowance;
             AnnualEmploymentAllowance = annualEmploymentAllowance;
             RPP32ReportMonths = rpP32ReportMonths;
         }
@@ -2179,6 +2310,8 @@ namespace PayRunIOClassLibrary
         public decimal ShppComp { get; set; }
         public decimal SapRecovered { get; set; }
         public decimal SapComp { get; set; }
+        public decimal SpbpRecovered { get; set; }
+        public decimal SpbpComp { get; set; }
         public decimal TotalDeductions { get; set; }
         public decimal AppLevy { get; set; }
         public decimal CisDeducted { get; set; }
@@ -2192,7 +2325,8 @@ namespace PayRunIOClassLibrary
         public RPP32Summary(decimal tax, decimal studentLoan, decimal postGraduateLoan, decimal netTax,
                             decimal employerNI, decimal employeeNI, decimal grossNICs, decimal smpRecovered,
                             decimal smpComp, decimal sppRecovered, decimal sppComp, decimal shppRecovered,
-                            decimal shppComp, decimal sapRecovered, decimal sapComp, decimal totalDeductions,
+                            decimal shppComp, decimal sapRecovered, decimal sapComp,
+                            decimal spbpRecovered, decimal spbpComp, decimal totalDeductions,
                             decimal appLevy, decimal cisDeducted, decimal cisSuffered, decimal netNICs,
                             decimal employmentAllowance, decimal amountDue, decimal amountPaid, decimal remainingBalance)
         {
@@ -2211,6 +2345,8 @@ namespace PayRunIOClassLibrary
             ShppComp = shppComp;
             SapRecovered = sapRecovered;
             SapComp = sapComp;
+            SpbpRecovered = spbpRecovered;
+            SpbpComp = spbpComp;
             TotalDeductions = totalDeductions;
             AppLevy = appLevy;
             CisDeducted = cisDeducted;
@@ -2250,18 +2386,20 @@ namespace PayRunIOClassLibrary
     {
         public DateTime PayDate { get; set; }
         public int PayPeriod { get; set; }
+        public int TaxPeriod { get; set; }
         public decimal IncomeTax { get; set; }
         public decimal StudentLoan { get; set; }
         public decimal PostGraduateLoan { get; set; }
         public decimal NetIncomeTax { get; set; }
         public decimal GrossNICs { get; set; }
         public RPP32PayRun() { }
-        public RPP32PayRun(DateTime payDate, int payPeriod, decimal incomeTax,
+        public RPP32PayRun(DateTime payDate, int payPeriod, int taxPeriod, decimal incomeTax,
                            decimal studentLoan, decimal postGraduateLoan,
                            decimal netIncomeTax, decimal grossNICs)
         {
             PayDate = payDate;
             PayPeriod = payPeriod;
+            TaxPeriod = taxPeriod;
             IncomeTax = incomeTax;
             StudentLoan = studentLoan;
             PostGraduateLoan = postGraduateLoan;

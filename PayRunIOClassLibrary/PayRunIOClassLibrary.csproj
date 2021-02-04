@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PayRunIOClassLibrary</RootNamespace>
     <AssemblyName>PayRunIOClassLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -38,14 +38,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AWSSDK.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
-      <HintPath>..\packages\AWSSDK.Core.3.5.1.48\lib\net45\AWSSDK.Core.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\AWSSDK.Core.3.5.1.59\lib\net45\AWSSDK.Core.dll</HintPath>
     </Reference>
     <Reference Include="AWSSDK.S3, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604, processorArchitecture=MSIL">
-      <HintPath>..\packages\AWSSDK.S3.3.5.6.4\lib\net45\AWSSDK.S3.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\AWSSDK.S3.3.5.7.6\lib\net45\AWSSDK.S3.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.BonusSkins.v20.1, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Charts.v20.2.Core, Version=20.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.Charts.Core.20.2.4\lib\net452\DevExpress.Charts.v20.2.Core.dll</HintPath>
       <Private>True</Private>
@@ -174,10 +171,6 @@
       <HintPath>..\packages\DevExpress.Win.Printing.20.2.4\lib\net452\DevExpress.XtraPrinting.v20.2.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DevExpress.XtraReports.v20.1.CodeCompletion, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.XtraReports.v20.1.Extensions, Version=20.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\packages\DevExpress.Win.Reporting.20.1.4\lib\net452\DevExpress.XtraReports.v20.1.Extensions.dll</HintPath>
-    </Reference>
     <Reference Include="DevExpress.XtraReports.v20.2, Version=20.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\packages\DevExpress.Reporting.Core.20.2.4\lib\net452\DevExpress.XtraReports.v20.2.dll</HintPath>
       <Private>True</Private>
@@ -210,29 +203,23 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\PayRunIOProcessReports\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.Core.Enums, Version=20.21.6.43, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PayRunIO.Core.Enums.20.21.6.43\lib\net452\PayRunIO.Core.Enums.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="PayRunIO.Core.Enums, Version=20.21.6.52, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayRunIO.Core.Enums.20.21.6.52\lib\net461\PayRunIO.Core.Enums.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.CSharp.SDK, Version=20.21.6.43, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PayRunIO.CSharp.SDK.20.21.6.43\lib\net452\PayRunIO.CSharp.SDK.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="PayRunIO.CSharp.SDK, Version=20.21.6.52, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayRunIO.CSharp.SDK.20.21.6.52\lib\net461\PayRunIO.CSharp.SDK.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.Models, Version=20.21.6.43, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PayRunIO.Models.20.21.6.43\lib\net452\PayRunIO.Models.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="PayRunIO.Models, Version=20.21.6.52, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayRunIO.Models.20.21.6.52\lib\net461\PayRunIO.Models.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.OAuth1, Version=20.21.6.43, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PayRunIO.OAuth1.20.21.6.43\lib\net452\PayRunIO.OAuth1.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="PayRunIO.OAuth1, Version=20.21.6.52, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayRunIO.OAuth1.20.21.6.52\lib\net461\PayRunIO.OAuth1.dll</HintPath>
     </Reference>
-    <Reference Include="PayRunIO.Utilities, Version=20.21.6.43, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PayRunIO.Utilities.20.21.6.43\lib\net452\PayRunIO.Utilities.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="PayRunIO.Utilities, Version=20.21.6.52, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PayRunIO.Utilities.20.21.6.52\lib\net461\PayRunIO.Utilities.dll</HintPath>
     </Reference>
-    <Reference Include="PicoXLSX, Version=2.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PicoXLSX.2.7.0\lib\net45\PicoXLSX.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="PicoXLSX, Version=2.8.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PicoXLSX.2.8.1\lib\net45\PicoXLSX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -254,6 +241,8 @@
   <ItemGroup>
     <EmbeddedResource Include="NoteAndCoinRequirementReport.repx" />
     <EmbeddedResource Include="CombinedPayrollRunReport.repx" />
+    <EmbeddedResource Include="P11Substitute.repx" />
+    <EmbeddedResource Include="ApprenticeshipLevyReport.repx" />
     <None Include="packages.config" />
     <None Include="PayRunIOClassLibrary.snk" />
     <EmbeddedResource Include="PensionContributionsToDateReport.repx" />
