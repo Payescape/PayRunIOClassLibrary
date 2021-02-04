@@ -23,6 +23,7 @@ namespace PayRunIOClassLibrary
         // Contacts to move to Payrun.io meta data:https://payrun.atlassian.net/browse/PEINT-330
         public void UpdateContactDetails(XDocument xdoc)
         {
+            string jim = "jim";
             string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
             string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL"; 
             string dataBase = xdoc.Root.Element("Database").Value;
