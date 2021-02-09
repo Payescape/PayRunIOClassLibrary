@@ -243,9 +243,19 @@
     <EmbeddedResource Include="CombinedPayrollRunReport.repx" />
     <EmbeddedResource Include="P11Substitute.repx" />
     <EmbeddedResource Include="ApprenticeshipLevyReport.repx" />
+    <EmbeddedResource Include="ComponentAnalysisReport.repx" />
+    <EmbeddedResource Include="P45.repx" />
+    <EmbeddedResource Include="P32Report.repx" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="PaymentsDueByMethodsReport.repx" />
+    <EmbeddedResource Include="PayrollRunDetailsReport.repx" />
+    <EmbeddedResource Include="PayrollRunDetailsYTDReport.repx" />
+    <EmbeddedResource Include="PayrollTotalsSummaryReport.repx" />
     <None Include="PayRunIOClassLibrary.snk" />
     <EmbeddedResource Include="PensionContributionsToDateReport.repx" />
+    <EmbeddedResource Include="Payslip.repx" />
+    <EmbeddedResource Include="PayslipSimple.repx" />
+    <EmbeddedResource Include="PensionContributionsReport.repx" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\AWSSDK.S3.3.5.4.1\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
