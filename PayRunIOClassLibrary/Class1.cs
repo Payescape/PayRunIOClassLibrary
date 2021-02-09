@@ -510,7 +510,7 @@ namespace PayRunIOClassLibrary
 
             return xmlReport;
         }
-        public string GetSmartPensionsReport(XDocument xdoc, RPParameters rpParameters)
+        public string GetCsvPensionsReport(XDocument xdoc, RPParameters rpParameters, RPPensionFileScheme rpPensionFileScheme)
         {
             string rptRef = "PAPDIS";
             string parameter1 = "EmployerKey";
@@ -520,20 +520,26 @@ namespace PayRunIOClassLibrary
             string parameter5 = "PensionKey";
             string parameter6 = "TransformDefinitionKey";
 
-            //Testing
-            //rpParameters.ErRef = "1107";
-            //rpParameters.PaySchedule = "Weekly";
-            //rpParameters.PayRunDate = new DateTime(2020,10,22);
+            string transformKey = null;
+            if (rpPensionFileScheme.ProviderName == "SMART PENSION")
+            {
+                //Get the Smart Pensions report
+                transformKey = "PE-PAPDIS1-CSV";
+            }
+            else if (rpPensionFileScheme.ProviderName == "ROYAL LONDON PENSION")
+            {
+                //Get the Royal London Pensions report
+                transformKey = "RL-PENSION-CSV";
+            }
 
-            //Get the Smart Pensions report
-            string  csvReport = RunTransformReport(xdoc, rptRef,
+            string csvReport = RunTransformReport(xdoc, rptRef,
                                 parameter1, rpParameters.ErRef,
                                 parameter2, rpParameters.PaySchedule,
-                                parameter3, rpParameters.TaxYear.ToString(), 
+                                parameter3, rpParameters.TaxYear.ToString(),
                                 parameter4, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
-                                parameter5, rpParameters.PensionKey.ToString(), 
-                                parameter6, "PE-PAPDIS1-CSV");
-
+                                parameter5, rpPensionFileScheme.Key.ToString(),
+                                parameter6, transformKey);
+            
 
             return csvReport;
         }
