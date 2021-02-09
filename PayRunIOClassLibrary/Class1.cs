@@ -193,8 +193,10 @@ namespace PayRunIOClassLibrary
                     foreach (string column in colFields)
                     {
 
-                        DataColumn datacolumn = new DataColumn(column);
-                        datacolumn.AllowDBNull = true;
+                        DataColumn datacolumn = new DataColumn(column)
+                        {
+                            AllowDBNull = true
+                        };
                         //
                         // Check to make sure we don't have two columns with the same name.
                         //
@@ -550,19 +552,6 @@ namespace PayRunIOClassLibrary
 
             return xmlReport;
         }
-        private int GetTaxMonth(DateTime thisDate)
-        {
-            int taxMonth = thisDate.Month - 3;
-            if (thisDate.Day < 6)
-            {
-                taxMonth -= 1;
-            }
-            if (taxMonth < 1)
-            {
-                taxMonth += 12;
-            }
-            return taxMonth;
-        }
         public string[] GetAListOfDirectories(XDocument xdoc, string source)
         {
             string path = xdoc.Root.Element("DataHomeFolder").Value + source;
@@ -681,20 +670,6 @@ namespace PayRunIOClassLibrary
             }
             return rpEmployer;
         }
-        public RPEmployer GetRPEmployer(XmlDocument xmlReport, RPParameters rpParameters)
-        {
-            RPEmployer rpEmployer = new RPEmployer();
-            foreach (XmlElement employer in xmlReport.GetElementsByTagName("Employer"))
-            {
-                rpEmployer.Name = GetElementByTagFromXml(employer, "Name");
-                rpEmployer.PayeRef = GetElementByTagFromXml(employer, "EmployerPayeRef");
-                
-            }
-
-            
-            return rpEmployer;
-        }
-
         public void ArchiveRTIOutputs(string directory, FileInfo file)
         {
             //Move RTI file to PE-ArchivedRTI from Outputs
@@ -949,9 +924,11 @@ namespace PayRunIOClassLibrary
             }
             foreach (DataRow drContactInfo in dtContactInfo.Rows)
             {
-                ContactInfo contactInfo = new ContactInfo();
-                contactInfo.EmailAddress = drContactInfo.ItemArray[0].ToString();
-                contactInfo.FirstName = drContactInfo.ItemArray[1].ToString();
+                ContactInfo contactInfo = new ContactInfo()
+                {
+                    EmailAddress = drContactInfo.ItemArray[0].ToString(),
+                    FirstName = drContactInfo.ItemArray[1].ToString()
+                };
                 contactInfoList.Add(contactInfo);
             }
 
@@ -1057,42 +1034,148 @@ namespace PayRunIOClassLibrary
 
             return xtraReport;
         }
+        public XtraReport CreatePDFReport(List<RPEmployeePeriod> rpEmployeePeriodList, RPEmployer rpEmployer, RPParameters rpParameters, string reportName, string assemblyName)
+        {
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
+            //Load report
+            reportName += ".repx";
+            var reportLayout = ResourceHelper.ReadResourceFileToStream(
+                assemblyName, reportName);
+            XtraReport xtraReport = XtraReport.FromStream(reportLayout);
+            xtraReport.Parameters["CmpName"].Value = rpEmployer.Name;
+            xtraReport.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+            xtraReport.Parameters["Date"].Value = rpParameters.PayRunDate;
+            xtraReport.Parameters["Period"].Value = rpParameters.PeriodNo;
+            xtraReport.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            xtraReport.Parameters["PAYEMonth"].Value = payeMonth;
+            xtraReport.DataSource = rpEmployeePeriodList;
+
+            return xtraReport;
+        }
+        public XtraReport CreatePDFReport(List<RPPensionContribution> rpPensionContributions, RPEmployer rpEmployer, RPParameters rpParameters, string reportName, string assemblyName)
+        {
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
+            //Load report
+            reportName += ".repx";
+            var reportLayout = ResourceHelper.ReadResourceFileToStream(
+                assemblyName, reportName);
+            XtraReport xtraReport = XtraReport.FromStream(reportLayout);
+            xtraReport.Parameters["CmpName"].Value = rpEmployer.Name;
+            xtraReport.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+            xtraReport.Parameters["Date"].Value = rpParameters.PayRunDate;
+            xtraReport.Parameters["Period"].Value = rpParameters.PeriodNo;
+            xtraReport.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            xtraReport.Parameters["PAYEMonth"].Value = payeMonth;
+            xtraReport.DataSource = rpPensionContributions;
+
+            return xtraReport;
+        }
+        public XtraReport CreatePDFReport(List<RPPayComponent> rpPayComponents, RPEmployer rpEmployer, RPParameters rpParameters, bool showDetail, string reportName, string assemblyName)
+        {
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
+            //Load report
+            reportName += ".repx";
+            var reportLayout = ResourceHelper.ReadResourceFileToStream(
+                assemblyName, reportName);
+            XtraReport xtraReport = XtraReport.FromStream(reportLayout);
+            xtraReport.Parameters["CmpName"].Value = rpEmployer.Name;
+            xtraReport.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+            xtraReport.Parameters["Date"].Value = rpParameters.PayRunDate;
+            xtraReport.Parameters["Period"].Value = rpParameters.PeriodNo;
+            xtraReport.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            xtraReport.Parameters["PAYEMonth"].Value = payeMonth;
+            xtraReport.Parameters["ShowDetailBand"].Value = showDetail;
+            xtraReport.DataSource = rpPayComponents;
+
+            return xtraReport;
+        }
+        public XtraReport CreatePDFReport(List<P45> p45s, string reportName, string assemblyName)
+        {
+            //Load report
+            reportName += ".repx";
+            var reportLayout = ResourceHelper.ReadResourceFileToStream(
+                assemblyName, reportName);
+            XtraReport xtraReport = XtraReport.FromStream(reportLayout);
+            xtraReport.DataSource = p45s;
+
+            return xtraReport;
+        }
+        public XtraReport CreatePDFReport(RPP32Report rpP32Report, RPEmployer rpEmployer, RPParameters rpParameters, string reportName, string assemblyName)
+        {
+            var payeMonth = rpParameters.PayRunDate.Day < 6 ? rpParameters.PayRunDate.Month - 4 : rpParameters.PayRunDate.Month - 3;
+            if (payeMonth <= 0)
+            {
+                payeMonth += 12;
+            }
+            //Load report
+            reportName += ".repx";
+            var reportLayout = ResourceHelper.ReadResourceFileToStream(
+                assemblyName, reportName);
+            XtraReport xtraReport = XtraReport.FromStream(reportLayout);
+            xtraReport.Parameters["CmpName"].Value = rpEmployer.Name;
+            xtraReport.Parameters["PayeRef"].Value = rpEmployer.PayeRef;
+            xtraReport.Parameters["Date"].Value = rpParameters.PayRunDate;
+            xtraReport.Parameters["Period"].Value = rpParameters.PeriodNo;
+            xtraReport.Parameters["Freq"].Value = rpParameters.PaySchedule;
+            xtraReport.Parameters["PAYEMonth"].Value = payeMonth;
+            xtraReport.Parameters["AnnualEmploymentAllowance"].Value = rpP32Report.AnnualEmploymentAllowance;
+            xtraReport.Parameters["PaymentRef"].Value = rpP32Report.PaymentRef;
+            xtraReport.Parameters["TaxYearStartDate"].Value = rpP32Report.TaxYearStartDate;
+            xtraReport.Parameters["TaxYearEndDate"].Value = rpP32Report.TaxYearEndDate;
+            xtraReport.DataSource = rpP32Report.RPP32ReportMonths;
+
+            return xtraReport;
+        }
         public List<string> CreateListOfFixedColumns()
         {
             //Create a list of the required fixed columns.
-            List<string> fixCol = new List<string>();
-            fixCol.Add("PayRunDate");
-            fixCol.Add("EeRef");
-            fixCol.Add("Name");
-            fixCol.Add("Dept");
-            fixCol.Add("CostCentre");
-            fixCol.Add("Branch");
-            fixCol.Add("Status");
-            fixCol.Add("TaxCode");
-            fixCol.Add("NILetter");
-            fixCol.Add("PreTaxAddDed");
-            fixCol.Add("GrossedUpTaxThisRun");
-            fixCol.Add("EeNIPdByEr");
-            fixCol.Add("GUStudentLoan");
-            fixCol.Add("GUNIReduction");
-            fixCol.Add("PenPreTaxEeGU");
-            fixCol.Add("TotalAbsencePay");
-            fixCol.Add("HolidayPay");
-            fixCol.Add("PenPreTaxEe");
-            fixCol.Add("TaxablePay");
-            fixCol.Add("Tax");
-            fixCol.Add("NI");
-            fixCol.Add("PostTaxAddDed");
-            fixCol.Add("PostTaxPension");
-            fixCol.Add("AEO");
-            fixCol.Add("StudentLoan");
-            fixCol.Add("NetPay");
-            fixCol.Add("ErNI");
-            fixCol.Add("PenEr");
-            fixCol.Add("TotalGrossUp");
-            fixCol.Add("TotalNICs");
-            fixCol.Add("TotalPens");
-
+            List<string> fixCol = new List<string>()
+            {
+                "PayRunDate",
+                "EeRef",
+                "Name",
+                "Dept",
+                "CostCentre",
+                "Branch",
+                "Status",
+                "TaxCode",
+                "NILetter",
+                "PreTaxAddDed",
+                "GrossedUpTaxThisRun",
+                "EeNIPdByEr",
+                "GUStudentLoan",
+                "GUNIReduction",
+                "PenPreTaxEeGU",
+                "TotalAbsencePay",
+                "HolidayPay",
+                "PenPreTaxEe",
+                "TaxablePay",
+                "Tax",
+                "NI",
+                "PostTaxAddDed",
+                "PostTaxPension",
+                "AEO",
+                "StudentLoan",
+                "NetPay",
+                "ErNI",
+                "PenEr",
+                "TotalGrossUp",
+                "TotalNICs",
+                "TotalPens"
+            };
+            
             return fixCol;
         }
         public List<string> CreateListOfVariableColumns(List<RPPreSamplePayCode> rpPreSamplePayCodes)
@@ -1633,11 +1716,10 @@ namespace PayRunIOClassLibrary
                           string studentLoanPlanType, decimal studentLoanDeductionsYTD, DateTime? postgraduateLoanStartDate, DateTime? postgraduateLoanEndDate,
                           decimal postgraduateLoanDeductionsYTD,
                           RPNicYtd nicYtd, RPNicAccountingPeriod nicAccountingPeriod,
-                          decimal eeReduction, 
                           string taxCode, bool week1Month1, int weekNumber, int monthNumber, int periodNumber,
                           decimal eeNiPaidByErAccountsAmount, decimal eeNiPaidByErAccountsUnits, decimal eeGuTaxPaidByErAccountsAmount, decimal eeGuTaxPaidByErAccountsUnits,
                           decimal eeNiLERtoUERAccountsAmount, decimal eeNiLERtoUERAccountsUnits, decimal eeNiLERtoUERPayeAmount, decimal eeNiLERtoUERPayeUnits,
-                          decimal erNiAccountsAmount, decimal erNiAccountsUnits, decimal erNiLERtoUERPayeAmount, decimal erNiLERtoUERPayeUnits, decimal eeNiPaidByErPayeAmount,
+                          decimal erNiAccountsAmount, decimal erNiAccountsUnits, decimal eeNiPaidByErPayeAmount,
                           decimal eeNiPaidByErPayeUnits, decimal eeGuTaxPaidByErPayeAmount, decimal eeGuTaxPaidByErPayeUnits, decimal erNiPayeAmount, decimal erNiPayeUnits,
                           List<RPPayCode> payCodes)
                           
@@ -1645,9 +1727,9 @@ namespace PayRunIOClassLibrary
             ThisPeriodStartDate = thisPeriodStartDate;
             LastPaymentDate = lastPaymentDate;
             EeRef = eeRef;
-            Branch = Branch;
-            CostCentre = CostCentre;
-            Department = Department;
+            Branch = branch;
+            CostCentre = costCentre;
+            Department = department;
             LeavingDate = leavingDate;
             Leaver = leaver;
             TaxPrevEmployment = taxPrevEmployment;
@@ -2031,7 +2113,7 @@ namespace PayRunIOClassLibrary
             PayToDate = payToDate;
             TaxToDate = taxToDate;
             PayThis = payThis;
-            TaxThis = TaxThis;
+            TaxThis = taxThis;
             EeRef = eeRef;
             IsMale = isMale;
             DateOfBirth = dateOfBirth;
@@ -2180,7 +2262,7 @@ namespace PayRunIOClassLibrary
             PayeAmount = payeAmount;
             AccountsUnits = accountsUnits;
             PayeUnits = payeUnits;
-            IsPayCode = IsPayCode;
+            IsPayCode = isPayCode;
         }
     }
     //Report (RP) PreSamplePayCode
@@ -2575,7 +2657,7 @@ namespace PayRunIOClassLibrary
         {
             PaymentDate = paymentDate;
             TaxPeriod = taxPeriod;
-            TaxYear = TaxYear;
+            TaxYear = taxYear;
             RPBranches = rpBranches;
             PAYEMonth = payeMonth;
         }
