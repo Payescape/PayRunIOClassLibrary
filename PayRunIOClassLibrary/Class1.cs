@@ -520,18 +520,30 @@ namespace PayRunIOClassLibrary
             string parameter5 = "PensionKey";
             string parameter6 = "TransformDefinitionKey";
 
-            string transformKey = null;
-            if (rpPensionFileScheme.ProviderName == "SMART PENSION")
+            string transformKey;
+            switch(rpPensionFileScheme.ProviderName)
             {
-                //Get the Smart Pensions report
-                transformKey = "PE-PAPDIS1-CSV";
+                case "ROYAL LONDON PENSION":
+                    //Get the Royal London Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "NOW PENSION":
+                    //Get the Now Pensions report
+                    transformKey = "RL-PENSION-CSV"; //TODO change this to NOW-PENSION-CSV or whatever Tim calls it.
+                    break;
+                case "LEGAL & GENERAL PENSION":
+                    //Get the Now Pensions report
+                    transformKey = "RL-PENSION-CSV"; //TODO change this to LG-PENSION-CSV or whatever Tim calls it.
+                    break;
+                case "AEGON PENSION":
+                    //Get the Now Pensions report
+                    transformKey = "RL-PENSION-CSV"; //TODO change this to AE-PENSION-CSV or whatever Tim calls it.
+                    break;
+                default:
+                    //Get the Smart Pensions report
+                    transformKey = "PE-PAPDIS1-CSV";
+                    break;
             }
-            else if (rpPensionFileScheme.ProviderName == "ROYAL LONDON PENSION")
-            {
-                //Get the Royal London Pensions report
-                transformKey = "RL-PENSION-CSV";
-            }
-
             string csvReport = RunTransformReport(xdoc, rptRef,
                                 parameter1, rpParameters.ErRef,
                                 parameter2, rpParameters.PaySchedule,
