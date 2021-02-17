@@ -1156,7 +1156,7 @@ namespace PayRunIOClassLibrary
 
             return xtraReport;
         }
-        public List<string> CreateListOfFixedColumns()
+        private List<string> CreateListOfFixedColumns()
         {
             //Create a list of the required fixed columns.
             List<string> fixCol = new List<string>()
@@ -1196,7 +1196,7 @@ namespace PayRunIOClassLibrary
             
             return fixCol;
         }
-        public List<string> CreateListOfVariableColumns(List<RPPreSamplePayCode> rpPreSamplePayCodes)
+        private List<string> CreateListOfVariableColumns(List<RPPreSamplePayCode> rpPreSamplePayCodes)
         {
             //Create a list of the required variable columns.
             List<string> varCol = new List<string>();
@@ -1214,7 +1214,7 @@ namespace PayRunIOClassLibrary
 
             return varCol;
         }
-        public Workbook CreateFixedWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod)
+        private Workbook CreateFixedWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod)
         {
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PayRunDate);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Reference);
@@ -1258,7 +1258,7 @@ namespace PayRunIOClassLibrary
 
             return workbook;
         }
-        public Workbook CreateVariableWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod, List<string> varCol)
+        private Workbook CreateVariableWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod, List<string> varCol)
         {
             foreach (string col in varCol)
             {
@@ -1300,7 +1300,288 @@ namespace PayRunIOClassLibrary
 
             return workbook;
         }
+        private List<RPPreSamplePayCode> CreateListOfRequiredColumns(XmlDocument xmlReport)
+        {
+            RPPreSamplePayCode rpPreSamplePayCode;
+            //Create a list of all possible pay codes. For this purpose pensions can be turned into pay codes.
+            List<RPPreSamplePayCode> rpPreSamplePayCodes = new List<RPPreSamplePayCode>();
 
+            //There could be multiple payruns in this xml file.
+            foreach (XmlElement payRun in xmlReport.GetElementsByTagName("PayRun"))
+            {
+                DateTime payRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(payRun, "PayRunDate"));
+                //There could be multiple employees in each pay run.
+                foreach (XmlElement employee in payRun.GetElementsByTagName("Employee"))
+                {
+                    //There could be multiple pensions in each employee.
+                    foreach (XmlElement pension in employee.GetElementsByTagName("Pension"))
+                    {
+                        string eeCode = GetElementByTagFromXml(pension, "Code") +
+                                   GetElementByTagFromXml(pension, "ProviderName");
+                        string eeDesc = GetElementByTagFromXml(pension, "SchemeName");
+                        string erCode = eeCode + "(Er)";
+                        string erDesc = eeDesc + "(Er)";
+                        //Add the Er pension
+                        rpPreSamplePayCode = new RPPreSamplePayCode()
+                        {
+                            Code = erCode,
+                            Description = erDesc,
+                            InUse = true
+                        };
+                        rpPreSamplePayCodes = CheckAddToList(rpPreSamplePayCodes, rpPreSamplePayCode);
+                        //Add the Ee Pension
+                        rpPreSamplePayCode = new RPPreSamplePayCode()
+                        {
+                            Code = eeCode,
+                            Description = eeDesc,
+                            InUse = true
+                        };
+                        rpPreSamplePayCodes = CheckAddToList(rpPreSamplePayCodes, rpPreSamplePayCode);
+                    }
+                    //There could be multiple pay codes in each employee.
+                    foreach (XmlElement payCode in employee.GetElementsByTagName("PayCode"))
+                    {
+                        rpPreSamplePayCode = new RPPreSamplePayCode()
+                        {
+                            Code = GetElementByTagFromXml(payCode, "Code"),
+                            Description = GetElementByTagFromXml(payCode, "Description"),
+                            InUse = true
+                        };
+                        rpPreSamplePayCodes = CheckAddToList(rpPreSamplePayCodes, rpPreSamplePayCode);
+                    }
+                }
+            }
+            return rpPreSamplePayCodes;
+        }
+        private List<RPEmployeePeriod> CreateListOfEmployeePeriods(XmlDocument xmlReport)
+        {
+            //Create a list of all the employees within each pay run date.
+            List<RPEmployeePeriod> rpEmployeePeriods = new List<RPEmployeePeriod>();
+            //There could be multiple payruns in this xml file.
+            foreach (XmlElement payRun in xmlReport.GetElementsByTagName("PayRun"))
+            {
+                DateTime payRunDate = Convert.ToDateTime(GetDateElementByTagFromXml(payRun, "PaymentDate"));
+                //There could be multiple employees in each pay run.
+                foreach (XmlElement employee in payRun.GetElementsByTagName("Employee"))
+                {
+                    RPEmployeePeriod rpEmployeePeriod = new RPEmployeePeriod();
+                    rpEmployeePeriod.PayRunDate = payRunDate;
+                    rpEmployeePeriod.Reference = GetElementByTagFromXml(employee, "Code");
+                    rpEmployeePeriod.Fullname = GetElementByTagFromXml(employee, "LastName") +
+                                                       " " +
+                                                       GetElementByTagFromXml(employee, "FirstName");
+                    rpEmployeePeriod.TaxCode = GetElementByTagFromXml(employee, "PayLineTaxCode");
+                    rpEmployeePeriod.NILetter = GetElementByTagFromXml(employee, "NiLetter");
+                    rpEmployeePeriod.PreTaxAddDed = GetDecimalElementByTagFromXml(employee, "PreTaxAddDed");
+                    rpEmployeePeriod.AbsencePay = GetDecimalElementByTagFromXml(employee, "AbsencePay");
+                    rpEmployeePeriod.HolidayPay = GetDecimalElementByTagFromXml(employee, "HolidayPay");
+                    rpEmployeePeriod.PreTaxPension = GetDecimalElementByTagFromXml(employee, "PreTaxPension");
+                    rpEmployeePeriod.TaxablePayTP = GetDecimalElementByTagFromXml(employee, "TaxablePay");
+                    rpEmployeePeriod.Tax = GetDecimalElementByTagFromXml(employee, "Tax");
+                    rpEmployeePeriod.NetNI = GetDecimalElementByTagFromXml(employee, "NetEeNi");
+                    rpEmployeePeriod.PostTaxAddDed = GetDecimalElementByTagFromXml(employee, "PostTaxAddDed");
+                    rpEmployeePeriod.PostTaxPension = GetDecimalElementByTagFromXml(employee, "PostTaxPension");
+                    rpEmployeePeriod.AEO = GetDecimalElementByTagFromXml(employee, "AEO");
+                    rpEmployeePeriod.StudentLoan = GetDecimalElementByTagFromXml(employee, "StudentLoan");
+                    rpEmployeePeriod.NetPayTP = GetDecimalElementByTagFromXml(employee, "NetPay");
+                    rpEmployeePeriod.ErNICTP = GetDecimalElementByTagFromXml(employee, "ErNi");
+                    rpEmployeePeriod.ErPensionTotalTP = GetDecimalElementByTagFromXml(employee, "ErPension");
+
+                    List<RPAddition> rpAdditions = new List<RPAddition>();
+                    List<RPDeduction> rpDeductions = new List<RPDeduction>();
+                    List<RPPensionPeriod> rpPensionPeriods = new List<RPPensionPeriod>();
+                    //There could be multiple pensions in each employee.
+                    foreach (XmlElement pension in employee.GetElementsByTagName("Pension"))
+                    {
+                        RPPensionPeriod rpPensionPeriod = new RPPensionPeriod();
+                        rpPensionPeriod.Key = Convert.ToInt32(pension.GetAttribute("Key"));
+                        rpPensionPeriod.Code = GetElementByTagFromXml(pension, "Code");
+                        rpPensionPeriod.ProviderName = GetElementByTagFromXml(pension, "ProviderName");
+                        rpPensionPeriod.SchemeName = GetElementByTagFromXml(pension, "SchemeName");
+                        rpPensionPeriod.StartJoinDate = GetDateElementByTagFromXml(pension, "StartJoinDate");
+                        rpPensionPeriod.IsJoiner = GetBooleanElementByTagFromXml(pension, "IsJoiner");
+                        rpPensionPeriod.ProviderEmployerReference = GetElementByTagFromXml(pension, "ProviderEmployerRef");
+                        rpPensionPeriod.EePensionYtd = GetDecimalElementByTagFromXml(pension, "EePensionYtd");
+                        rpPensionPeriod.ErPensionYtd = GetDecimalElementByTagFromXml(pension, "ErPensionYtd");
+                        rpPensionPeriod.PensionablePayYtd = GetDecimalElementByTagFromXml(pension, "PensionablePayYtd");
+                        rpPensionPeriod.EePensionTaxPeriod = GetDecimalElementByTagFromXml(pension, "EePensionTaxPeriod");
+                        rpPensionPeriod.ErPensionTaxPeriod = GetDecimalElementByTagFromXml(pension, "ErPensionTaxPeriod");
+                        rpPensionPeriod.PensionablePayTaxPeriod = GetDecimalElementByTagFromXml(pension, "PensionablePayTaxPeriod");
+                        rpPensionPeriod.EePensionPayRunDate = GetDecimalElementByTagFromXml(pension, "EePensionPayRunDate");
+                        rpPensionPeriod.ErPensionPayRunDate = GetDecimalElementByTagFromXml(pension, "ErPensionPayRunDate");
+                        rpPensionPeriod.PensionablePayPayRunDate = GetDecimalElementByTagFromXml(pension, "PensionablePayDate");
+                        rpPensionPeriod.EeContibutionPercent = GetDecimalElementByTagFromXml(pension, "EeContributionPercent") * 100;
+                        rpPensionPeriod.ErContributionPercent = GetDecimalElementByTagFromXml(pension, "ErContributionPercent") * 100;
+                        rpPensionPeriod.TotalPayTaxPeriod = rpEmployeePeriod.Gross;
+
+                        rpPensionPeriods.Add(rpPensionPeriod);
+
+                        string eeCode = GetElementByTagFromXml(pension, "Code") +
+                                   GetElementByTagFromXml(pension, "ProviderName");
+                        string eeDesc = GetElementByTagFromXml(pension, "SchemeName");
+                        string erCode = eeCode + "(Er)";
+                        string erDesc = eeDesc + "(Er)";
+                        //Add as an addition to the employee period object for Ee pension
+                        RPAddition rpAddition = new RPAddition()
+                        {
+                            Code = erCode,
+                            Description = erDesc,
+                            AmountTP = GetDecimalElementByTagFromXml(pension, "ErPensionTaxPeriod")
+                        };
+                        rpAdditions.Add(rpAddition);
+                        //Add as an addition to the employee period object for Ee pension
+                        rpAddition = new RPAddition()
+                        {
+                            Code = eeCode,
+                            Description = eeDesc,
+                            AmountTP = GetDecimalElementByTagFromXml(pension, "EePensionTaxPeriod")
+                        };
+                        rpAdditions.Add(rpAddition);
+                    }
+                    rpEmployeePeriod.Pensions = rpPensionPeriods;
+                    //There could be multiple pay codes in each employee.
+                    foreach (XmlElement payCode in employee.GetElementsByTagName("PayCode"))
+                    {
+                        //Add them all as additions for the purposes of this report
+                        RPAddition rpAddition = new RPAddition()
+                        {
+                            Code = GetElementByTagFromXml(payCode, "Code"),
+                            Description = GetElementByTagFromXml(payCode, "Description"),
+                            AmountTP = GetDecimalElementByTagFromXml(payCode, "Amount")
+                        };
+                        //If it's a deduction multiply by -1
+                        if (GetElementByTagFromXml(payCode, "EarningOrDeduction") == "D")
+                        {
+                            rpAddition.AmountTP *= -1;
+                        }
+
+                        rpAdditions.Add(rpAddition);
+
+                    }
+                    rpEmployeePeriod.Additions = rpAdditions;
+                    rpEmployeePeriod.Deductions = rpDeductions;
+                    rpEmployeePeriods.Add(rpEmployeePeriod);
+                }
+
+            }
+            return rpEmployeePeriods;
+        }
+        private List<RPPreSamplePayCode> CheckAddToList(List<RPPreSamplePayCode> rpPreSamplePayCodes, RPPreSamplePayCode rpPreSampleNewPayCode)
+        {
+            bool inList = false;
+            foreach (RPPreSamplePayCode rpPreSamplePayCode in rpPreSamplePayCodes)
+            {
+                if (rpPreSampleNewPayCode.Code == rpPreSamplePayCode.Code)
+                {
+                    inList = true;
+                    break;
+                }
+            }
+            if (!inList)
+            {
+                rpPreSamplePayCodes.Add(rpPreSampleNewPayCode);
+            }
+            return rpPreSamplePayCodes;
+        }
+        public PicoXLSX.Workbook PreparePreReport(XmlDocument xmlReport, PicoXLSX.Workbook workbook)
+        {
+            //Create a list of pay codes that are in use.
+            List<RPPreSamplePayCode> rpPreSamplePayCodes = CreateListOfRequiredColumns(xmlReport);
+            //Create a list of the fixed columns required.
+            List<string> fixCol = CreateListOfFixedColumns();
+            //Create a list of the variable columns required.
+            List<string> varCol = CreateListOfVariableColumns(rpPreSamplePayCodes);
+            //Create a list of employee period object within each pay run.
+            List<RPEmployeePeriod> rpEmployeePeriods = CreateListOfEmployeePeriods(xmlReport);
+
+            //Create a workbook.
+            workbook = CreatePreXLSX(rpEmployeePeriods, fixCol, varCol, workbook);
+
+            return workbook;
+        }
+        public PicoXLSX.Workbook CreatePreXLSX(List<RPEmployeePeriod> rpEmployeePeriodList,
+                                       List<string> fixCol, List<string> varCol,
+                                       PicoXLSX.Workbook workbook)
+        {
+            //Add the fixed headings
+            foreach (string col in fixCol)
+            {
+                workbook.CurrentWorksheet.AddNextCell(col, PicoXLSX.Style.BasicStyles.Bold);
+
+            }
+            //Add the variable headings
+            foreach (string col in varCol)
+            {
+                workbook.CurrentWorksheet.AddNextCell(col, PicoXLSX.Style.BasicStyles.Bold);
+            }
+
+            //Now for each employee create a row and add in the values for each column
+            foreach (RPEmployeePeriod rpEmployeePeriod in rpEmployeePeriodList)
+            {
+                workbook.CurrentWorksheet.GoToNextRow();
+
+                workbook = CreateFixedWorkbookColumns(workbook, rpEmployeePeriod);
+                workbook = CreateVariableWorkbookColumns(workbook, rpEmployeePeriod, varCol);
+
+            }
+            //Try adding a formula
+            workbook.CurrentWorksheet.GoToNextRow();
+            workbook.CurrentWorksheet.GoToNextRow();
+
+            workbook.CurrentWorksheet.AddNextCell("Totals", PicoXLSX.Style.BasicStyles.ColorizedText("990000"));
+
+            //From Reference column to NILetter column
+            for (int i = 0; i < 8; i++)
+            {
+                workbook.CurrentWorksheet.AddNextCell("");
+            }
+            //The first 9 columns are text and cannot be summed. 
+            //The can be summed using a formula in the form =SUM(J2:J61). Column J is column 10 and is the first summable column.
+            int rows = rpEmployeePeriodList.Count + 1;
+            int cols = fixCol.Count + varCol.Count - 9;
+            for (int i = 10; i < cols + 10; i++)
+            {
+                string colName = GetExcelColumnName(i);
+                string formula = "=SUM(" + colName + "2:" + colName + rows + ")";
+                workbook.WS.Formula(formula, PicoXLSX.Style.BasicStyles.ColorizedText("990000"));
+            }
+
+            return workbook;
+
+        }
+        public string GetEmployerNumber(XmlDocument xmlReport)
+        {
+            string coNo = null;
+            foreach (XmlElement parameters in xmlReport.GetElementsByTagName("Parameters"))
+            {
+                coNo = GetElementByTagFromXml(parameters, "EmployerCode");
+            }
+            return coNo;
+        }
+        private string GetExcelColumnName(int columnNumber)
+        {
+            int dividend = columnNumber;
+            string columnName = String.Empty;
+            int modulo;
+
+            while (dividend > 0)
+            {
+                modulo = (dividend - 1) % 26;
+                columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
+                dividend = (int)((dividend - modulo) / 26);
+            }
+
+            return columnName;
+        }
+        public PicoXLSX.Workbook CreatePreReportWorkbook(XmlDocument xmlReport, string workBookName)
+        {
+            PicoXLSX.Workbook workbook = new PicoXLSX.Workbook(workBookName, "Pre");
+
+            //Will need to return the xlsx file
+            workbook = PreparePreReport(xmlReport, workbook);
+
+            return workbook;
+        }
     }
     public class ReadConfigFile
     {
