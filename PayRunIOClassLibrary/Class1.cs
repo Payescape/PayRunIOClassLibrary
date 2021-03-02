@@ -719,7 +719,7 @@ namespace PayRunIOClassLibrary
         {
             bool boolValue = false;
             string element = GetElementByTagFromXml(xmlElement, tag);
-            if(element=="Y" || element=="Yes")
+            if(element == "Y" || element == "Yes")
             {
                 element = "true";
             }
