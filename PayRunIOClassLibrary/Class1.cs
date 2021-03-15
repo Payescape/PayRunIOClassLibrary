@@ -529,14 +529,14 @@ namespace PayRunIOClassLibrary
                     break;
                 case "NOW PENSION":
                     //Get the Now Pensions report
-                    transformKey = "RL-PENSION-CSV"; //TODO change this to NOW-PENSION-CSV or whatever Tim calls it.
+                    transformKey = "NOW-PENSION-CSV";
                     break;
                 case "LEGAL & GENERAL PENSION":
-                    //Get the Now Pensions report
+                    //Get the Legal & General Pensions report
                     transformKey = "RL-PENSION-CSV"; //TODO change this to LG-PENSION-CSV or whatever Tim calls it.
                     break;
                 case "AEGON PENSION":
-                    //Get the Now Pensions report
+                    //Get the Aegon Pensions report
                     transformKey = "RL-PENSION-CSV"; //TODO change this to AE-PENSION-CSV or whatever Tim calls it.
                     break;
                 default:
