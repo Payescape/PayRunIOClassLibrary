@@ -494,6 +494,20 @@ namespace PayRunIOClassLibrary
             
             return xmlReport;
         }
+        public XmlDocument GetApprenticeshipLevyReport(XDocument xdoc, RPParameters rpParameters)
+        {
+            string rptRef = "PE-AppLevyAnnual";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "TaxYear";
+            
+            //Get the Note And Coin Requirement report
+            XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef,
+                                              parameter2, rpParameters.TaxYear.ToString(),
+                                              null, null, null, null, null, null, null, null);
+
+
+            return xmlReport;
+        }
         public XmlDocument GetNoteAndCoinRequirementReport(XDocument xdoc, RPParameters rpParameters)
         {
             string rptRef = "PSCOIN2";
@@ -610,7 +624,7 @@ namespace PayRunIOClassLibrary
                 rpEmployer.Name = GetElementByTagFromXml(employer, "Name");
                 rpEmployer.PayeRef = GetElementByTagFromXml(employer, "EmployerPayeRef");
                 rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
-               
+                rpEmployer.CalculateApprenticeshipLevy = GetBooleanElementByTagFromXml(employer, "CalculateApprenticeshipLevy");
             }
 
             rpEmployer.BankFileCode = "000";
@@ -1661,6 +1675,7 @@ namespace PayRunIOClassLibrary
         public bool PayrollTotalsSummaryRequired { get; set; }
         public bool NoteAndCoinRequired { get; set; }
         public bool HoldPayHistory { get; set; }
+        public bool CalculateApprenticeshipLevy { get; set; }
 
         public RPEmployer() { }
         public RPEmployer(string name, string payeRef, string hmrcDesc,
@@ -1669,7 +1684,8 @@ namespace PayRunIOClassLibrary
                            bool p32Required, string nestPensionText, int? hrEscapeCompanyNo,
                            string reportPassword, bool zipReports, bool reportsInExcelFormat,
                            bool payRunDetailsYTDRequired, bool payrollTotalsSummaryRequired,
-                           bool noteAndCoinRequired, bool holdPayHistory)
+                           bool noteAndCoinRequired, bool holdPayHistory,
+                           bool calculateApprenticeshipLevy)
         {
             Name = name;
             PayeRef = payeRef;
@@ -1687,6 +1703,7 @@ namespace PayRunIOClassLibrary
             PayrollTotalsSummaryRequired = payrollTotalsSummaryRequired;
             NoteAndCoinRequired = noteAndCoinRequired;
             HoldPayHistory = holdPayHistory;
+            CalculateApprenticeshipLevy = calculateApprenticeshipLevy;
         }
     }
 
