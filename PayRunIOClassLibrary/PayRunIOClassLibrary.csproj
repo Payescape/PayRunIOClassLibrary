@@ -257,6 +257,7 @@
     <EmbeddedResource Include="PayslipSimple.repx" />
     <EmbeddedResource Include="PensionContributionsReport.repx" />
     <EmbeddedResource Include="StatutoryAbsenceReport.repx" />
+    <EmbeddedResource Include="StatutorySickPayPaidReport.repx" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\AWSSDK.S3.3.5.4.1\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
