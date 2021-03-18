@@ -9,13 +9,13 @@
     <Item4 Ref="6" ControlType="ReportHeaderBand" Name="ReportHeader" PageBreak="BeforeBand" HeightF="10.4168577" />
     <Item5 Ref="7" ControlType="PageHeaderBand" Name="PageHeader" HeightF="172.582977" TextAlignment="MiddleRight">
       <Controls>
-        <Item1 Ref="8" ControlType="XRLabel" Name="label38" Multiline="true" Text="SSP&#xD;&#xA;OffSet" TextAlignment="BottomRight" SizeF="58.12494,38.2082977" LocationFloat="996.607849,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+        <Item1 Ref="8" ControlType="XRLabel" Name="label38" Multiline="true" Text="SSP&#xD;&#xA;OffSet" TextAlignment="BottomRight" SizeF="58.12494,38.2082977" LocationFloat="1058.83337,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
           <StylePriority Ref="9" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
         </Item1>
-        <Item2 Ref="10" ControlType="XRLabel" Name="label36" Multiline="true" Text="SSP&#xD;&#xA;Paid" TextAlignment="BottomRight" SizeF="58.12494,38.2082977" LocationFloat="938.4829,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+        <Item2 Ref="10" ControlType="XRLabel" Name="label36" Multiline="true" Text="SSP&#xD;&#xA;Paid" TextAlignment="BottomRight" SizeF="58.12494,38.2082977" LocationFloat="1000.70844,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
           <StylePriority Ref="11" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
         </Item2>
-        <Item3 Ref="12" ControlType="XRLabel" Name="label34" Text="Working Pattern" TextAlignment="BottomLeft" SizeF="81.42438,38.2082977" LocationFloat="857.058533,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+        <Item3 Ref="12" ControlType="XRLabel" Name="label34" Text="Working Pattern" TextAlignment="BottomLeft" SizeF="143.6499,38.2082977" LocationFloat="857.058533,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
           <StylePriority Ref="13" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
         </Item3>
         <Item4 Ref="14" ControlType="XRLabel" Name="label32" Text="Pay Code Type" TextAlignment="BottomLeft" SizeF="81.42438,38.2082977" LocationFloat="775.634155,122.916794" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
@@ -93,7 +93,7 @@
                   <Bands>
                     <Item1 Ref="58" ControlType="DetailBand" Name="Detail4" HeightF="25.958252">
                       <Controls>
-                        <Item1 Ref="59" ControlType="XRLabel" Name="label14" TextFormatString="{0:0.0000}" Multiline="true" Text="label12" TextAlignment="MiddleRight" SizeF="58.12491,23" LocationFloat="938.4829,0" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item1 Ref="59" ControlType="XRLabel" Name="label14" TextFormatString="{0:0.00}" Multiline="true" Text="label12" TextAlignment="MiddleRight" SizeF="58.12491,23" LocationFloat="1000.70844,0" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="60" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([SSP])" />
                           </ExpressionBindings>
@@ -165,13 +165,13 @@
                           </ExpressionBindings>
                           <StylePriority Ref="94" UseFont="false" UseTextAlignment="false" />
                         </Item12>
-                        <Item13 Ref="95" ControlType="XRLabel" Name="label37" TextFormatString="{0:0.0000}" Multiline="true" Text="label12" TextAlignment="MiddleLeft" SizeF="81.42438,23" LocationFloat="857.058533,0" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item13 Ref="95" ControlType="XRLabel" Name="label37" TextFormatString="{0:0.0000}" Multiline="true" Text="label12" TextAlignment="MiddleLeft" SizeF="143.6499,23" LocationFloat="857.058533,0" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="96" EventName="BeforePrint" PropertyName="Text" Expression="[WorkingWeek]" />
                           </ExpressionBindings>
                           <StylePriority Ref="97" UseFont="false" UseTextAlignment="false" />
                         </Item13>
-                        <Item14 Ref="98" ControlType="XRLabel" Name="label40" TextFormatString="{0:0.0000}" Multiline="true" Text="label12" TextAlignment="MiddleRight" SizeF="58.12491,23" LocationFloat="996.607849,0" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item14 Ref="98" ControlType="XRLabel" Name="label40" TextFormatString="{0:0.00}" Multiline="true" Text="label12" TextAlignment="MiddleRight" SizeF="58.12491,23" LocationFloat="1058.83337,0" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="99" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([SSPOFFSET])" />
                           </ExpressionBindings>
@@ -184,77 +184,83 @@
                           <StylePriority Ref="103" UseFont="false" />
                         </Item15>
                       </Controls>
+                      <ExpressionBindings>
+                        <Item1 Ref="104" EventName="BeforePrint" PropertyName="Visible" Expression="Iif(Sum([SSP]) &lt;= 0,false,true )&#xA;" />
+                      </ExpressionBindings>
                     </Item1>
-                    <Item2 Ref="104" ControlType="GroupFooterBand" Name="GroupFooter1" HeightF="55.20846">
+                    <Item2 Ref="105" ControlType="GroupFooterBand" Name="GroupFooter1" HeightF="49.0417328">
                       <Controls>
-                        <Item1 Ref="105" ControlType="XRLabel" Name="label41" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="344.835266,9.999974" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
-                          <Summary Ref="106" Running="Group" />
+                        <Item1 Ref="106" ControlType="XRLabel" Name="label41" TextFormatString="{0:N0}" Multiline="true" Text="label12" TextAlignment="MiddleRight" SizeF="46.4998779,23" LocationFloat="554.71,7.87442541" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                          <Summary Ref="107" Running="Group" />
                           <ExpressionBindings>
-                            <Item1 Ref="107" EventName="BeforePrint" PropertyName="Text" Expression="sumCount([Code])" />
+                            <Item1 Ref="108" EventName="BeforePrint" PropertyName="Text" Expression="ToInt([QualifyingDays])" />
                           </ExpressionBindings>
-                          <StylePriority Ref="108" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+                          <StylePriority Ref="109" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                         </Item1>
-                        <Item2 Ref="109" ControlType="XRLabel" Name="label39" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="971.607849,9.999974" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
-                          <Summary Ref="110" Running="Group" />
+                        <Item2 Ref="110" ControlType="XRLabel" Name="label39" TextFormatString="{0:0.00}" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="1033.83337,7.87442541" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                          <Summary Ref="111" Running="Group" />
                           <ExpressionBindings>
-                            <Item1 Ref="111" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([SSPOFFSET])" />
+                            <Item1 Ref="112" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([SSPOFFSET])" />
                           </ExpressionBindings>
-                          <StylePriority Ref="112" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+                          <StylePriority Ref="113" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                         </Item2>
-                        <Item3 Ref="113" ControlType="XRLine" Name="line5" SizeF="1116.95825,7.87442" LocationFloat="0,0" ForeColor="MidnightBlue">
-                          <StylePriority Ref="114" UseForeColor="false" />
+                        <Item3 Ref="114" ControlType="XRLine" Name="line5" SizeF="1116.95825,7.87442" LocationFloat="0,0" ForeColor="MidnightBlue">
+                          <StylePriority Ref="115" UseForeColor="false" />
                         </Item3>
-                        <Item4 Ref="115" ControlType="XRLine" Name="line4" SizeF="141.249939,5.291683" LocationFloat="913.482849,35.333252" ForeColor="Maroon">
-                          <StylePriority Ref="116" UseForeColor="false" />
+                        <Item4 Ref="116" ControlType="XRLine" Name="line4" SizeF="562.2482,5.291683" LocationFloat="554.71,33.2077026" ForeColor="Maroon">
+                          <StylePriority Ref="117" UseForeColor="false" />
                         </Item4>
-                        <Item5 Ref="117" ControlType="XRLine" Name="line3" SizeF="141.249939,5.291691" LocationFloat="913.482849,39.5833321" ForeColor="Maroon">
-                          <StylePriority Ref="118" UseForeColor="false" />
+                        <Item5 Ref="118" ControlType="XRLine" Name="line3" SizeF="562.2482,5.291691" LocationFloat="554.71,37.4577827" ForeColor="Maroon">
+                          <StylePriority Ref="119" UseForeColor="false" />
                         </Item5>
-                        <Item6 Ref="119" ControlType="XRLabel" Name="label12" Multiline="true" Text="Totals" SizeF="148.958344,23" LocationFloat="148.958328,10" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
-                          <StylePriority Ref="120" UseFont="false" UseForeColor="false" />
+                        <Item6 Ref="120" ControlType="XRLabel" Name="label12" Multiline="true" Text="Totals" SizeF="148.958344,23" LocationFloat="148.958328,10" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                          <StylePriority Ref="121" UseFont="false" UseForeColor="false" />
                         </Item6>
-                        <Item7 Ref="121" ControlType="XRLabel" Name="label10" TextFormatString="{0:dd MMMM yyyy}" Multiline="true" Text="label19" SizeF="148.958344,23" LocationFloat="0,10" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                        <Item7 Ref="122" ControlType="XRLabel" Name="label10" TextFormatString="{0:dd MMMM yyyy}" Multiline="true" Text="label19" SizeF="148.958344,23" LocationFloat="0,10" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
                           <ExpressionBindings>
-                            <Item1 Ref="122" EventName="BeforePrint" PropertyName="Text" Expression="GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])" />
+                            <Item1 Ref="123" EventName="BeforePrint" PropertyName="Text" Expression="GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])" />
                           </ExpressionBindings>
-                          <StylePriority Ref="123" UseFont="false" UseForeColor="false" />
+                          <StylePriority Ref="124" UseFont="false" UseForeColor="false" />
                         </Item7>
-                        <Item8 Ref="124" ControlType="XRLabel" Name="label15" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="913.4829,10" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
-                          <Summary Ref="125" Running="Group" />
+                        <Item8 Ref="125" ControlType="XRLabel" Name="label15" TextFormatString="{0:0.00}" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="975.708435,7.87442541" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                          <Summary Ref="126" Running="Group" />
                           <ExpressionBindings>
-                            <Item1 Ref="126" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([SSP])" />
+                            <Item1 Ref="127" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([SSP])" />
                           </ExpressionBindings>
-                          <StylePriority Ref="127" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+                          <StylePriority Ref="128" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                         </Item8>
                       </Controls>
                       <ExpressionBindings>
-                        <Item1 Ref="128" EventName="BeforePrint" PropertyName="Visible" Expression="Iif([ReportItems.label41].[Text] == '0',true,true )" />
+                        <Item1 Ref="129" EventName="BeforePrint" PropertyName="Visible" Expression="Iif(Sum([SSP]) &lt;= 0,false,true )" />
                       </ExpressionBindings>
                     </Item2>
-                    <Item3 Ref="129" ControlType="GroupHeaderBand" Name="GroupHeader1" HeightF="66.7500153">
+                    <Item3 Ref="130" ControlType="GroupHeaderBand" Name="GroupHeader1" HeightF="66.7500153">
                       <Controls>
-                        <Item1 Ref="130" ControlType="XRLabel" Name="label8" Multiline="true" Text="label15" SizeF="247.930084,23" LocationFloat="255.736664,29" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                        <Item1 Ref="131" ControlType="XRLabel" Name="label8" Multiline="true" Text="label15" SizeF="247.930084,23" LocationFloat="255.736664,29" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
                           <ExpressionBindings>
-                            <Item1 Ref="131" EventName="BeforePrint" PropertyName="Text" Expression="Concat(' - Pay period : ',[PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[TaxPeriod],' - PAYE Month : ',Iif(Iif(GetDay(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) &lt; 6, GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -4,GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -3 ) &lt;= 0,(Iif(GetDay(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) &lt; 6, GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -4,GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -3 ) + 12),(Iif(GetDay(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) &lt; 6, GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -4,GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -3 ))))" />
+                            <Item1 Ref="132" EventName="BeforePrint" PropertyName="Text" Expression="Concat(' - Pay period : ',[PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[TaxPeriod],' - PAYE Month : ',Iif(Iif(GetDay(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) &lt; 6, GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -4,GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -3 ) &lt;= 0,(Iif(GetDay(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) &lt; 6, GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -4,GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -3 ) + 12),(Iif(GetDay(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) &lt; 6, GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -4,GetMonth(GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])) -3 ))))" />
                           </ExpressionBindings>
-                          <StylePriority Ref="132" UseFont="false" UseForeColor="false" />
+                          <StylePriority Ref="133" UseFont="false" UseForeColor="false" />
                         </Item1>
-                        <Item2 Ref="133" ControlType="XRLine" Name="line2" SizeF="1116.95825,5.291687" LocationFloat="0,58.58336" ForeColor="Maroon">
-                          <StylePriority Ref="134" UseForeColor="false" />
+                        <Item2 Ref="134" ControlType="XRLine" Name="line2" SizeF="1116.95825,5.291687" LocationFloat="0,58.58336" ForeColor="Maroon">
+                          <StylePriority Ref="135" UseForeColor="false" />
                         </Item2>
-                        <Item3 Ref="135" ControlType="XRLabel" Name="label21" Multiline="true" Text="label21" SizeF="123.999893,23" LocationFloat="0,29" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                        <Item3 Ref="136" ControlType="XRLabel" Name="label21" Multiline="true" Text="label21" SizeF="123.999893,23" LocationFloat="0,29" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
                           <ExpressionBindings>
-                            <Item1 Ref="136" EventName="BeforePrint" PropertyName="Text" Expression="Concat([PaySchedule].[Name],' Payroll : ')" />
+                            <Item1 Ref="137" EventName="BeforePrint" PropertyName="Text" Expression="Concat([PaySchedule].[Name],' Payroll : ')" />
                           </ExpressionBindings>
-                          <StylePriority Ref="137" UseFont="false" UseForeColor="false" />
+                          <StylePriority Ref="138" UseFont="false" UseForeColor="false" />
                         </Item3>
-                        <Item4 Ref="138" ControlType="XRLabel" Name="label19" TextFormatString="{0:dd MMMM yyyy}" Multiline="true" Text="label19" SizeF="131.25,23" LocationFloat="123.999916,29" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
+                        <Item4 Ref="139" ControlType="XRLabel" Name="label19" TextFormatString="{0:dd MMMM yyyy}" Multiline="true" Text="label19" SizeF="131.25,23" LocationFloat="123.999916,29" Font="Arial, 9.75pt, style=Bold" ForeColor="Maroon" Padding="2,2,0,0,100">
                           <ExpressionBindings>
-                            <Item1 Ref="139" EventName="BeforePrint" PropertyName="Text" Expression="GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])" />
+                            <Item1 Ref="140" EventName="BeforePrint" PropertyName="Text" Expression="GetDate([PaySchedule].[PaySchedule_PayRuns].[PayRuns_PayRun].[PaymentDate])" />
                           </ExpressionBindings>
-                          <StylePriority Ref="140" UseFont="false" UseForeColor="false" />
+                          <StylePriority Ref="141" UseFont="false" UseForeColor="false" />
                         </Item4>
                       </Controls>
+                      <ExpressionBindings>
+                        <Item1 Ref="142" EventName="BeforePrint" PropertyName="Visible" Expression="Iif(Sum([SSP]) &lt;= 0,false,true )&#xA;" />
+                      </ExpressionBindings>
                     </Item3>
                   </Bands>
                 </Item2>
@@ -262,18 +268,38 @@
             </Item2>
           </Bands>
         </Item2>
-        <Item3 Ref="141" ControlType="ReportFooterBand" Name="ReportFooter">
+        <Item3 Ref="143" ControlType="ReportFooterBand" Name="ReportFooter" HeightF="79.95821">
           <Controls>
-            <Item1 Ref="142" ControlType="XRLabel" Name="label17" Multiline="true" Text="Total for report" TextAlignment="MiddleLeft" SizeF="209.999969,23" LocationFloat="0,0" Font="Arial, 9.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
-              <StylePriority Ref="143" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+            <Item1 Ref="144" ControlType="XRLine" Name="line6" SizeF="562.2482,5.291683" LocationFloat="554.71,57.0000343" ForeColor="MidnightBlue">
+              <StylePriority Ref="145" UseForeColor="false" />
             </Item1>
-            <Item2 Ref="144" ControlType="XRLabel" Name="label16" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="913.4829,0" Font="Arial, 9.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
-              <Summary Ref="145" Running="Report" />
-              <ExpressionBindings>
-                <Item1 Ref="146" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([PaySchedule_PayRuns].[PayRuns_PayRun].[PayRun_Employee].[SSP])" />
-              </ExpressionBindings>
-              <StylePriority Ref="147" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+            <Item2 Ref="146" ControlType="XRLine" Name="line7" SizeF="562.2482,5.291691" LocationFloat="554.71,61.2501144" ForeColor="MidnightBlue">
+              <StylePriority Ref="147" UseForeColor="false" />
             </Item2>
+            <Item3 Ref="148" ControlType="XRLabel" Name="label43" TextFormatString="{0:N0}" Multiline="true" Text="label12" TextAlignment="MiddleRight" SizeF="46.4998779,23" LocationFloat="554.71,34.0000153" Font="Arial, 9.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+              <Summary Ref="149" Running="Report" />
+              <ExpressionBindings>
+                <Item1 Ref="150" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([PaySchedule_PayRuns].[PayRuns_PayRun].[PayRun_Employee].[QualifyingDays])" />
+              </ExpressionBindings>
+              <StylePriority Ref="151" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+            </Item3>
+            <Item4 Ref="152" ControlType="XRLabel" Name="label42" TextFormatString="{0:0.00}" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="1033.83325,34.0000153" Font="Arial, 9.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+              <Summary Ref="153" Running="Report" />
+              <ExpressionBindings>
+                <Item1 Ref="154" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([PaySchedule_PayRuns].[PayRuns_PayRun].[PayRun_Employee].[SSPOFFSET])" />
+              </ExpressionBindings>
+              <StylePriority Ref="155" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+            </Item4>
+            <Item5 Ref="156" ControlType="XRLabel" Name="label17" Multiline="true" Text="Total for report" TextAlignment="MiddleLeft" SizeF="209.999969,23" LocationFloat="0,34" Font="Arial, 9.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+              <StylePriority Ref="157" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+            </Item5>
+            <Item6 Ref="158" ControlType="XRLabel" Name="label16" TextFormatString="{0:0.00}" Multiline="true" Text="label14" TextAlignment="MiddleRight" SizeF="83.12494,23" LocationFloat="975.7083,34.0000153" Font="Arial, 9.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+              <Summary Ref="159" Running="Report" />
+              <ExpressionBindings>
+                <Item1 Ref="160" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([PaySchedule_PayRuns].[PayRuns_PayRun].[PayRun_Employee].[SSP])" />
+              </ExpressionBindings>
+              <StylePriority Ref="161" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
+            </Item6>
           </Controls>
         </Item3>
       </Bands>
