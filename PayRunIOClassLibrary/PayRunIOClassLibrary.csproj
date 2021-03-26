@@ -65,11 +65,14 @@
     <EmbeddedResource Include="PayrollRunDetailsReport.repx" />
     <EmbeddedResource Include="PayrollRunDetailsYTDReport.repx" />
     <EmbeddedResource Include="PayrollTotalsSummaryReport.repx" />
+    <EmbeddedResource Include="PayComponentExceptionReport.repx" />
     <None Include="PayRunIOClassLibrary.snk" />
     <EmbeddedResource Include="PensionContributionsToDateReport.repx" />
     <EmbeddedResource Include="Payslip.repx" />
     <EmbeddedResource Include="PayslipSimple.repx" />
     <EmbeddedResource Include="PensionContributionsReport.repx" />
+    <EmbeddedResource Include="StatutoryAbsenceReport.repx" />
+    <EmbeddedResource Include="StatutorySickPayPaidReport.repx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3">

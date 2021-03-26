@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <XtraReportsLayoutSerializer SerializerVersion="20.2.4.0" Ref="1" ControlType="DevExpress.XtraReports.UI.XtraReport, DevExpress.XtraReports.v20.2, Version=20.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" Name="P32" DisplayName="P32Report" Landscape="true" Margins="15, 15, 0, 1" PaperKind="A4" PageWidth="1169" PageHeight="827" Version="20.2" DataSource="#Ref-0">
   <Parameters>
-    <Item1 Ref="3" Description="Company name" ValueInfo="Woodhouse Contracts Ltd" Name="CmpName" />
-    <Item2 Ref="4" Description="PAYE Reference" ValueInfo="120/YB25472" Name="PayeRef" />
-    <Item3 Ref="6" Description="Date" ValueInfo="2021-01-06" Name="Date" Type="#Ref-5" />
-    <Item4 Ref="8" Description="Tax Period" ValueInfo="10" Name="Period" Type="#Ref-7" />
-    <Item5 Ref="9" Description="AnnualEmploymentAllowance" ValueInfo="0" Name="AnnualEmploymentAllowance" Type="#Ref-7" />
-    <Item6 Ref="10" Description="Payment Reference" ValueInfo="120PW01041377" Name="PaymentRef" />
+    <Item1 Ref="3" Description="Company name" ValueInfo="Outbrain UK Ltd" Name="CmpName" />
+    <Item2 Ref="4" Description="PAYE Reference" ValueInfo="120/HA55261" Name="PayeRef" />
+    <Item3 Ref="6" Description="Date" ValueInfo="2021-02-26" Name="Date" Type="#Ref-5" />
+    <Item4 Ref="8" Description="Tax Period" ValueInfo="11" Name="Period" Type="#Ref-7" />
+    <Item5 Ref="9" Description="AnnualEmploymentAllowance" ValueInfo="4000.00" Name="AnnualEmploymentAllowance" Type="#Ref-7" />
+    <Item6 Ref="10" Description="Payment Reference" ValueInfo="120PA00284065" Name="PaymentRef" />
     <Item7 Ref="11" Description="Tax year start date" ValueInfo="2020-04-06" Name="TaxYearStartDate" Type="#Ref-5" />
     <Item8 Ref="12" Description="Tax year end date" ValueInfo="2021-04-05" Name="TaxYearEndDate" Type="#Ref-5" />
     <Item9 Ref="13" Description="Frequency" ValueInfo="Monthly" Name="Freq" />
-    <Item10 Ref="14" Description="PAYE month" ValueInfo="10" Name="PAYEMonth" Type="#Ref-7" />
+    <Item10 Ref="14" Description="PAYE month" ValueInfo="11" Name="PAYEMonth" Type="#Ref-7" />
   </Parameters>
   <Bands>
     <Item1 Ref="15" ControlType="TopMarginBand" Name="TopMargin" HeightF="0" TextAlignment="TopLeft" Padding="0,0,0,0,100" />
@@ -144,13 +144,13 @@
         </Item2>
         <Item3 Ref="94" ControlType="XRLabel" Name="label57" TextFormatString="{0:0.00}" Text="label51" TextAlignment="MiddleRight" SizeF="49.16687,15.0000257" LocationFloat="791.6261,19.9999733" Font="Arial, 6.75pt, style=Bold, charSet=0" Padding="2,2,0,0,100">
           <ExpressionBindings>
-            <Item1 Ref="95" EventName="BeforePrint" PropertyName="Text" Expression="[RPP32Summary].[SppComp]" />
+            <Item1 Ref="95" EventName="BeforePrint" PropertyName="Text" Expression="[RPP32Summary].[SpbpComp]" />
           </ExpressionBindings>
           <StylePriority Ref="96" UseFont="false" UseTextAlignment="false" />
         </Item3>
         <Item4 Ref="97" ControlType="XRLabel" Name="label56" TextFormatString="{0:0.00}" Text="label51" TextAlignment="MiddleRight" SizeF="49.16687,15.0000257" LocationFloat="758.709,19.9999733" Font="Arial, 6.75pt, style=Bold, charSet=0" Padding="2,2,0,0,100">
           <ExpressionBindings>
-            <Item1 Ref="98" EventName="BeforePrint" PropertyName="Text" Expression="[RPP32Summary].[SppRecovered]" />
+            <Item1 Ref="98" EventName="BeforePrint" PropertyName="Text" Expression="[RPP32Summary].[SpbpRecovered]" />
           </ExpressionBindings>
           <StylePriority Ref="99" UseFont="false" UseTextAlignment="false" />
         </Item4>
