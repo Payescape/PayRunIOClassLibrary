@@ -252,6 +252,7 @@
     <EmbeddedResource Include="PayrollRunDetailsYTDReport.repx" />
     <EmbeddedResource Include="PayrollTotalsSummaryReport.repx" />
     <EmbeddedResource Include="PayComponentExceptionReport.repx" />
+    <EmbeddedResource Include="PayrollRunExceptionReport.repx" />
     <None Include="PayRunIOClassLibrary.snk" />
     <EmbeddedResource Include="PensionContributionsToDateReport.repx" />
     <EmbeddedResource Include="Payslip.repx" />
