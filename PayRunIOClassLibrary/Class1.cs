@@ -1170,7 +1170,8 @@ namespace PayRunIOClassLibrary
 
             return xtraReport;
         }
-        private List<string> CreateListOfFixedColumns()
+
+        public List<string> CreateListOfFixedColumns()
         {
             //Create a list of the required fixed columns.
             List<string> fixCol = new List<string>()
@@ -1210,7 +1211,8 @@ namespace PayRunIOClassLibrary
             
             return fixCol;
         }
-        private List<string> CreateListOfVariableColumns(List<RPPreSamplePayCode> rpPreSamplePayCodes)
+
+        public List<string> CreateListOfVariableColumns(List<RPPreSamplePayCode> rpPreSamplePayCodes)
         {
             //Create a list of the required variable columns.
             List<string> varCol = new List<string>();
@@ -1228,7 +1230,8 @@ namespace PayRunIOClassLibrary
 
             return varCol;
         }
-        private Workbook CreateFixedWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod)
+
+        public Workbook CreateFixedWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod)
         {
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PayRunDate);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Reference);
@@ -1272,7 +1275,8 @@ namespace PayRunIOClassLibrary
 
             return workbook;
         }
-        private Workbook CreateVariableWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod, List<string> varCol)
+
+        public Workbook CreateVariableWorkbookColumns(Workbook workbook, RPEmployeePeriod rpEmployeePeriod, List<string> varCol)
         {
             foreach (string col in varCol)
             {
