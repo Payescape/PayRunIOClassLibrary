@@ -524,6 +524,22 @@ namespace PayRunIOClassLibrary
 
             return xmlReport;
         }
+        public XmlDocument GetCurrentAttachmentOfEarningsOrders(XDocument xdoc, RPParameters rpParameters)
+        {
+            string rptRef = "PSAEORUN";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "PayScheduleKey";
+            string parameter3 = "PaymentDate";
+
+            //Get the Note And Coin Requirement report
+            XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef,
+                                              parameter2, rpParameters.PaySchedule,
+                                              parameter3, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
+                                              null, null, null, null, null, null);
+
+
+            return xmlReport;
+        }
         public string GetCsvPensionsReport(XDocument xdoc, RPParameters rpParameters, RPPensionFileScheme rpPensionFileScheme)
         {
             string rptRef = "PAPDIS";
@@ -1641,12 +1657,13 @@ namespace PayRunIOClassLibrary
         public DateTime PayRunDate { get; set; }
         public int PensionKey { get; set; }
         public bool PaidInCash { get; set; }
+        public bool AOERequired { get; set; }
 
         public RPParameters() { }
         public RPParameters(string erRef, int taxYear, DateTime accYearStart,
                             DateTime accYearEnd, int taxPeriod, int periodNo,
                             string paySchedule, DateTime payRundate,
-                            int pensionKey, bool paidInCash)
+                            int pensionKey, bool paidInCash, bool aoeRequired)
         {
             ErRef = erRef;
             TaxYear = taxYear;
@@ -1658,6 +1675,7 @@ namespace PayRunIOClassLibrary
             PayRunDate = payRundate;
             PensionKey = pensionKey;
             PaidInCash = paidInCash;
+            AOERequired = aoeRequired;
         }
     }
     //Report (RP) Employer

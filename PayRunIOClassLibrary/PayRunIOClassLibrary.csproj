@@ -60,6 +60,8 @@
     <EmbeddedResource Include="ComponentAnalysisReport.repx" />
     <EmbeddedResource Include="P45.repx" />
     <EmbeddedResource Include="P32Report.repx" />
+    <EmbeddedResource Include="EPSReport.repx" />
+    <EmbeddedResource Include="CurrentAttachmentOfEarningsOrders.repx" />
     <None Include="packages.config" />
     <EmbeddedResource Include="PaymentsDueByMethodsReport.repx" />
     <EmbeddedResource Include="PayrollRunDetailsReport.repx" />
