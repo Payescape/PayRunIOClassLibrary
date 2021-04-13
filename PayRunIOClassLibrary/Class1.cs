@@ -557,6 +557,22 @@ namespace PayRunIOClassLibrary
                     //Get the Royal London Pensions report
                     transformKey = "RL-PENSION-CSV";
                     break;
+                case "FRIENDS LIFE PENSION":
+                    //Get the Friends Life Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "STANDARD LIFE PENSION":
+                    //Get the Standard Life Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "THE AMBER PENSION TRUST":
+                    //Get The Amber Pension Trust Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "SCOTTISH WIDOWS PENSION":
+                    //Get the Scottish Widows Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
                 case "NOW PENSION":
                     //Get the Now Pensions report
                     transformKey = "NOW-PENSION-CSV";
