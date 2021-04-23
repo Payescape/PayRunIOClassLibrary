@@ -1198,6 +1198,7 @@ namespace PayRunIOClassLibrary
             xtraReport.Parameters["PaymentRef"].Value = rpP32Report.PaymentRef;
             xtraReport.Parameters["TaxYearStartDate"].Value = rpP32Report.TaxYearStartDate;
             xtraReport.Parameters["TaxYearEndDate"].Value = rpP32Report.TaxYearEndDate;
+            xtraReport.Parameters["TaxYear"].Value = rpP32Report.TaxYear;
             xtraReport.DataSource = rpP32Report.RPP32ReportMonths;
 
             return xtraReport;
@@ -2684,11 +2685,13 @@ namespace PayRunIOClassLibrary
         public DateTime TaxYearEndDate { get; set; }
         public decimal ApprenticeshipLevyAllowance { get; set; }
         public decimal AnnualEmploymentAllowance { get; set; }
+        public bool OpeningBalancesRequired { get; set; }
         public List<RPP32ReportMonth> RPP32ReportMonths { get; set; }
         public RPP32Report() { }
         public RPP32Report(string employerName, string employerPayeRef, string paymentRef,
                                   int taxYear, DateTime taxYearStartDate, DateTime taxYearEndDate,
                                   decimal apprenticeshipLevyAllowance, decimal annualEmploymentAllowance,
+                                  bool openBalancesRequired,
                                   List<RPP32ReportMonth> rpP32ReportMonths)
         {
             EmployerName = employerName;
@@ -2699,6 +2702,7 @@ namespace PayRunIOClassLibrary
             TaxYearEndDate = taxYearEndDate;
             ApprenticeshipLevyAllowance = apprenticeshipLevyAllowance;
             AnnualEmploymentAllowance = annualEmploymentAllowance;
+            OpeningBalancesRequired = openBalancesRequired;
             RPP32ReportMonths = rpP32ReportMonths;
         }
     }
