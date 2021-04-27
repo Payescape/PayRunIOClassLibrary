@@ -440,6 +440,11 @@ namespace PayRunIOClassLibrary
             string consumerKey = xdoc.Root.Element("PayRunConsumerKey").Value;
             string consumerSecret = xdoc.Root.Element("PayRunConsumerSecret").Value;
             string url = xdoc.Root.Element("PayRunUrl").Value;
+            //Get reports from the live server when necessary
+            //consumerKey = "OcMeDpYcUaacLPyztnMLA";
+            //consumerSecret = "MpR3BR0OwkOmqgn9ZROWbglc55uEO6jEar58SPYpCkA";
+            //url = "https://api.payrun.io";
+            
             RestApiHelper apiHelper = new RestApiHelper(
                     new PayRunIO.OAuth1.OAuthSignatureGenerator(),
                     consumerKey,
