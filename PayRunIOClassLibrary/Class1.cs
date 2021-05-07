@@ -3128,6 +3128,12 @@ namespace PayRunIOClassLibrary
                    @"^([a-zA-Z]){2}( )?([0-9]){2}( )?([0-9]){2}( )?([0-9]){2}( )?([a-zA-Z]){1}?$",
                    RegexOptions.IgnoreCase);
         }
+        public string RemoveNonAlphaNumericChars(string text)
+        {
+            Regex alphaNumeric = new Regex("[^a-zA-Z0-9]");
+            text = alphaNumeric.Replace(text, "");
+            return text;
+        }
         private string DomainMapper(Match match)
         {
             // IdnMapping class with default property values.
