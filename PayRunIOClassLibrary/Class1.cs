@@ -440,6 +440,11 @@ namespace PayRunIOClassLibrary
             string consumerKey = xdoc.Root.Element("PayRunConsumerKey").Value;
             string consumerSecret = xdoc.Root.Element("PayRunConsumerSecret").Value;
             string url = xdoc.Root.Element("PayRunUrl").Value;
+            //Get reports from the live server when necessary
+            //consumerKey = "OcMeDpYcUaacLPyztnMLA";
+            //consumerSecret = "MpR3BR0OwkOmqgn9ZROWbglc55uEO6jEar58SPYpCkA";
+            //url = "https://api.payrun.io";
+            
             RestApiHelper apiHelper = new RestApiHelper(
                     new PayRunIO.OAuth1.OAuthSignatureGenerator(),
                     consumerKey,
@@ -555,6 +560,22 @@ namespace PayRunIOClassLibrary
             {
                 case "ROYAL LONDON PENSION":
                     //Get the Royal London Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "FRIENDS LIFE PENSION":
+                    //Get the Friends Life Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "STANDARD LIFE PENSION":
+                    //Get the Standard Life Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "THE AMBER PENSION TRUST":
+                    //Get The Amber Pension Trust Pensions report
+                    transformKey = "RL-PENSION-CSV";
+                    break;
+                case "SCOTTISH WIDOWS PENSION":
+                    //Get the Scottish Widows Pensions report
                     transformKey = "RL-PENSION-CSV";
                     break;
                 case "NOW PENSION":
@@ -1182,6 +1203,7 @@ namespace PayRunIOClassLibrary
             xtraReport.Parameters["PaymentRef"].Value = rpP32Report.PaymentRef;
             xtraReport.Parameters["TaxYearStartDate"].Value = rpP32Report.TaxYearStartDate;
             xtraReport.Parameters["TaxYearEndDate"].Value = rpP32Report.TaxYearEndDate;
+            xtraReport.Parameters["TaxYear"].Value = rpP32Report.TaxYear;
             xtraReport.DataSource = rpP32Report.RPP32ReportMonths;
 
             return xtraReport;
@@ -2672,11 +2694,13 @@ namespace PayRunIOClassLibrary
         public DateTime TaxYearEndDate { get; set; }
         public decimal ApprenticeshipLevyAllowance { get; set; }
         public decimal AnnualEmploymentAllowance { get; set; }
+        public bool OpeningBalancesRequired { get; set; }
         public List<RPP32ReportMonth> RPP32ReportMonths { get; set; }
         public RPP32Report() { }
         public RPP32Report(string employerName, string employerPayeRef, string paymentRef,
                                   int taxYear, DateTime taxYearStartDate, DateTime taxYearEndDate,
                                   decimal apprenticeshipLevyAllowance, decimal annualEmploymentAllowance,
+                                  bool openBalancesRequired,
                                   List<RPP32ReportMonth> rpP32ReportMonths)
         {
             EmployerName = employerName;
@@ -2687,6 +2711,7 @@ namespace PayRunIOClassLibrary
             TaxYearEndDate = taxYearEndDate;
             ApprenticeshipLevyAllowance = apprenticeshipLevyAllowance;
             AnnualEmploymentAllowance = annualEmploymentAllowance;
+            OpeningBalancesRequired = openBalancesRequired;
             RPP32ReportMonths = rpP32ReportMonths;
         }
     }
@@ -3106,6 +3131,12 @@ namespace PayRunIOClassLibrary
             return Regex.IsMatch(strIn,
                    @"^([a-zA-Z]){2}( )?([0-9]){2}( )?([0-9]){2}( )?([0-9]){2}( )?([a-zA-Z]){1}?$",
                    RegexOptions.IgnoreCase);
+        }
+        public string RemoveNonAlphaNumericChars(string text)
+        {
+            Regex alphaNumeric = new Regex("[^a-zA-Z0-9]");
+            text = alphaNumeric.Replace(text, "");
+            return text;
         }
         private string DomainMapper(Match match)
         {
