@@ -545,7 +545,7 @@ namespace PayRunIOClassLibrary
 
             return xmlReport;
         }
-        public string GetCsvPensionsReport(XDocument xdoc, RPParameters rpParameters, RPPensionFileScheme rpPensionFileScheme)
+        public string GetCsvPensionsReport(XDocument xdoc, RPParameters rpParameters, RPPensionFileScheme rpPensionFileScheme, bool isJoiner)
         {
             string rptRef = "PAPDIS";
             string parameter1 = "EmployerKey";
@@ -582,18 +582,22 @@ namespace PayRunIOClassLibrary
                     //Get the Now Pensions report
                     transformKey = "NOW-PENSION-CSV";
                     break;
-                case "LEGAL & GENERAL PENSION":
+                case "LEGAL & GENERAL":
                     //Get the Legal & General Pensions report
-                    transformKey = "RL-PENSION-CSV"; //TODO change this to LG-PENSION-CSV or whatever Tim calls it.
+                    transformKey = "LG-CONTRIBS-CSV"; //TODO change this to LG-PENSION-CSV or whatever Tim calls it.
                     break;
-                case "AEGON PENSION":
+                case "AEGON":
                     //Get the Aegon Pensions report
-                    transformKey = "RL-PENSION-CSV"; //TODO change this to AE-PENSION-CSV or whatever Tim calls it.
+                    transformKey = "AEGON-CONTRIBS-CSV"; //TODO change this to AE-PENSION-CSV or whatever Tim calls it.
                     break;
                 default:
                     //Get the Smart Pensions report
                     transformKey = "PE-PAPDIS1-CSV";
                     break;
+            }
+            if(isJoiner)
+            {
+                transformKey = transformKey.Replace("CONTRIBS-CSV", "JOINERS-CSV");
             }
             string csvReport = RunTransformReport(xdoc, rptRef,
                                 parameter1, rpParameters.ErRef,
