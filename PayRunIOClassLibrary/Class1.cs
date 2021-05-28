@@ -536,7 +536,23 @@ namespace PayRunIOClassLibrary
             string parameter2 = "PayScheduleKey";
             string parameter3 = "PaymentDate";
 
-            //Get the Note And Coin Requirement report
+            //Get the current attachment of earnings orders
+            XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef,
+                                              parameter2, rpParameters.PaySchedule,
+                                              parameter3, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
+                                              null, null, null, null, null, null);
+
+
+            return xmlReport;
+        }
+        public XmlDocument GetBankFileReport(XDocument xdoc, RPParameters rpParameters)
+        {
+            string rptRef = "PEBankFile";
+            string parameter1 = "EmployerKey";
+            string parameter2 = "PayScheduleKey";
+            string parameter3 = "PaymentDate";
+
+            //Get the Bank File report
             XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef,
                                               parameter2, rpParameters.PaySchedule,
                                               parameter3, rpParameters.PayRunDate.ToString("yyyy-MM-dd"),
@@ -622,7 +638,7 @@ namespace PayRunIOClassLibrary
             XmlDocument xmlReport = RunReport(xdoc, rptRef, parameter1, rpParameters.ErRef, parameter2, rpParameters.PaySchedule,
                                               parameter3, "2020/04/06", parameter4, "2021/04/05", null, null, null, null);
 
-
+            
             return xmlReport;
         }
         public string[] GetAListOfDirectories(XDocument xdoc, string source)
@@ -1539,6 +1555,85 @@ namespace PayRunIOClassLibrary
             }
             return rpPreSamplePayCodes;
         }
+        public PicoXLSX.Workbook PrepareBottomlineReport(XmlDocument xmlReport, PicoXLSX.Workbook workbook)
+        {
+            DateTime creationDate = DateTime.Now;
+            DateTime processDate = DateTime.Now;
+            string bacsServiceUserNumber = null;
+            string erName;
+            string erBankAccountName = null;
+            string erBankSortCode = null;
+            string erBankAccountNumber = null;
+            decimal totalAmount = 0;
+            foreach(XmlElement employer in xmlReport.GetElementsByTagName("Employer"))
+            {
+                processDate=Convert.ToDateTime(GetElementByTagFromXml(employer,"PaymentDate"));
+                erName = GetElementByTagFromXml(employer, "Name");
+                erBankAccountName = GetElementByTagFromXml(employer, "BankAccountName");
+                erBankAccountNumber = GetElementByTagFromXml(employer, "BankAccountNumber");
+                erBankSortCode = GetElementByTagFromXml(employer, "BankAccountSortCode");
+                bacsServiceUserNumber = GetElementByTagFromXml(employer, "BacsServiceUserNumber");
+                
+            }
+            processDate = GetPreviousWorkingDay(processDate);
+            //First row
+            workbook = CreateBottomlineRow(workbook, "BACS File Submission", "", "", "Creation date:", creationDate.ToString("dd/MM/yyyy"));
+            //Next row
+            workbook = CreateBottomlineRow(workbook, "", "", "", "Process date:", processDate.ToString("dd/MM/yyyy"));
+            //Next row
+            workbook = CreateBottomlineRow(workbook, "", "", "", "Value date:", creationDate.ToString("dd/MM/yyyy"));
+            //Next row
+            workbook = CreateBottomlineRow(workbook, "Service User Number", bacsServiceUserNumber, "", "", "");
+            //Next row
+            workbook.CurrentWorksheet.GoToNextRow();
+            //Next row
+            workbook = CreateBottomlineRow(workbook, "AccName", "SortCode", "AccNumber", "Amount", "Ref");
+            //Loop through each employee
+            string eeFullName;
+            string eeBankAccountName;
+            string eeBankAccountNumber;
+            string eeBankSortCode;
+            string eeBankAccountReference;
+            decimal eeNetPay;
+            foreach(XmlElement payRun in xmlReport.GetElementsByTagName("PayRuns"))
+            {
+                foreach(XmlElement employee in payRun.GetElementsByTagName("Employee"))
+                {
+                    eeFullName = GetElementByTagFromXml(employee, "FullName");
+                    eeBankAccountName = GetElementByTagFromXml(employee, "BankAccountName");
+                    eeBankAccountNumber = GetElementByTagFromXml(employee, "BankAccountNumber");
+                    eeBankSortCode = GetElementByTagFromXml(employee, "BankAccountSortCode");
+                    eeBankAccountReference = GetElementByTagFromXml(employee, "BankAccountReference");
+                    eeNetPay = GetDecimalElementByTagFromXml(employee, "NetPay");
+                    //Next row
+                    workbook = CreateBottomlineRow(workbook, eeBankAccountName, eeBankSortCode, eeBankAccountNumber, eeNetPay.ToString(), eeBankAccountReference);
+                    totalAmount += eeNetPay;
+                }
+            }
+            workbook = CreateBottomlineRow(workbook, erBankAccountName, erBankSortCode, erBankAccountNumber, (totalAmount * -1).ToString(), "CONTRA");
+            
+            return workbook;
+        }
+        private PicoXLSX.Workbook CreateBottomlineRow(PicoXLSX.Workbook workbook, string col1, string col2, string col3, string col4, string col5)
+        {
+            workbook.CurrentWorksheet.AddNextCell(col1);
+            workbook.CurrentWorksheet.AddNextCell(col2);
+            workbook.CurrentWorksheet.AddNextCell(col3);
+            workbook.CurrentWorksheet.AddNextCell(col4);
+            workbook.CurrentWorksheet.AddNextCell(col5);
+            workbook.CurrentWorksheet.GoToNextRow();
+            return workbook;
+        }
+        public DateTime GetPreviousWorkingDay(DateTime date)
+        {
+            DateTime prevDay = date.AddDays(-1);
+            
+            while(prevDay.DayOfWeek == DayOfWeek.Saturday || prevDay.DayOfWeek == DayOfWeek.Sunday)
+            {
+                prevDay = prevDay.AddDays(-1);
+            }
+            return prevDay;
+        }
         public PicoXLSX.Workbook PreparePreReport(XmlDocument xmlReport, PicoXLSX.Workbook workbook)
         {
             //Create a list of pay codes that are in use.
@@ -1635,6 +1730,15 @@ namespace PayRunIOClassLibrary
 
             //Will need to return the xlsx file
             workbook = PreparePreReport(xmlReport, workbook);
+
+            return workbook;
+        }
+        public PicoXLSX.Workbook CreateBottomlineReportWorkbook(XmlDocument xmlReport, string workBookName)
+        {
+            PicoXLSX.Workbook workbook = new PicoXLSX.Workbook(workBookName, "BACSDetails");
+
+            //Will need to return the xlsx file
+            workbook = PrepareBottomlineReport(xmlReport, workbook);
 
             return workbook;
         }
