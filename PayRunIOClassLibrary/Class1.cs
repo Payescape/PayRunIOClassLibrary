@@ -471,9 +471,17 @@ namespace PayRunIOClassLibrary
                 foreach (FileInfo file in files)
                 {
                     string destFileName = file.FullName.Replace(originalDirName, archiveDirName);
-                    destFileName = destFileName.Replace(".xml", "_" + now.ToString("yyyyMMddHHmmssfff") + ".xml");
-                    destFileName = destFileName.Replace(".csv", "_" + now.ToString("yyyyMMddHHmmssfff") + ".csv");
-                    File.Move(file.FullName, destFileName);
+                    //destFileName = destFileName.Replace(".xml", "_" + now.ToString("yyyyMMddHHmmssfff") + ".xml");
+                    //destFileName = destFileName.Replace(".csv", "_" + now.ToString("yyyyMMddHHmmssfff") + ".csv");
+                    try
+                    {
+                        File.Move(file.FullName, destFileName);
+                    }
+                    catch
+                    {
+                        file.Delete();
+                    }
+                    
 
                 }
 
