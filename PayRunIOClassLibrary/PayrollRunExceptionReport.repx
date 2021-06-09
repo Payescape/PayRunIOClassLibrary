@@ -18,10 +18,7 @@
         <Item3 Ref="12" ControlType="XRPageInfo" Name="pageInfo1" PageInfo="DateTime" SizeF="487.5,23" LocationFloat="16.166687,79.20834" Font="Arial, 9.75pt, charSet=0" Padding="2,2,0,0,100">
           <StylePriority Ref="13" UseFont="false" />
         </Item3>
-        <Item4 Ref="14" ControlType="XRLabel" Name="label2" Text="Combined Payroll Run Report" SizeF="736.3766,23" LocationFloat="16.166687,46.5833435" Font="Arial, 14.25pt, style=Bold, charSet=0" ForeColor="Maroon" Padding="2,2,0,0,100">
-          <ExpressionBindings>
-            <Item1 Ref="15" EventName="BeforePrint" PropertyName="Text" Expression="[Parameters].[ReportTitle]" />
-          </ExpressionBindings>
+        <Item4 Ref="14" ControlType="XRLabel" Name="label2" Text="Payroll Exception Run Report" SizeF="736.3766,23" LocationFloat="16.166687,46.5833435" Font="Arial, 14.25pt, style=Bold, charSet=0" ForeColor="Maroon" Padding="2,2,0,0,100">
           <StylePriority Ref="16" UseFont="false" UseForeColor="false" />
         </Item4>
         <Item5 Ref="17" ControlType="XRLabel" Name="label1" Text="Mr Stephen and Rosemay Taylor" SizeF="487.5,23" LocationFloat="16.166687,13.5833426" Font="Arial, 14.25pt, style=Bold, charSet=0" ForeColor="Maroon" Padding="2,2,0,0,100">
