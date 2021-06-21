@@ -383,21 +383,23 @@ namespace PayRunIOClassLibrary
             }
             return xmlReport;
         }
-        public XmlDocument GetPayRunIOObject(XDocument xdoc, string objectType, string erNo)
-        {
-            XmlDocument xmlObject = null;
-            try
-            {
-                var apiHelper = ApiHelper(xdoc);
-                xmlObject = apiHelper.GetRawXml("/" + objectType + "/" + erNo);
+        
+        //public XmlDocument GetPayRunIOObject(XDocument xdoc, string objectType, string erNo)
+        //{
+        //    XmlDocument xmlObject = null;
+        //    try
+        //    {
+        //        var apiHelper = ApiHelper(xdoc);
+        //        xmlObject = apiHelper.GetRawXml("/" + objectType + "/" + erNo);
 
-            }
-            catch(Exception ex)
-            {
+        //    }
+        //    catch(Exception ex)
+        //    {
                 
-            }
-            return xmlObject;
-        }
+        //    }
+        //    return xmlObject;
+        //}
+        
         public string RunTransformReport(XDocument xdoc, string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
                                  string prm4, string val4, string prm5, string val5, string prm6, string val6)
         {
@@ -693,7 +695,7 @@ namespace PayRunIOClassLibrary
         public RPEmployer GetRPEmployer(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
         {
             string objectType = "Employer";
-            XmlDocument xmlEmployer = GetPayRunIOObject(xdoc, objectType, rpParameters.ErRef);
+            //XmlDocument xmlEmployer = GetPayRunIOObject(xdoc, objectType, rpParameters.ErRef);
             RPEmployer rpEmployer = new RPEmployer();
             string dataSource = xdoc?.Root?.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
             string dataBase = xdoc?.Root?.Element("Database").Value;
@@ -708,15 +710,16 @@ namespace PayRunIOClassLibrary
                 rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
                 rpEmployer.CalculateApprenticeshipLevy = GetBooleanElementByTagFromXml(employer, "CalculateApprenticeshipLevy");
             }
-            foreach (XmlElement address in xmlEmployer.GetElementsByTagName("Address"))
-            {
-                rpEmployer.Address1 = GetElementByTagFromXml(address, "Address1");
-                rpEmployer.Address2 = GetElementByTagFromXml(address, "Address2");
-                rpEmployer.Address3 = GetElementByTagFromXml(address, "Address3");
-                rpEmployer.Address4 = GetElementByTagFromXml(address, "Address4");
-                rpEmployer.Postcode = GetElementByTagFromXml(address, "Postcode");
-                rpEmployer.Country = GetElementByTagFromXml(address, "Country");
-            }
+            
+            //foreach (XmlElement address in xmlEmployer.GetElementsByTagName("Address"))
+            //{
+            //    rpEmployer.Address1 = GetElementByTagFromXml(address, "Address1");
+            //    rpEmployer.Address2 = GetElementByTagFromXml(address, "Address2");
+            //    rpEmployer.Address3 = GetElementByTagFromXml(address, "Address3");
+            //    rpEmployer.Address4 = GetElementByTagFromXml(address, "Address4");
+            //    rpEmployer.Postcode = GetElementByTagFromXml(address, "Postcode");
+            //    rpEmployer.Country = GetElementByTagFromXml(address, "Country");
+            //}
 
             rpEmployer.BankFileCode = "000";
             rpEmployer.PensionReportFileType = "Unknown";
