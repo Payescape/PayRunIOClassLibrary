@@ -72,10 +72,10 @@
         <Item19 Ref="46" ControlType="XRLabel" Name="label39" Multiline="true" Text="Net&#xD;&#xA;Pay" TextAlignment="BottomRight" SizeF="64.41681,40.291687" LocationFloat="952.0009,121.833527" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
           <StylePriority Ref="47" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
         </Item19>
-        <Item20 Ref="48" ControlType="XRLabel" Name="label38" Multiline="true" Text="Net Er NI&#xD;&#xA;Including Class 1A" TextAlignment="BottomRight" SizeF="46.0838,40.291687" LocationFloat="1025.66614,121.833527" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+        <Item20 Ref="48" ControlType="XRLabel" Name="label38" Multiline="true" Text="Net Er NI&#xD;&#xA;Including Class 1A" TextAlignment="BottomRight" SizeF="53.3322754,40.2916946" LocationFloat="1016.41772,121.833519" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
           <StylePriority Ref="49" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
         </Item20>
-        <Item21 Ref="50" ControlType="XRLabel" Name="label36" Multiline="true" Text="Er&#xD;&#xA;Pension" TextAlignment="BottomRight" SizeF="43.208252,40.291687" LocationFloat="1071.74976,121.458313" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+        <Item21 Ref="50" ControlType="XRLabel" Name="label36" Multiline="true" Text="Er&#xD;&#xA;Pension" TextAlignment="BottomRight" SizeF="45.2080078,40.2916946" LocationFloat="1069.75,121.458305" Font="Arial, 6.75pt, charSet=0" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
           <StylePriority Ref="51" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
         </Item21>
       </Controls>
@@ -98,49 +98,49 @@
                   <Bands>
                     <Item1 Ref="61" ControlType="DetailBand" Name="Detail4" HeightF="96.95835" KeepTogether="true">
                       <Controls>
-                        <Item1 Ref="62" ControlType="XRLabel" Name="label91" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="43.208252,17.0000076" LocationFloat="1071.74976,70.0000153" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item1 Ref="62" ControlType="XRLabel" Name="label91" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="45.2080078,17.0000076" LocationFloat="1069.75,70.0000153" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="63" EventName="BeforePrint" PropertyName="Text" Expression="Iif(ToDecimal([ErPension1]) == 0,ToDecimal(0) ,((ToDecimal([ErPension2]) - ToDecimal([ErPension1])) / ToDecimal([ErPension1])) * 100&#xA;)" />
                           </ExpressionBindings>
                           <StylePriority Ref="64" UseFont="false" UseTextAlignment="false" />
                         </Item1>
-                        <Item2 Ref="65" ControlType="XRLabel" Name="label92" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="43.208374,17.0000076" LocationFloat="1071.74988,53.00007" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item2 Ref="65" ControlType="XRLabel" Name="label92" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="45.20813,17.0000076" LocationFloat="1069.75012,53.00007" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="66" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([ErPension2]) - ToDecimal([ErPension1])" />
                           </ExpressionBindings>
                           <StylePriority Ref="67" UseFont="false" UseTextAlignment="false" />
                         </Item2>
-                        <Item3 Ref="68" ControlType="XRLabel" Name="label93" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="43.208252,17.0000076" LocationFloat="1071.74976,35.9999962" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item3 Ref="68" ControlType="XRLabel" Name="label93" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="45.2080078,17.0000076" LocationFloat="1069.75,35.9999962" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="69" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([ErPension2])" />
                           </ExpressionBindings>
                           <StylePriority Ref="70" UseFont="false" UseTextAlignment="false" />
                         </Item3>
-                        <Item4 Ref="71" ControlType="XRLabel" Name="label94" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="43.208252,17.00001" LocationFloat="1071.74976,19.0001163" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item4 Ref="71" ControlType="XRLabel" Name="label94" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="45.2080078,17.00001" LocationFloat="1069.75,19.0001163" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="72" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([ErPension1])" />
                           </ExpressionBindings>
                           <StylePriority Ref="73" UseFont="false" UseTextAlignment="false" />
                         </Item4>
-                        <Item5 Ref="74" ControlType="XRLabel" Name="label87" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="46.0838623,17.0000076" LocationFloat="1025.66614,71.00016" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item5 Ref="74" ControlType="XRLabel" Name="label87" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="53.3322754,17.0000076" LocationFloat="1016.41772,71.00016" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="75" EventName="BeforePrint" PropertyName="Text" Expression="Iif(ToDecimal([ErNi1]) == 0,ToDecimal(0) ,((ToDecimal([ErNi2]) - ToDecimal([ErNi1])) / ToDecimal([ErNi1])) * 100&#xA;)" />
                           </ExpressionBindings>
                           <StylePriority Ref="76" UseFont="false" UseTextAlignment="false" />
                         </Item5>
-                        <Item6 Ref="77" ControlType="XRLabel" Name="label88" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="46.0838623,17" LocationFloat="1025.66626,53.00004" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item6 Ref="77" ControlType="XRLabel" Name="label88" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="53.3322754,17" LocationFloat="1016.41785,53.00007" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="78" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([ErNi2]) - ToDecimal([ErNi1])" />
                           </ExpressionBindings>
                           <StylePriority Ref="79" UseFont="false" UseTextAlignment="false" />
                         </Item6>
-                        <Item7 Ref="80" ControlType="XRLabel" Name="label89" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="46.0838623,17" LocationFloat="1025.66614,36.00003" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item7 Ref="80" ControlType="XRLabel" Name="label89" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="53.3322754,17" LocationFloat="1016.41772,35.9999962" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="81" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([ErNi2])" />
                           </ExpressionBindings>
                           <StylePriority Ref="82" UseFont="false" UseTextAlignment="false" />
                         </Item7>
-                        <Item8 Ref="83" ControlType="XRLabel" Name="label90" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="46.0838623,17.00001" LocationFloat="1025.66614,19.0001163" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
+                        <Item8 Ref="83" ControlType="XRLabel" Name="label90" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="53.3322754,17.00001" LocationFloat="1016.41772,19.0001163" Font="Arial, 7.75pt" Padding="2,2,0,0,100">
                           <ExpressionBindings>
                             <Item1 Ref="84" EventName="BeforePrint" PropertyName="Text" Expression="ToDecimal([ErNi1])" />
                           </ExpressionBindings>
@@ -480,56 +480,56 @@
                     <Item2 Ref="251" ControlType="XRLine" Name="line3" SizeF="750.75,7.87442" LocationFloat="366.208252,79.00003" ForeColor="MidnightBlue">
                       <StylePriority Ref="252" UseForeColor="false" />
                     </Item2>
-                    <Item3 Ref="253" ControlType="XRLabel" Name="label139" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="43.208252,17.0000057" LocationFloat="1071.74976,28.0000057" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item3 Ref="253" ControlType="XRLabel" Name="label139" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="45.20813,17.0000057" LocationFloat="1069.74988,28.0000057" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="254" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="255" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([Employees_Employee].[ErPension2])" />
                       </ExpressionBindings>
                       <StylePriority Ref="256" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item3>
-                    <Item4 Ref="257" ControlType="XRLabel" Name="label140" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="43.208252,17.0000076" LocationFloat="1071.74976,9.999974" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item4 Ref="257" ControlType="XRLabel" Name="label140" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="45.20813,17.0000076" LocationFloat="1069.74988,9.999974" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="258" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="259" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([Employees_Employee].[ErPension1])" />
                       </ExpressionBindings>
                       <StylePriority Ref="260" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item4>
-                    <Item5 Ref="261" ControlType="XRLabel" Name="label141" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="43.208374,17.0000076" LocationFloat="1071.74988,45.00001" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item5 Ref="261" ControlType="XRLabel" Name="label141" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="45.208252,17.0000076" LocationFloat="1069.75,45.00001" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="262" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="263" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([Employees_Employee].[ErPension2]) - sumSum([Employees_Employee].[ErPension1])&#xA;" />
                       </ExpressionBindings>
                       <StylePriority Ref="264" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item5>
-                    <Item6 Ref="265" ControlType="XRLabel" Name="label142" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="43.208374,17.0000114" LocationFloat="1071.74988,62.00002" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item6 Ref="265" ControlType="XRLabel" Name="label142" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="45.208252,17.0000114" LocationFloat="1069.75,62.00002" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="266" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="267" EventName="BeforePrint" PropertyName="Text" Expression="Iif(sumSum([Employees_Employee].[ErPension1]) == 0,ToDecimal(0),((sumSum([Employees_Employee].[ErPension2]) - sumSum([Employees_Employee].[ErPension1]))&#xA;/ sumSum([Employees_Employee].[ErPension1])) * 100)&#xA;" />
                       </ExpressionBindings>
                       <StylePriority Ref="268" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item6>
-                    <Item7 Ref="269" ControlType="XRLabel" Name="label135" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="46.0838623,17.0000057" LocationFloat="1025.66614,28.0000057" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item7 Ref="269" ControlType="XRLabel" Name="label135" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="53.33246,17.0000057" LocationFloat="1016.41754,28.0000057" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="270" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="271" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([Employees_Employee].[ErNi2])" />
                       </ExpressionBindings>
                       <StylePriority Ref="272" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item7>
-                    <Item8 Ref="273" ControlType="XRLabel" Name="label136" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="46.0838623,17.0000076" LocationFloat="1025.66614,9.999974" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item8 Ref="273" ControlType="XRLabel" Name="label136" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label8" TextAlignment="MiddleRight" SizeF="53.33246,17.0000076" LocationFloat="1016.41754,9.999974" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="274" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="275" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([Employees_Employee].[ErNi1])" />
                       </ExpressionBindings>
                       <StylePriority Ref="276" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item8>
-                    <Item9 Ref="277" ControlType="XRLabel" Name="label137" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="46.0838623,17.0000076" LocationFloat="1025.66626,45.00001" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item9 Ref="277" ControlType="XRLabel" Name="label137" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="53.3323975,17.0000076" LocationFloat="1016.41772,45.00001" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="278" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="279" EventName="BeforePrint" PropertyName="Text" Expression="sumSum([Employees_Employee].[ErNi2]) - sumSum([Employees_Employee].[ErNi1])&#xA;" />
                       </ExpressionBindings>
                       <StylePriority Ref="280" UseFont="false" UseForeColor="false" UseTextAlignment="false" />
                     </Item9>
-                    <Item10 Ref="281" ControlType="XRLabel" Name="label138" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="46.0838623,17.0000114" LocationFloat="1025.66626,62.00002" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
+                    <Item10 Ref="281" ControlType="XRLabel" Name="label138" TextFormatString="{0:0.00;(0.00)}" Multiline="true" Text="label10" TextAlignment="MiddleRight" SizeF="53.3323975,17.0000114" LocationFloat="1016.41772,62.00002" Font="Arial, 7.75pt, style=Bold" ForeColor="MidnightBlue" Padding="2,2,0,0,100">
                       <Summary Ref="282" Running="Report" />
                       <ExpressionBindings>
                         <Item1 Ref="283" EventName="BeforePrint" PropertyName="Text" Expression="Iif(sumSum([Employees_Employee].[ErNi1]) == 0,ToDecimal(0),((sumSum([Employees_Employee].[ErNi2]) - sumSum([Employees_Employee].[ErNi1]))&#xA;/ sumSum([Employees_Employee].[ErNi1])) * 100)" />
