@@ -1325,9 +1325,9 @@ namespace PayRunIOClassLibrary
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PayRunDate);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Reference);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Fullname);
-            workbook.CurrentWorksheet.AddNextCell("Department");
-            workbook.CurrentWorksheet.AddNextCell("Cost Centre");
-            workbook.CurrentWorksheet.AddNextCell("Branch");
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Department);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.CostCentre);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Branch);
             workbook.CurrentWorksheet.AddNextCell("Calc");
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.TaxCode);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.NILetter);
@@ -1492,6 +1492,9 @@ namespace PayRunIOClassLibrary
                     rpEmployeePeriod.NetPayTP = GetDecimalElementByTagFromXml(employee, "NetPay");
                     rpEmployeePeriod.ErNICTP = GetDecimalElementByTagFromXml(employee, "ErNi");
                     rpEmployeePeriod.ErPensionTotalTP = GetDecimalElementByTagFromXml(employee, "ErPension");
+                    rpEmployeePeriod.Branch = GetElementByTagFromXml(employee, "Branch");
+                    rpEmployeePeriod.Branch = GetElementByTagFromXml(employee, "Department");
+                    rpEmployeePeriod.Branch = GetElementByTagFromXml(employee, "CostCentre");
 
                     List<RPAddition> rpAdditions = new List<RPAddition>();
                     List<RPDeduction> rpDeductions = new List<RPDeduction>();
@@ -2015,6 +2018,9 @@ namespace PayRunIOClassLibrary
         public decimal SPBPAdd { get; set; }
         
         public decimal Zero { get; set; }
+        public string Branch { get; set; }
+        public string Department { get; set; }
+        public string CostCentre { get; set; }
         public List<RPAddition> Additions { get; set; }
         public List<RPDeduction> Deductions { get; set; }
         public List<RPPayslipDeduction> PayslipDeductions { get; set; }
@@ -2039,7 +2045,7 @@ namespace PayRunIOClassLibrary
                           decimal postTaxAddDed, decimal postTaxPension, decimal aeo, decimal aeoYtd, 
                           decimal totalPayComponentAdditions, decimal totalPayComponentDeductions, decimal benefitsInKind,
                           decimal sspSetOff, decimal sspAdd, decimal smpSetOff, decimal smpAdd, decimal osppSetOff, decimal osppAdd, decimal sapSetOff, decimal sapAdd,
-                          decimal shppSetOff, decimal shppAdd, decimal spbpSetOff, decimal spbpAdd, decimal zero,
+                          decimal shppSetOff, decimal shppAdd, decimal spbpSetOff, decimal spbpAdd, decimal zero, string branch, string department, string costCentre,
                           List<RPAddition> additions, List<RPDeduction> deductions, List<RPPayslipDeduction> payslipDeductions)
         {
             Reference = reference;
@@ -2150,6 +2156,9 @@ namespace PayRunIOClassLibrary
             SPBPSetOff = spbpSetOff;
             SPBPAdd = spbpAdd;
             Zero = zero;
+            Branch = branch;
+            Department = department;
+            CostCentre = costCentre;
             Additions = additions;
             Deductions = deductions;
             PayslipDeductions = payslipDeductions;
