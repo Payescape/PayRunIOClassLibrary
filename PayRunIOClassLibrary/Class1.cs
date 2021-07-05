@@ -19,297 +19,296 @@ namespace PayRunIOClassLibrary
     {
         public PayRunIOWebGlobeClass() { }
 
-        //Testing making a change to the class 
         // Contacts to move to Payrun.io meta data:https://payrun.atlassian.net/browse/PEINT-330
-        public void UpdateContactDetails(XDocument xdoc)
-        {
-            string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
-            string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL"; 
-            string dataBase = xdoc.Root.Element("Database").Value;
-            string userID = xdoc.Root.Element("Username").Value;
-            string password = xdoc.Root.Element("Password").Value;
-            string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
+        //public void UpdateContactDetails(XDocument xdoc)
+        //{
+        //    string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
+        //    string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL"; 
+        //    string dataBase = xdoc.Root.Element("Database").Value;
+        //    string userID = xdoc.Root.Element("Username").Value;
+        //    string password = xdoc.Root.Element("Password").Value;
+        //    string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
 
-            DirectoryInfo dirInfo = new DirectoryInfo(contactsFolder);
-            FileInfo[] files = dirInfo.GetFiles("*.csv");
-            foreach (FileInfo file in files)
-            {
-                if (file.FullName.Contains("_contacts_"))
-                {
-                    //Get a table of contacts from the csv file.
-                    DataTable dtContacts = GetDataTableFromCSVFile(xdoc, file.FullName);
-                    //Insert the data into an SQL Database.
-                    bool success = InsertDataIntoSQLServerUsingSQLBulkCopy(dtContacts, sqlConnectionString, xdoc);
-                    if (success)
-                    {
-                        //We've successfully written the contact data to a temporary table with the name "tmp_CompanyNo_Contacts". e.g. "tmp_2137_Contacts"
-                        //Now Insert / Update the contacts table then delete the table.
-                        int x = file.FullName.LastIndexOf("\\") + 1;
-                        string companyNo = file.FullName.Substring(x, 4);
-                        success = InsertUpdateContacts(xdoc, sqlConnectionString, companyNo);
-                        if (success)
-                        {
-                            //Delete the temporary contacts.
-                            DeleteTemporaryContacts(xdoc, sqlConnectionString);
-                            //Delete the csv file.
-                            file.Delete();
-                        }
-                    }
-                }
+        //    DirectoryInfo dirInfo = new DirectoryInfo(contactsFolder);
+        //    FileInfo[] files = dirInfo.GetFiles("*.csv");
+        //    foreach (FileInfo file in files)
+        //    {
+        //        if (file.FullName.Contains("_contacts_"))
+        //        {
+        //            //Get a table of contacts from the csv file.
+        //            DataTable dtContacts = GetDataTableFromCSVFile(xdoc, file.FullName);
+        //            //Insert the data into an SQL Database.
+        //            bool success = InsertDataIntoSQLServerUsingSQLBulkCopy(dtContacts, sqlConnectionString, xdoc);
+        //            if (success)
+        //            {
+        //                //We've successfully written the contact data to a temporary table with the name "tmp_CompanyNo_Contacts". e.g. "tmp_2137_Contacts"
+        //                //Now Insert / Update the contacts table then delete the table.
+        //                int x = file.FullName.LastIndexOf("\\") + 1;
+        //                string companyNo = file.FullName.Substring(x, 4);
+        //                success = InsertUpdateContacts(xdoc, sqlConnectionString, companyNo);
+        //                if (success)
+        //                {
+        //                    //Delete the temporary contacts.
+        //                    DeleteTemporaryContacts(xdoc, sqlConnectionString);
+        //                    //Delete the csv file.
+        //                    file.Delete();
+        //                }
+        //            }
+        //        }
 
-            }
-        }
-        private bool InsertDataIntoSQLServerUsingSQLBulkCopy(DataTable csvDataTable, string sqlConnectionString, XDocument xdoc)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
+        //    }
+        //}
+        //private bool InsertDataIntoSQLServerUsingSQLBulkCopy(DataTable csvDataTable, string sqlConnectionString, XDocument xdoc)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
 
-            using (SqlConnection sqlConnection = new SqlConnection(sqlConnectionString))
-            {
+        //    using (SqlConnection sqlConnection = new SqlConnection(sqlConnectionString))
+        //    {
 
-                try
-                {
-                    sqlConnection.Open();
-                    // Check if a table exsists
-                    bool tableExists;
-                    string tableName;
-                    //This is the contacts file we've received from Web Globe it's named in the following format.
-                    //CompanyNo_unity_contacts_export_datetimestamp.csv e.g. 1234_unity_contacts_export_20190630100130001.csv
-                    //We just need the company number and contacts for the a table name.
+        //        try
+        //        {
+        //            sqlConnection.Open();
+        //            // Check if a table exsists
+        //            bool tableExists;
+        //            string tableName;
+        //            //This is the contacts file we've received from Web Globe it's named in the following format.
+        //            //CompanyNo_unity_contacts_export_datetimestamp.csv e.g. 1234_unity_contacts_export_20190630100130001.csv
+        //            //We just need the company number and contacts for the a table name.
 
-                    tableName = "tmpContacts";  // Create a temporary invoices table and an SQL query will create the live one.
-
-
-                    string sqlStatement = "SELECT COUNT (*) FROM " + tableName;
+        //            tableName = "tmpContacts";  // Create a temporary invoices table and an SQL query will create the live one.
 
 
-                    try
-                    {
-                        using (SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection))
-                        {
-                            sqlCommand.ExecuteScalar();
-                            tableExists = true;
-                        }
-                    }
-                    catch
-                    {
-                        tableExists = false;
-                    }
-
-                    if (!tableExists)
-                    {
-                        // Create the table
-                        try
-                        {
-                            textLine = string.Format("About to create tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            sqlStatement = "CREATE TABLE " + tableName + "(";
-                            foreach (DataColumn dataColumn in csvDataTable.Columns)
-                            {
-
-                                dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
-                                sqlStatement = sqlStatement + dataColumn.ColumnName + " varchar(150),";
-                            }
-                            sqlStatement = sqlStatement.Remove(sqlStatement.Length - 1, 1) + ")";
-                            SqlCommand createTable = new SqlCommand(sqlStatement, sqlConnection);
-                            createTable.ExecuteNonQuery();
-
-                            textLine = string.Format("Sucessfully created tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-                        }
-                        catch
-                        {
-                            textLine = string.Format("Failed to create tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            return false;
-
-                        }
-                    }
-                    try
-                    {
-                        using (SqlBulkCopy bulkData = new SqlBulkCopy(sqlConnection))
-                        {
-                            textLine = string.Format("About to bulk write to tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            bulkData.DestinationTableName = tableName;
-
-                            foreach (DataColumn dataColumn in csvDataTable.Columns)
-                            {
-                                dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
-                                bulkData.ColumnMappings.Add(dataColumn.ToString(), dataColumn.ToString());
-
-                            }
-                            //bulkData.BulkCopyTimeout = 600; // 600 seconds
-                            bulkData.WriteToServer(csvDataTable);
-
-                            textLine = string.Format("Successfull bulk write to tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            return true;
-
-                        }
-                    }
-                    catch
-                    {
-                        textLine = string.Format("Failed bulk write to tmpContacts table.");
-                        Update_Progress(textLine, configDirName);
-
-                        return false;
-
-                    }
-                }
-                catch
-                {
-                    return false;
-
-                }
-                finally
-                {
-                    sqlConnection.Close();
-
-                }
-
-            }
-        }
-        private DataTable GetDataTableFromCSVFile(XDocument xdoc, string csvFileName)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
-
-            string delimiter = ",";
-            DataTable csvDataTable = new DataTable();
-            try
-            {
-                using (TextFieldParser csvReader = new TextFieldParser(csvFileName))
-                {
-                    csvReader.SetDelimiters(new string[] { delimiter });
-                    csvReader.HasFieldsEnclosedInQuotes = true;
-
-                    string[] colFields = csvReader.ReadFields();
-
-                    foreach (string column in colFields)
-                    {
-
-                        DataColumn datacolumn = new DataColumn(column)
-                        {
-                            AllowDBNull = true
-                        };
-                        //
-                        // Check to make sure we don't have two columns with the same name.
-                        //
-                        try
-                        {
-                            csvDataTable.Columns.Add(datacolumn);
-                        }
-                        catch (Exception ex)
-                        {
-                            //
-                            // We do have a column with this name already.
-                            //
-                            if (ex.ToString().Contains("already belongs to"))
-                            {
-                                DateTime dateTimeNow = DateTime.Now;
-                                DataColumn dataColumnUnique = new DataColumn(column + dateTimeNow);
-                                csvDataTable.Columns.Add(dataColumnUnique);
-                            }
-                            else
-                            {
-                                textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
-                                Update_Progress(textLine, configDirName);
-                            }
-
-                        }
-
-                    }
-
-                    while (!csvReader.EndOfData)
-                    {
-                        string[] fieldData = csvReader.ReadFields();
-                        int x = fieldData.Count();
-                        string[] tableData = new string[x];
-                        for (int i = 0; i < x; i++)
-                        {
-                            tableData[i] = fieldData[i];
-                        }
+        //            string sqlStatement = "SELECT COUNT (*) FROM " + tableName;
 
 
-                        csvDataTable.Rows.Add(tableData);
-                    }
-                }
+        //            try
+        //            {
+        //                using (SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection))
+        //                {
+        //                    sqlCommand.ExecuteScalar();
+        //                    tableExists = true;
+        //                }
+        //            }
+        //            catch
+        //            {
+        //                tableExists = false;
+        //            }
 
-            }
-            catch (Exception ex)
-            {
-                textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
-                Update_Progress(textLine, configDirName);
+        //            if (!tableExists)
+        //            {
+        //                // Create the table
+        //                try
+        //                {
+        //                    textLine = string.Format("About to create tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
 
-            }
-            return csvDataTable;
-        }
-        private bool InsertUpdateContacts(XDocument xdoc, string sqlConnectionString, string companyNo)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
+        //                    sqlStatement = "CREATE TABLE " + tableName + "(";
+        //                    foreach (DataColumn dataColumn in csvDataTable.Columns)
+        //                    {
 
-            bool success = false;
-            //
-            //Try using a stored procedure
-            //
-            try
-            {
-                using (var connection = new SqlConnection(sqlConnectionString))
-                using (var command = new SqlCommand("InsertUpdateContacts", connection)
-                {
-                    CommandType = CommandType.StoredProcedure
-                })
-                {
-                    connection.Open();
-                    command.Parameters.AddWithValue("CompanyNo", companyNo);
-                    command.ExecuteNonQuery();
-                    success = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                textLine = string.Format("Error inserting/updating contacts.\r\n{0}.\r\n", ex);
-                Update_Progress(textLine, configDirName);
-            }
+        //                        dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
+        //                        sqlStatement = sqlStatement + dataColumn.ColumnName + " varchar(150),";
+        //                    }
+        //                    sqlStatement = sqlStatement.Remove(sqlStatement.Length - 1, 1) + ")";
+        //                    SqlCommand createTable = new SqlCommand(sqlStatement, sqlConnection);
+        //                    createTable.ExecuteNonQuery();
+
+        //                    textLine = string.Format("Sucessfully created tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+        //                }
+        //                catch
+        //                {
+        //                    textLine = string.Format("Failed to create tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+
+        //                    return false;
+
+        //                }
+        //            }
+        //            try
+        //            {
+        //                using (SqlBulkCopy bulkData = new SqlBulkCopy(sqlConnection))
+        //                {
+        //                    textLine = string.Format("About to bulk write to tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+
+        //                    bulkData.DestinationTableName = tableName;
+
+        //                    foreach (DataColumn dataColumn in csvDataTable.Columns)
+        //                    {
+        //                        dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
+        //                        bulkData.ColumnMappings.Add(dataColumn.ToString(), dataColumn.ToString());
+
+        //                    }
+        //                    //bulkData.BulkCopyTimeout = 600; // 600 seconds
+        //                    bulkData.WriteToServer(csvDataTable);
+
+        //                    textLine = string.Format("Successfull bulk write to tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+
+        //                    return true;
+
+        //                }
+        //            }
+        //            catch
+        //            {
+        //                textLine = string.Format("Failed bulk write to tmpContacts table.");
+        //                Update_Progress(textLine, configDirName);
+
+        //                return false;
+
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            return false;
+
+        //        }
+        //        finally
+        //        {
+        //            sqlConnection.Close();
+
+        //        }
+
+        //    }
+        //}
+        //private DataTable GetDataTableFromCSVFile(XDocument xdoc, string csvFileName)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
+
+        //    string delimiter = ",";
+        //    DataTable csvDataTable = new DataTable();
+        //    try
+        //    {
+        //        using (TextFieldParser csvReader = new TextFieldParser(csvFileName))
+        //        {
+        //            csvReader.SetDelimiters(new string[] { delimiter });
+        //            csvReader.HasFieldsEnclosedInQuotes = true;
+
+        //            string[] colFields = csvReader.ReadFields();
+
+        //            foreach (string column in colFields)
+        //            {
+
+        //                DataColumn datacolumn = new DataColumn(column)
+        //                {
+        //                    AllowDBNull = true
+        //                };
+        //                //
+        //                // Check to make sure we don't have two columns with the same name.
+        //                //
+        //                try
+        //                {
+        //                    csvDataTable.Columns.Add(datacolumn);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    //
+        //                    // We do have a column with this name already.
+        //                    //
+        //                    if (ex.ToString().Contains("already belongs to"))
+        //                    {
+        //                        DateTime dateTimeNow = DateTime.Now;
+        //                        DataColumn dataColumnUnique = new DataColumn(column + dateTimeNow);
+        //                        csvDataTable.Columns.Add(dataColumnUnique);
+        //                    }
+        //                    else
+        //                    {
+        //                        textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
+        //                        Update_Progress(textLine, configDirName);
+        //                    }
+
+        //                }
+
+        //            }
+
+        //            while (!csvReader.EndOfData)
+        //            {
+        //                string[] fieldData = csvReader.ReadFields();
+        //                int x = fieldData.Count();
+        //                string[] tableData = new string[x];
+        //                for (int i = 0; i < x; i++)
+        //                {
+        //                    tableData[i] = fieldData[i];
+        //                }
 
 
-            return success;
-        }
-        private void DeleteTemporaryContacts(XDocument xdoc, string sqlConnectionString)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
+        //                csvDataTable.Rows.Add(tableData);
+        //            }
+        //        }
 
-            //
-            //Try using a stored procedure
-            //
-            try
-            {
-                using (var connection = new SqlConnection(sqlConnectionString))
-                using (var command = new SqlCommand("DeleteTemporaryContacts", connection)
-                {
-                    CommandType = CommandType.StoredProcedure
-                })
-                {
-                    connection.Open();
-                    command.ExecuteNonQuery();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
+        //        Update_Progress(textLine, configDirName);
 
-                }
-            }
-            catch (Exception ex)
-            {
-                textLine = string.Format("Error deleting temporary contacts.\r\n{0}.\r\n", ex);
-                Update_Progress(textLine, configDirName);
-            }
+        //    }
+        //    return csvDataTable;
+        //}
+        //private bool InsertUpdateContacts(XDocument xdoc, string sqlConnectionString, string companyNo)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
+
+        //    bool success = false;
+        //    //
+        //    //Try using a stored procedure
+        //    //
+        //    try
+        //    {
+        //        using (var connection = new SqlConnection(sqlConnectionString))
+        //        using (var command = new SqlCommand("InsertUpdateContacts", connection)
+        //        {
+        //            CommandType = CommandType.StoredProcedure
+        //        })
+        //        {
+        //            connection.Open();
+        //            command.Parameters.AddWithValue("CompanyNo", companyNo);
+        //            command.ExecuteNonQuery();
+        //            success = true;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        textLine = string.Format("Error inserting/updating contacts.\r\n{0}.\r\n", ex);
+        //        Update_Progress(textLine, configDirName);
+        //    }
 
 
-        }
+        //    return success;
+        //}
+        //private void DeleteTemporaryContacts(XDocument xdoc, string sqlConnectionString)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
+
+        //    //
+        //    //Try using a stored procedure
+        //    //
+        //    try
+        //    {
+        //        using (var connection = new SqlConnection(sqlConnectionString))
+        //        using (var command = new SqlCommand("DeleteTemporaryContacts", connection)
+        //        {
+        //            CommandType = CommandType.StoredProcedure
+        //        })
+        //        {
+        //            connection.Open();
+        //            command.ExecuteNonQuery();
+
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        textLine = string.Format("Error deleting temporary contacts.\r\n{0}.\r\n", ex);
+        //        Update_Progress(textLine, configDirName);
+        //    }
+
+
+        //}
         public void Update_Progress(string textLine, string configDirName)
         {
             //Get the month and year from today's date
