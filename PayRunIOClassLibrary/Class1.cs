@@ -12,6 +12,7 @@ using System.Globalization;
 using PayRunIO.CSharp.SDK;
 using DevExpress.XtraReports.UI;
 using PicoXLSX;
+using System.Text;
 
 namespace PayRunIOClassLibrary
 {
@@ -1631,6 +1632,88 @@ namespace PayRunIOClassLibrary
             
             return workbook;
         }
+        public StringBuilder PrepareBottomlineReportCSV(XmlDocument xmlReport)
+        {
+            DateTime creationDate = DateTime.Now;
+            DateTime processDate = DateTime.Now;
+            string bacsServiceUserNumber = null;
+            string erName;
+            string erBankAccountName = null;
+            string erBankSortCode = null;
+            string erBankAccountNumber = null;
+            decimal totalAmount = 0;
+            foreach (XmlElement employer in xmlReport.GetElementsByTagName("Employer"))
+            {
+                processDate = Convert.ToDateTime(GetElementByTagFromXml(employer, "PaymentDate"));
+                erName = GetElementByTagFromXml(employer, "Name");
+                erBankAccountName = GetElementByTagFromXml(employer, "BankAccountName");
+                erBankAccountNumber = GetElementByTagFromXml(employer, "BankAccountNumber");
+                erBankSortCode = GetElementByTagFromXml(employer, "BankAccountSortCode");
+                bacsServiceUserNumber = GetElementByTagFromXml(employer, "BacsServiceUserNumber");
+
+            }
+            processDate = GetPreviousWorkingDay(processDate);
+            StringBuilder stringBuilder = new StringBuilder();
+            //First row
+            string csvLine = "BACS File Submission,,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = "Submission serial number :,," + bacsServiceUserNumber + ",,,Creation date :," + creationDate.ToString("dd-MMM-yy");
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = "Bureau number : B40000,,,,,Process date :," +  processDate.ToString("dd-MMM-yy");
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,Expire date :," + creationDate.ToString("dd-MMM-yy");
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = "FILE COMPLETE,,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",Account Name,Sort Code,Acc Number,Amount,Ref,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row (Employer details)
+            csvLine = erBankAccountName + ",,," + erBankSortCode + ",,,";
+            stringBuilder.AppendLine(csvLine);
+            //Loop through each employee
+            string eeFullName;
+            string eeBankAccountName;
+            string eeBankAccountNumber;
+            string eeBankSortCode;
+            string eeBankAccountReference;
+            decimal eeNetPay;
+            foreach (XmlElement payRun in xmlReport.GetElementsByTagName("PayRuns"))
+            {
+                foreach (XmlElement employee in payRun.GetElementsByTagName("Employee"))
+                {
+                    eeFullName = GetElementByTagFromXml(employee, "FullName");
+                    eeBankAccountName = GetElementByTagFromXml(employee, "BankAccountName");
+                    eeBankAccountNumber = GetElementByTagFromXml(employee, "BankAccountNumber");
+                    eeBankSortCode = GetElementByTagFromXml(employee, "BankAccountSortCode");
+                    eeBankAccountReference = GetElementByTagFromXml(employee, "BankAccountReference");
+                    eeNetPay = GetDecimalElementByTagFromXml(employee, "NetPay");
+                    //Next row
+                    csvLine = "," + eeBankAccountName + "," + eeBankSortCode + "," + eeBankAccountNumber + 
+                              "," + eeNetPay.ToString() + "," + erBankAccountName + ",";
+                    stringBuilder.AppendLine(csvLine);
+                    totalAmount += eeNetPay;
+                }
+            }
+            csvLine = "," + erBankAccountName + "," + erBankSortCode + "," + erBankAccountNumber + 
+                      "," + (totalAmount * -1).ToString() + "," + "CONTRA" + ",";
+            stringBuilder.AppendLine(csvLine);
+
+            return stringBuilder;
+        }
         private PicoXLSX.Workbook CreateBottomlineRow(PicoXLSX.Workbook workbook, string col1, string col2, string col3, string col4, string col5)
         {
             workbook.CurrentWorksheet.AddNextCell(col1);
@@ -1758,6 +1841,13 @@ namespace PayRunIOClassLibrary
             workbook = PrepareBottomlineReport(xmlReport, workbook);
 
             return workbook;
+        }
+        public StringBuilder CreateBottomlineReportCSVFile(XmlDocument xmlReport)
+        {
+            //Will need to return the csv file
+            StringBuilder csvFile = PrepareBottomlineReportCSV(xmlReport);
+
+            return csvFile;
         }
     }
     public class ReadConfigFile
