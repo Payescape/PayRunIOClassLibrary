@@ -12,6 +12,7 @@ using System.Globalization;
 using PayRunIO.CSharp.SDK;
 using DevExpress.XtraReports.UI;
 using PicoXLSX;
+using System.Text;
 
 namespace PayRunIOClassLibrary
 {
@@ -19,297 +20,296 @@ namespace PayRunIOClassLibrary
     {
         public PayRunIOWebGlobeClass() { }
 
-        //Testing making a change to the class 
         // Contacts to move to Payrun.io meta data:https://payrun.atlassian.net/browse/PEINT-330
-        public void UpdateContactDetails(XDocument xdoc)
-        {
-            string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
-            string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL"; 
-            string dataBase = xdoc.Root.Element("Database").Value;
-            string userID = xdoc.Root.Element("Username").Value;
-            string password = xdoc.Root.Element("Password").Value;
-            string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
+        //public void UpdateContactDetails(XDocument xdoc)
+        //{
+        //    string contactsFolder = xdoc.Root.Element("DataHomeFolder").Value + "PE-Contacts\\";
+        //    string dataSource = xdoc.Root.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL"; 
+        //    string dataBase = xdoc.Root.Element("Database").Value;
+        //    string userID = xdoc.Root.Element("Username").Value;
+        //    string password = xdoc.Root.Element("Password").Value;
+        //    string sqlConnectionString = "Server=" + dataSource + ";Database=" + dataBase + ";User ID=" + userID + ";Password=" + password + ";";
 
-            DirectoryInfo dirInfo = new DirectoryInfo(contactsFolder);
-            FileInfo[] files = dirInfo.GetFiles("*.csv");
-            foreach (FileInfo file in files)
-            {
-                if (file.FullName.Contains("_contacts_"))
-                {
-                    //Get a table of contacts from the csv file.
-                    DataTable dtContacts = GetDataTableFromCSVFile(xdoc, file.FullName);
-                    //Insert the data into an SQL Database.
-                    bool success = InsertDataIntoSQLServerUsingSQLBulkCopy(dtContacts, sqlConnectionString, xdoc);
-                    if (success)
-                    {
-                        //We've successfully written the contact data to a temporary table with the name "tmp_CompanyNo_Contacts". e.g. "tmp_2137_Contacts"
-                        //Now Insert / Update the contacts table then delete the table.
-                        int x = file.FullName.LastIndexOf("\\") + 1;
-                        string companyNo = file.FullName.Substring(x, 4);
-                        success = InsertUpdateContacts(xdoc, sqlConnectionString, companyNo);
-                        if (success)
-                        {
-                            //Delete the temporary contacts.
-                            DeleteTemporaryContacts(xdoc, sqlConnectionString);
-                            //Delete the csv file.
-                            file.Delete();
-                        }
-                    }
-                }
+        //    DirectoryInfo dirInfo = new DirectoryInfo(contactsFolder);
+        //    FileInfo[] files = dirInfo.GetFiles("*.csv");
+        //    foreach (FileInfo file in files)
+        //    {
+        //        if (file.FullName.Contains("_contacts_"))
+        //        {
+        //            //Get a table of contacts from the csv file.
+        //            DataTable dtContacts = GetDataTableFromCSVFile(xdoc, file.FullName);
+        //            //Insert the data into an SQL Database.
+        //            bool success = InsertDataIntoSQLServerUsingSQLBulkCopy(dtContacts, sqlConnectionString, xdoc);
+        //            if (success)
+        //            {
+        //                //We've successfully written the contact data to a temporary table with the name "tmp_CompanyNo_Contacts". e.g. "tmp_2137_Contacts"
+        //                //Now Insert / Update the contacts table then delete the table.
+        //                int x = file.FullName.LastIndexOf("\\") + 1;
+        //                string companyNo = file.FullName.Substring(x, 4);
+        //                success = InsertUpdateContacts(xdoc, sqlConnectionString, companyNo);
+        //                if (success)
+        //                {
+        //                    //Delete the temporary contacts.
+        //                    DeleteTemporaryContacts(xdoc, sqlConnectionString);
+        //                    //Delete the csv file.
+        //                    file.Delete();
+        //                }
+        //            }
+        //        }
 
-            }
-        }
-        private bool InsertDataIntoSQLServerUsingSQLBulkCopy(DataTable csvDataTable, string sqlConnectionString, XDocument xdoc)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
+        //    }
+        //}
+        //private bool InsertDataIntoSQLServerUsingSQLBulkCopy(DataTable csvDataTable, string sqlConnectionString, XDocument xdoc)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
 
-            using (SqlConnection sqlConnection = new SqlConnection(sqlConnectionString))
-            {
+        //    using (SqlConnection sqlConnection = new SqlConnection(sqlConnectionString))
+        //    {
 
-                try
-                {
-                    sqlConnection.Open();
-                    // Check if a table exsists
-                    bool tableExists;
-                    string tableName;
-                    //This is the contacts file we've received from Web Globe it's named in the following format.
-                    //CompanyNo_unity_contacts_export_datetimestamp.csv e.g. 1234_unity_contacts_export_20190630100130001.csv
-                    //We just need the company number and contacts for the a table name.
+        //        try
+        //        {
+        //            sqlConnection.Open();
+        //            // Check if a table exsists
+        //            bool tableExists;
+        //            string tableName;
+        //            //This is the contacts file we've received from Web Globe it's named in the following format.
+        //            //CompanyNo_unity_contacts_export_datetimestamp.csv e.g. 1234_unity_contacts_export_20190630100130001.csv
+        //            //We just need the company number and contacts for the a table name.
 
-                    tableName = "tmpContacts";  // Create a temporary invoices table and an SQL query will create the live one.
-
-
-                    string sqlStatement = "SELECT COUNT (*) FROM " + tableName;
+        //            tableName = "tmpContacts";  // Create a temporary invoices table and an SQL query will create the live one.
 
 
-                    try
-                    {
-                        using (SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection))
-                        {
-                            sqlCommand.ExecuteScalar();
-                            tableExists = true;
-                        }
-                    }
-                    catch
-                    {
-                        tableExists = false;
-                    }
-
-                    if (!tableExists)
-                    {
-                        // Create the table
-                        try
-                        {
-                            textLine = string.Format("About to create tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            sqlStatement = "CREATE TABLE " + tableName + "(";
-                            foreach (DataColumn dataColumn in csvDataTable.Columns)
-                            {
-
-                                dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
-                                sqlStatement = sqlStatement + dataColumn.ColumnName + " varchar(150),";
-                            }
-                            sqlStatement = sqlStatement.Remove(sqlStatement.Length - 1, 1) + ")";
-                            SqlCommand createTable = new SqlCommand(sqlStatement, sqlConnection);
-                            createTable.ExecuteNonQuery();
-
-                            textLine = string.Format("Sucessfully created tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-                        }
-                        catch
-                        {
-                            textLine = string.Format("Failed to create tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            return false;
-
-                        }
-                    }
-                    try
-                    {
-                        using (SqlBulkCopy bulkData = new SqlBulkCopy(sqlConnection))
-                        {
-                            textLine = string.Format("About to bulk write to tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            bulkData.DestinationTableName = tableName;
-
-                            foreach (DataColumn dataColumn in csvDataTable.Columns)
-                            {
-                                dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
-                                bulkData.ColumnMappings.Add(dataColumn.ToString(), dataColumn.ToString());
-
-                            }
-                            //bulkData.BulkCopyTimeout = 600; // 600 seconds
-                            bulkData.WriteToServer(csvDataTable);
-
-                            textLine = string.Format("Successfull bulk write to tmpContacts table.");
-                            Update_Progress(textLine, configDirName);
-
-                            return true;
-
-                        }
-                    }
-                    catch
-                    {
-                        textLine = string.Format("Failed bulk write to tmpContacts table.");
-                        Update_Progress(textLine, configDirName);
-
-                        return false;
-
-                    }
-                }
-                catch
-                {
-                    return false;
-
-                }
-                finally
-                {
-                    sqlConnection.Close();
-
-                }
-
-            }
-        }
-        private DataTable GetDataTableFromCSVFile(XDocument xdoc, string csvFileName)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
-
-            string delimiter = ",";
-            DataTable csvDataTable = new DataTable();
-            try
-            {
-                using (TextFieldParser csvReader = new TextFieldParser(csvFileName))
-                {
-                    csvReader.SetDelimiters(new string[] { delimiter });
-                    csvReader.HasFieldsEnclosedInQuotes = true;
-
-                    string[] colFields = csvReader.ReadFields();
-
-                    foreach (string column in colFields)
-                    {
-
-                        DataColumn datacolumn = new DataColumn(column)
-                        {
-                            AllowDBNull = true
-                        };
-                        //
-                        // Check to make sure we don't have two columns with the same name.
-                        //
-                        try
-                        {
-                            csvDataTable.Columns.Add(datacolumn);
-                        }
-                        catch (Exception ex)
-                        {
-                            //
-                            // We do have a column with this name already.
-                            //
-                            if (ex.ToString().Contains("already belongs to"))
-                            {
-                                DateTime dateTimeNow = DateTime.Now;
-                                DataColumn dataColumnUnique = new DataColumn(column + dateTimeNow);
-                                csvDataTable.Columns.Add(dataColumnUnique);
-                            }
-                            else
-                            {
-                                textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
-                                Update_Progress(textLine, configDirName);
-                            }
-
-                        }
-
-                    }
-
-                    while (!csvReader.EndOfData)
-                    {
-                        string[] fieldData = csvReader.ReadFields();
-                        int x = fieldData.Count();
-                        string[] tableData = new string[x];
-                        for (int i = 0; i < x; i++)
-                        {
-                            tableData[i] = fieldData[i];
-                        }
+        //            string sqlStatement = "SELECT COUNT (*) FROM " + tableName;
 
 
-                        csvDataTable.Rows.Add(tableData);
-                    }
-                }
+        //            try
+        //            {
+        //                using (SqlCommand sqlCommand = new SqlCommand(sqlStatement, sqlConnection))
+        //                {
+        //                    sqlCommand.ExecuteScalar();
+        //                    tableExists = true;
+        //                }
+        //            }
+        //            catch
+        //            {
+        //                tableExists = false;
+        //            }
 
-            }
-            catch (Exception ex)
-            {
-                textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
-                Update_Progress(textLine, configDirName);
+        //            if (!tableExists)
+        //            {
+        //                // Create the table
+        //                try
+        //                {
+        //                    textLine = string.Format("About to create tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
 
-            }
-            return csvDataTable;
-        }
-        private bool InsertUpdateContacts(XDocument xdoc, string sqlConnectionString, string companyNo)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
+        //                    sqlStatement = "CREATE TABLE " + tableName + "(";
+        //                    foreach (DataColumn dataColumn in csvDataTable.Columns)
+        //                    {
 
-            bool success = false;
-            //
-            //Try using a stored procedure
-            //
-            try
-            {
-                using (var connection = new SqlConnection(sqlConnectionString))
-                using (var command = new SqlCommand("InsertUpdateContacts", connection)
-                {
-                    CommandType = CommandType.StoredProcedure
-                })
-                {
-                    connection.Open();
-                    command.Parameters.AddWithValue("CompanyNo", companyNo);
-                    command.ExecuteNonQuery();
-                    success = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                textLine = string.Format("Error inserting/updating contacts.\r\n{0}.\r\n", ex);
-                Update_Progress(textLine, configDirName);
-            }
+        //                        dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
+        //                        sqlStatement = sqlStatement + dataColumn.ColumnName + " varchar(150),";
+        //                    }
+        //                    sqlStatement = sqlStatement.Remove(sqlStatement.Length - 1, 1) + ")";
+        //                    SqlCommand createTable = new SqlCommand(sqlStatement, sqlConnection);
+        //                    createTable.ExecuteNonQuery();
+
+        //                    textLine = string.Format("Sucessfully created tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+        //                }
+        //                catch
+        //                {
+        //                    textLine = string.Format("Failed to create tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+
+        //                    return false;
+
+        //                }
+        //            }
+        //            try
+        //            {
+        //                using (SqlBulkCopy bulkData = new SqlBulkCopy(sqlConnection))
+        //                {
+        //                    textLine = string.Format("About to bulk write to tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+
+        //                    bulkData.DestinationTableName = tableName;
+
+        //                    foreach (DataColumn dataColumn in csvDataTable.Columns)
+        //                    {
+        //                        dataColumn.ColumnName = Regex.Replace(dataColumn.ColumnName, "[^A-Za-z0-9]", "");
+        //                        bulkData.ColumnMappings.Add(dataColumn.ToString(), dataColumn.ToString());
+
+        //                    }
+        //                    //bulkData.BulkCopyTimeout = 600; // 600 seconds
+        //                    bulkData.WriteToServer(csvDataTable);
+
+        //                    textLine = string.Format("Successfull bulk write to tmpContacts table.");
+        //                    Update_Progress(textLine, configDirName);
+
+        //                    return true;
+
+        //                }
+        //            }
+        //            catch
+        //            {
+        //                textLine = string.Format("Failed bulk write to tmpContacts table.");
+        //                Update_Progress(textLine, configDirName);
+
+        //                return false;
+
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            return false;
+
+        //        }
+        //        finally
+        //        {
+        //            sqlConnection.Close();
+
+        //        }
+
+        //    }
+        //}
+        //private DataTable GetDataTableFromCSVFile(XDocument xdoc, string csvFileName)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
+
+        //    string delimiter = ",";
+        //    DataTable csvDataTable = new DataTable();
+        //    try
+        //    {
+        //        using (TextFieldParser csvReader = new TextFieldParser(csvFileName))
+        //        {
+        //            csvReader.SetDelimiters(new string[] { delimiter });
+        //            csvReader.HasFieldsEnclosedInQuotes = true;
+
+        //            string[] colFields = csvReader.ReadFields();
+
+        //            foreach (string column in colFields)
+        //            {
+
+        //                DataColumn datacolumn = new DataColumn(column)
+        //                {
+        //                    AllowDBNull = true
+        //                };
+        //                //
+        //                // Check to make sure we don't have two columns with the same name.
+        //                //
+        //                try
+        //                {
+        //                    csvDataTable.Columns.Add(datacolumn);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    //
+        //                    // We do have a column with this name already.
+        //                    //
+        //                    if (ex.ToString().Contains("already belongs to"))
+        //                    {
+        //                        DateTime dateTimeNow = DateTime.Now;
+        //                        DataColumn dataColumnUnique = new DataColumn(column + dateTimeNow);
+        //                        csvDataTable.Columns.Add(dataColumnUnique);
+        //                    }
+        //                    else
+        //                    {
+        //                        textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
+        //                        Update_Progress(textLine, configDirName);
+        //                    }
+
+        //                }
+
+        //            }
+
+        //            while (!csvReader.EndOfData)
+        //            {
+        //                string[] fieldData = csvReader.ReadFields();
+        //                int x = fieldData.Count();
+        //                string[] tableData = new string[x];
+        //                for (int i = 0; i < x; i++)
+        //                {
+        //                    tableData[i] = fieldData[i];
+        //                }
 
 
-            return success;
-        }
-        private void DeleteTemporaryContacts(XDocument xdoc, string sqlConnectionString)
-        {
-            string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
-            string textLine;
+        //                csvDataTable.Rows.Add(tableData);
+        //            }
+        //        }
 
-            //
-            //Try using a stored procedure
-            //
-            try
-            {
-                using (var connection = new SqlConnection(sqlConnectionString))
-                using (var command = new SqlCommand("DeleteTemporaryContacts", connection)
-                {
-                    CommandType = CommandType.StoredProcedure
-                })
-                {
-                    connection.Open();
-                    command.ExecuteNonQuery();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        textLine = string.Format("Error getting data from csv file.\r\n{0}.\r\n", ex);
+        //        Update_Progress(textLine, configDirName);
 
-                }
-            }
-            catch (Exception ex)
-            {
-                textLine = string.Format("Error deleting temporary contacts.\r\n{0}.\r\n", ex);
-                Update_Progress(textLine, configDirName);
-            }
+        //    }
+        //    return csvDataTable;
+        //}
+        //private bool InsertUpdateContacts(XDocument xdoc, string sqlConnectionString, string companyNo)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
+
+        //    bool success = false;
+        //    //
+        //    //Try using a stored procedure
+        //    //
+        //    try
+        //    {
+        //        using (var connection = new SqlConnection(sqlConnectionString))
+        //        using (var command = new SqlCommand("InsertUpdateContacts", connection)
+        //        {
+        //            CommandType = CommandType.StoredProcedure
+        //        })
+        //        {
+        //            connection.Open();
+        //            command.Parameters.AddWithValue("CompanyNo", companyNo);
+        //            command.ExecuteNonQuery();
+        //            success = true;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        textLine = string.Format("Error inserting/updating contacts.\r\n{0}.\r\n", ex);
+        //        Update_Progress(textLine, configDirName);
+        //    }
 
 
-        }
+        //    return success;
+        //}
+        //private void DeleteTemporaryContacts(XDocument xdoc, string sqlConnectionString)
+        //{
+        //    string configDirName = xdoc.Root.Element("SoftwareHomeFolder").Value;
+        //    string textLine;
+
+        //    //
+        //    //Try using a stored procedure
+        //    //
+        //    try
+        //    {
+        //        using (var connection = new SqlConnection(sqlConnectionString))
+        //        using (var command = new SqlCommand("DeleteTemporaryContacts", connection)
+        //        {
+        //            CommandType = CommandType.StoredProcedure
+        //        })
+        //        {
+        //            connection.Open();
+        //            command.ExecuteNonQuery();
+
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        textLine = string.Format("Error deleting temporary contacts.\r\n{0}.\r\n", ex);
+        //        Update_Progress(textLine, configDirName);
+        //    }
+
+
+        //}
         public void Update_Progress(string textLine, string configDirName)
         {
             //Get the month and year from today's date
@@ -382,21 +382,6 @@ namespace PayRunIOClassLibrary
                 //MessageBox.Show("Error running a report.\r\n" + ex);
             }
             return xmlReport;
-        }
-        public XmlDocument GetPayRunIOObject(XDocument xdoc, string objectType, string erNo)
-        {
-            XmlDocument xmlObject = null;
-            try
-            {
-                var apiHelper = ApiHelper(xdoc);
-                xmlObject = apiHelper.GetRawXml("/" + objectType + "/" + erNo);
-
-            }
-            catch(Exception ex)
-            {
-                
-            }
-            return xmlObject;
         }
         public string RunTransformReport(XDocument xdoc, string rptRef, string prm1, string val1, string prm2, string val2, string prm3, string val3,
                                  string prm4, string val4, string prm5, string val5, string prm6, string val6)
@@ -692,8 +677,6 @@ namespace PayRunIOClassLibrary
         }
         public RPEmployer GetRPEmployer(XDocument xdoc, XmlDocument xmlReport, RPParameters rpParameters)
         {
-            string objectType = "Employer";
-            XmlDocument xmlEmployer = GetPayRunIOObject(xdoc, objectType, rpParameters.ErRef);
             RPEmployer rpEmployer = new RPEmployer();
             string dataSource = xdoc?.Root?.Element("DataSource").Value;            //"APPSERVER1\\MSSQL";  //"13.69.154.210\\MSSQL";  
             string dataBase = xdoc?.Root?.Element("Database").Value;
@@ -707,17 +690,14 @@ namespace PayRunIOClassLibrary
                 rpEmployer.PayeRef = GetElementByTagFromXml(employer, "EmployerPayeRef");
                 rpEmployer.P32Required = GetBooleanElementByTagFromXml(employer, "P32Required");
                 rpEmployer.CalculateApprenticeshipLevy = GetBooleanElementByTagFromXml(employer, "CalculateApprenticeshipLevy");
+                rpEmployer.Address1 = GetElementByTagFromXml(employer, "Address1");
+                rpEmployer.Address2 = GetElementByTagFromXml(employer, "Address2");
+                rpEmployer.Address3 = GetElementByTagFromXml(employer, "Address3");
+                rpEmployer.Address4 = GetElementByTagFromXml(employer, "Address4");
+                rpEmployer.Postcode = GetElementByTagFromXml(employer, "Postcode");
+                rpEmployer.Country = GetElementByTagFromXml(employer, "Country");
             }
-            foreach (XmlElement address in xmlEmployer.GetElementsByTagName("Address"))
-            {
-                rpEmployer.Address1 = GetElementByTagFromXml(address, "Address1");
-                rpEmployer.Address2 = GetElementByTagFromXml(address, "Address2");
-                rpEmployer.Address3 = GetElementByTagFromXml(address, "Address3");
-                rpEmployer.Address4 = GetElementByTagFromXml(address, "Address4");
-                rpEmployer.Postcode = GetElementByTagFromXml(address, "Postcode");
-                rpEmployer.Country = GetElementByTagFromXml(address, "Country");
-            }
-
+            
             rpEmployer.BankFileCode = "000";
             rpEmployer.PensionReportFileType = "Unknown";
             rpEmployer.PensionReportAEWorkersGroup = "A";
@@ -1073,6 +1053,7 @@ namespace PayRunIOClassLibrary
             Update_Progress(textLine, configDirName);
 
             string companyNo = rpParameters.ErRef;                  //file.FullName.Substring(0, 4);
+            //companyNo = "2004";
             DataTable dtCompanyReportCodes = new DataTable();
             try
             {
@@ -1328,9 +1309,9 @@ namespace PayRunIOClassLibrary
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.PayRunDate);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Reference);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Fullname);
-            workbook.CurrentWorksheet.AddNextCell("Department");
-            workbook.CurrentWorksheet.AddNextCell("Cost Centre");
-            workbook.CurrentWorksheet.AddNextCell("Branch");
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Department);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.CostCentre);
+            workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.Branch);
             workbook.CurrentWorksheet.AddNextCell("Calc");
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.TaxCode);
             workbook.CurrentWorksheet.AddNextCell(rpEmployeePeriod.NILetter);
@@ -1496,6 +1477,9 @@ namespace PayRunIOClassLibrary
                     rpEmployeePeriod.NetPayTP = GetDecimalElementByTagFromXml(employee, "NetPay");
                     rpEmployeePeriod.ErNICTP = GetDecimalElementByTagFromXml(employee, "ErNi");
                     rpEmployeePeriod.ErPensionTotalTP = GetDecimalElementByTagFromXml(employee, "ErPension");
+                    rpEmployeePeriod.Branch = GetElementByTagFromXml(employee, "Branch");
+                    rpEmployeePeriod.Branch = GetElementByTagFromXml(employee, "Department");
+                    rpEmployeePeriod.Branch = GetElementByTagFromXml(employee, "CostCentre");
 
                     List<RPAddition> rpAdditions = new List<RPAddition>();
                     List<RPDeduction> rpDeductions = new List<RPDeduction>();
@@ -1652,6 +1636,88 @@ namespace PayRunIOClassLibrary
             
             return workbook;
         }
+        public StringBuilder PrepareBottomlineReportCSV(XmlDocument xmlReport)
+        {
+            DateTime creationDate = DateTime.Now;
+            DateTime processDate = DateTime.Now;
+            string bacsServiceUserNumber = null;
+            string erName;
+            string erBankAccountName = null;
+            string erBankSortCode = null;
+            string erBankAccountNumber = null;
+            decimal totalAmount = 0;
+            foreach (XmlElement employer in xmlReport.GetElementsByTagName("Employer"))
+            {
+                processDate = Convert.ToDateTime(GetElementByTagFromXml(employer, "PaymentDate"));
+                erName = GetElementByTagFromXml(employer, "Name");
+                erBankAccountName = GetElementByTagFromXml(employer, "BankAccountName");
+                erBankAccountNumber = GetElementByTagFromXml(employer, "BankAccountNumber");
+                erBankSortCode = GetElementByTagFromXml(employer, "BankAccountSortCode");
+                bacsServiceUserNumber = GetElementByTagFromXml(employer, "BacsServiceUserNumber");
+
+            }
+            processDate = GetPreviousWorkingDay(processDate);
+            StringBuilder stringBuilder = new StringBuilder();
+            //First row
+            string csvLine = "BACS File Submission,,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = "Submission serial number :,," + bacsServiceUserNumber + ",,,Creation date :," + creationDate.ToString("dd-MMM-yy");
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = "Bureau number : B40000,,,,,Process date :," +  processDate.ToString("dd-MMM-yy");
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,Expire date :," + creationDate.ToString("dd-MMM-yy");
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = "FILE COMPLETE,,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",Account Name,Sort Code,Acc Number,Amount,Ref,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row
+            csvLine = ",,,,,,";
+            stringBuilder.AppendLine(csvLine);
+            //Next row (Employer details)
+            csvLine = erBankAccountName + ",,," + erBankSortCode + ",,,";
+            stringBuilder.AppendLine(csvLine);
+            //Loop through each employee
+            string eeFullName;
+            string eeBankAccountName;
+            string eeBankAccountNumber;
+            string eeBankSortCode;
+            string eeBankAccountReference;
+            decimal eeNetPay;
+            foreach (XmlElement payRun in xmlReport.GetElementsByTagName("PayRuns"))
+            {
+                foreach (XmlElement employee in payRun.GetElementsByTagName("Employee"))
+                {
+                    eeFullName = GetElementByTagFromXml(employee, "FullName");
+                    eeBankAccountName = GetElementByTagFromXml(employee, "BankAccountName");
+                    eeBankAccountNumber = GetElementByTagFromXml(employee, "BankAccountNumber");
+                    eeBankSortCode = GetElementByTagFromXml(employee, "BankAccountSortCode");
+                    eeBankAccountReference = GetElementByTagFromXml(employee, "BankAccountReference");
+                    eeNetPay = GetDecimalElementByTagFromXml(employee, "NetPay");
+                    //Next row
+                    csvLine = "," + eeBankAccountName + "," + eeBankSortCode + "," + eeBankAccountNumber + 
+                              "," + eeNetPay.ToString() + "," + erBankAccountName + ",";
+                    stringBuilder.AppendLine(csvLine);
+                    totalAmount += eeNetPay;
+                }
+            }
+            csvLine = "," + erBankAccountName + "," + erBankSortCode + "," + erBankAccountNumber + 
+                      "," + (totalAmount * -1).ToString() + "," + "CONTRA" + ",";
+            stringBuilder.AppendLine(csvLine);
+
+            return stringBuilder;
+        }
         private PicoXLSX.Workbook CreateBottomlineRow(PicoXLSX.Workbook workbook, string col1, string col2, string col3, string col4, string col5)
         {
             workbook.CurrentWorksheet.AddNextCell(col1);
@@ -1779,6 +1845,13 @@ namespace PayRunIOClassLibrary
             workbook = PrepareBottomlineReport(xmlReport, workbook);
 
             return workbook;
+        }
+        public StringBuilder CreateBottomlineReportCSVFile(XmlDocument xmlReport)
+        {
+            //Will need to return the csv file
+            StringBuilder csvFile = PrepareBottomlineReportCSV(xmlReport);
+
+            return csvFile;
         }
     }
     public class ReadConfigFile
@@ -2019,6 +2092,9 @@ namespace PayRunIOClassLibrary
         public decimal SPBPAdd { get; set; }
         
         public decimal Zero { get; set; }
+        public string Branch { get; set; }
+        public string Department { get; set; }
+        public string CostCentre { get; set; }
         public List<RPAddition> Additions { get; set; }
         public List<RPDeduction> Deductions { get; set; }
         public List<RPPayslipDeduction> PayslipDeductions { get; set; }
@@ -2043,7 +2119,7 @@ namespace PayRunIOClassLibrary
                           decimal postTaxAddDed, decimal postTaxPension, decimal aeo, decimal aeoYtd, 
                           decimal totalPayComponentAdditions, decimal totalPayComponentDeductions, decimal benefitsInKind,
                           decimal sspSetOff, decimal sspAdd, decimal smpSetOff, decimal smpAdd, decimal osppSetOff, decimal osppAdd, decimal sapSetOff, decimal sapAdd,
-                          decimal shppSetOff, decimal shppAdd, decimal spbpSetOff, decimal spbpAdd, decimal zero,
+                          decimal shppSetOff, decimal shppAdd, decimal spbpSetOff, decimal spbpAdd, decimal zero, string branch, string department, string costCentre,
                           List<RPAddition> additions, List<RPDeduction> deductions, List<RPPayslipDeduction> payslipDeductions)
         {
             Reference = reference;
@@ -2154,6 +2230,9 @@ namespace PayRunIOClassLibrary
             SPBPSetOff = spbpSetOff;
             SPBPAdd = spbpAdd;
             Zero = zero;
+            Branch = branch;
+            Department = department;
+            CostCentre = costCentre;
             Additions = additions;
             Deductions = deductions;
             PayslipDeductions = payslipDeductions;
